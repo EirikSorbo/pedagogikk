@@ -44,8 +44,7 @@ import { RETUR_FELTER } from "./artist-schema.js";
 import { genererReturKode, normaliserReturKode, merkHarSendtInn } from "../felles/util.js";
 import { PROPOSABLE_KEYS } from "../forslag/proposal-fields.js";
 import { sorterPodkaster } from "../felles/podkast-rekkefolge.js";
-import { mergeHeatRows } from "./import-format.js";
-import { BATCH_MAX, DECADES, INSTRUMENT_TIMELINE_GROUPS, instrumentPageId } from "../felles/limits.js";
+import { BATCH_MAX, INSTRUMENT_TIMELINE_GROUPS, instrumentPageId } from "../felles/limits.js";
 
 // Normaliserings-/bygge-logikken bor i artist-normalize.js (ren modul,
 // enhetstestbar) og importeres direkte der den trengs — store.js bruker den
@@ -74,7 +73,6 @@ const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
 const artistsCol = collection(db, "artists");
-const decadesCol = collection(db, "decades");
 // Sjangerbeskrivelser (alle nivåer: meta/main/sub). Het tidligere «subgenres»
 // — navnet kolliderte med artistfeltet `subGenre`; migrert 2026-07.
 const genreDescsCol = collection(db, "genreDescriptions");
@@ -91,7 +89,8 @@ const notaterCol = collection(db, "notater");
 const timeforslagCol = collection(db, "timeforslag");
 const techCol = collection(db, "tech");
 const pendingEditsCol = collection(db, "pendingEdits");
-// Innholdssider (Om historie, Røtter) og varmekartet — se INNHOLD-seksjonen.
+// Innholdssider (Om historie, Røtter), sjangertreet og kjøreplanene — se
+// INNHOLD-seksjonen.
 const contentCol = collection(db, "content");
 
 // ----------------------------------------------------------------------------
@@ -203,8 +202,8 @@ export async function fetchArtists() {
 }
 
 // Konfig-abonnementet er fjernet (v3.68): instrument-vokabularet — det siste
-// som lå i config-dokumentet — er nå INSTRUMENTS-konstanten i limits.js,
-// samme mønster som DECADES og sjangertreet. config/settings-dokumentet i
+// som lå i config-dokumentet — er nå INSTRUMENTS-konstanten i limits.js.
+// config/settings-dokumentet i
 // Firestore leses ikke lenger og kan slettes manuelt.
 
 // ----------------------------------------------------------------------------
@@ -347,16 +346,10 @@ export async function deleteAllArtists() {
 }
 
 // ----------------------------------------------------------------------------
-//  TIÅR- OG UNDERSJANGER-BESKRIVELSER
+//  SJANGER- OG UNDERSJANGER-BESKRIVELSER
 // ----------------------------------------------------------------------------
-
-export function subscribeDecades(callback) {
-  return onSnapshot(decadesCol, (snapshot) => {
-    const decades = {};
-    snapshot.docs.forEach((d) => { decades[d.id] = { id: d.id, ...d.data() }; });
-    callback(decades);
-  }, onSubscribeError("tiårsbeskrivelser"));
-}
+//  (Samlingen decades, tiårsbeskrivelsene, abonneres ikke lenger: tiårskortene
+//  ble tatt ut i fase 2.)
 
 export function subscribeGenreDescs(callback) {
   return onSnapshot(genreDescsCol, (snapshot) => {
@@ -480,10 +473,6 @@ export async function deleteTech(id) {
   return deleteDoc(doc(db, "tech", id));
 }
 
-export async function saveDecadeDesc(decadeId, data) {
-  return setDoc(doc(db, "decades", String(decadeId)), data, { merge: true });
-}
-
 
 // ----------------------------------------------------------------------------
 //  MIGRERING AV SJANGERTREET
@@ -593,9 +582,10 @@ export async function clearStory(genreId) {
 
 // ----------------------------------------------------------------------------
 //  INNHOLD (content-samlingen): innholdssidene «Om historie» (omHistorie) og
-//  «Røtter før 1910» (rotter) som markdown-light-body, og varmekartets
-//  varmenivåer (varmekart.heat = { sjanger: [13 nivåer 0–5 eller null] }).
-//  Alt pensuminnhold bor i Firestore — ingen fallback-tekster i koden.
+//  «Røtter før 1910» (rotter) som markdown-light-body, sjangertreet med
+//  tidsrommene (genealogy) og kjøreplanene. Alt pensuminnhold bor i
+//  Firestore — ingen fallback-tekster i koden. (Varmekartet, content/varmekart,
+//  ble tatt ut i fase 2.)
 // ----------------------------------------------------------------------------
 
 export function subscribeContent(callback) {
@@ -618,8 +608,7 @@ export async function deletePage(pageId) {
   return deleteDoc(doc(db, "content", pageId));
 }
 
-// Kjøreplanene for presentasjonsvisningen (v5.25) — ETT dokument, som
-// varmekartet. Siden v5.43 skrives ÉN plan om gangen: merge på planer.<id>
+// Kjøreplanene for presentasjonsvisningen (v5.25) — ETT dokument. Siden v5.43 skrives ÉN plan om gangen: merge på planer.<id>
 // (setDoc med merge fletter maps per nøkkel og erstatter stopp-lista inne i
 // planen), og sletting med deleteField på samme nøkkel. Før ble hele
 // planer-feltet skrevet fra skriverens kopi, og en tom eller utdatert kopi
@@ -652,22 +641,6 @@ export async function deletePlan(id) {
 export async function saveReferanser(kilder) {
   return setDoc(doc(db, "content", "referanser"),
     { kilder, updatedAt: new Date().toISOString() });
-}
-
-// Skriver et UTVALG varmekart-rader uten å røre resten. Leser dagens dokument
-// først (ikke lokal state — importen OG celleredigeringen skal være trygg også
-// før første snapshot har landet, og to faner skal ikke overskrive hverandre),
-// fletter inn radene fra kallet og skriver hele dokumentet tilbake (full skriv,
-// ikke felt-stier: sjangernavn kan inneholde «/» og andre tegn som er kronglete
-// i Firestore-feltstier). Eneste vei inn til content/varmekart fra både import
-// og celleklikk. Returnerer { written, kept, skipped } for kvitteringen.
-export async function mergeVarmekartRows(rows) {
-  const ref = doc(db, "content", "varmekart");
-  const snap = await getDoc(ref);
-  const current = (snap.exists() && snap.data().heat) || {};
-  const { heat, written, kept, skipped } = mergeHeatRows(current, rows);
-  await setDoc(ref, { heat, updatedAt: new Date().toISOString() });
-  return { written, kept, skipped };
 }
 
 
@@ -767,8 +740,8 @@ export async function approvePendingEdit(pendingEditId, approvedKeys) {
     if (data.entityType === "artist") toApply.teacherChecked = false;
     // artist/tech MÅ finnes fra før — ellers ville merge opprettet et tomt
     // spøkelsesdokument (uten navn/status) hvis forslaget godkjennes etter at
-    // målet er slettet. genreDescriptions/decades kan derimot opprettes ved
-    // første beskrivelse, så der er merge riktig.
+    // målet er slettet. genreDescriptions kan derimot opprettes ved første
+    // beskrivelse, så der er merge riktig.
     const mustExist = data.entityType === "artist" || data.entityType === "tech";
     if (mustExist) {
       const targetSnap = await getDoc(targetRef);
@@ -792,8 +765,6 @@ export function sjekkVedGodkjenning(data) {
   switch (data?.entityType) {
     case "tech": return { kategori: "tech", ider: [id] };
     case "instrument": return { kategori: "pages", ider: [id] };
-    case "decade-society": return { kategori: "decades", ider: [id] };
-    case "decade-tech": return { kategori: "decadesTech", ider: [id] };
     case "subgenre": {
       if (genreEditLevel(data) === "sub") return { kategori: "subgenres", ider: [id] };
       const node = findTreeGenreNode(id);
@@ -952,7 +923,7 @@ function pendingEditTargetRef(entityType, entityId, level) {
     case "tech":           return doc(db, "tech", entityId);
     // entityType beholdes som «subgenre» for bakoverkompat med eksisterende
     // pendingEdits-dokumenter; målet er nå genreDescriptions-samlingen.
-    // entityId er STUDENT-skrevet, akkurat som for instrument og tiår under.
+    // entityId er STUDENT-skrevet, akkurat som for instrument under.
     // Uvalidert kunne et forslag med entityId «Pop» eller et vilkårlig navn få
     // lærerens godkjenning til å merge inn i et hvilket som helst dokument i
     // genreDescriptions — også metasjangernes, der historiene bor. Vi krever
@@ -969,11 +940,8 @@ function pendingEditTargetRef(entityType, entityId, level) {
     case "instrument":
       return INSTRUMENT_TIMELINE_GROUPS.some((g) => instrumentPageId(g) === entityId)
         ? doc(db, "content", entityId) : null;
-    // Samme vern: tiåret må være et av appens tiår.
-    case "decade-society":
-    case "decade-tech":
-      return DECADES.map(String).includes(String(entityId))
-        ? doc(db, "decades", String(entityId)) : null;
+    // (Tiårsforslagene, decade-society og decade-tech, ble tatt ut i fase 2:
+    // et slikt forslag har ikke lenger noe mål og kan bare avvises.)
     default:               return null;
   }
 }

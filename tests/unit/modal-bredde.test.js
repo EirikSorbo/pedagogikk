@@ -26,7 +26,7 @@ const INNHOLDSKORT = {
   "teacher.html": ["modal-detail", "modal-laerer-handbok"],
   "js/utforsk/explore-modals.js": [
     "modal-teknologi", "modal-instrumenter", "modal-podkaster", "modal-instr-tech",
-    "modal-decade-view", "modal-varmekart", "modal-sjangerperioder", "modal-sjangerhimmel",
+    "modal-sjangerperioder", "modal-sjangerhimmel",
     "modal-tidslinje", "modal-subgenre-list", "modal-undersjangre", "modal-subgenre-info",
     "modal-store-bildet", "modal-referanser", "modal-app-guide", "modal-om-historie",
     "modal-rotter", "modal-historier",
@@ -36,9 +36,9 @@ const INNHOLDSKORT = {
 
 const BEHOLDER_BREDDEN = {
   "index.html": ["modal-proposal"],
-  "js/utforsk/explore-modals.js": ["modal-sok", "modal-vk-edit"],
+  "js/utforsk/explore-modals.js": ["modal-sok"],
   "teacher.html": ["modal-oversikt", "modal-retur"],
-  "js/laerer/teacher-genres.js": ["modal-genre-admin", "modal-genre-edit"],
+  "js/laerer/teacher-genres.js": ["modal-genre-admin", "modal-genre-edit", "modal-genre-tidsrom"],
 };
 
 test("innholdskortene har den brede rammen", () => {

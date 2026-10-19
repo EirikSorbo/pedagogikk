@@ -22,7 +22,7 @@ export const PROPOSABLE_KEYS = {
   // allerede lå inne. Feltene er innhold, ikke privilegier — systemfeltene
   // (status, priority, votedUpBy …) står uansett ikke i ARTIST_FIELDS.
   artist: ARTIST_FIELDS.map((f) => f.key),
-  tech: ["name", "type", "category", "instrument", "decade", "inventedYear", "adoptedYear", "adoptedLabel", "description", "kilder", "imageUrl", "imageCredit"],
+  tech: ["name", "type", "category", "instrument", "inventedYear", "adoptedYear", "adoptedLabel", "description", "kilder", "imageUrl", "imageCredit"],
   // Sjangre (main = tre-node, sub = fri undersjanger). «kilder» ble åpnet for
   // forslag da sjangerkortene fikk kildelister på linje med artistkortene;
   // activeFrom/activeTo er epoken, og gjelder i praksis bare main-nivået.
@@ -30,8 +30,7 @@ export const PROPOSABLE_KEYS = {
   // Instrumentsammendraget bor i content-samlingen; body er hele teksten, og
   // kilder er kildelista under den (samme form som på sjangerkortene).
   instrument: ["body", "kilder"],
-  "decade-society": ["society"],
-  "decade-tech": ["tech"],
+  // (decade-society og decade-tech, tiårstekstene, ble tatt ut i fase 2.)
 };
 
 // Nøklene som lovlig kan skrives for en gitt entityType (tom liste = ukjent).

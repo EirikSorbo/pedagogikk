@@ -27,16 +27,16 @@ import { onAuthChange, savePlan } from "./data/store.js";
 import { TEACHER_EMAILS } from "./firebase-config.js";
 import { SKJUL_I_STUDENTVISNING, SKJUL_I_HUBEN, synlighetGrunn } from "./felles/feature-flags.js";
 import { settSjekketLaerer } from "./felles/sjekket.js";
-import { settSammen, foreslaaTittel, tellingerTekst, heltPensum, pensumMetasjangre, anslagSider, planFraModell, DELER, TYPE_ETIKETT, META_PREFIKS, normaliserTittel, normaliserLagret, kanoniskVis, TITTEL_MAKS } from "./utskrift/utskrift-modell.js";
+import { settSammen, foreslaaTittel, tellingerTekst, heltPensum, pensumMetasjangre, anslagSider, planFraModell, tidslinjePos, DELER, TYPE_ETIKETT, META_PREFIKS, normaliserTittel, normaliserLagret, kanoniskVis, TITTEL_MAKS } from "./utskrift/utskrift-modell.js";
+import { visAar } from "./felles/aarstall.js";
 import { lesUtvalg, lagreUtvalg, leggTil, etterLeggTil, huk, hukFlere, toem, initUtskriftValg, UTSKRIFT_HENDELSE } from "./utskrift/utskrift-utvalg.js";
 import { byggIndeks, sok, normaliser, TYPE_LABEL } from "./felles/search.js";
 import { byggVisVerdi } from "./felles/vis-lenke.js";
 import { renderRichText, renderInline } from "./felles/rich-text.js";
-import { formatInfoText, musicExampleLabel } from "./ui/ui-helpers.js";
+import { musicExampleLabel } from "./ui/ui-helpers.js";
 import { escapeHtml, wikimediaThumb } from "./felles/util.js";
-import { heatColor, HEAT_NODATA } from "./sjangre/heat-strip.js";
 import { artistStripHtml } from "./ui/artist-strip.js";
-import { DECADES, isVisible } from "./felles/limits.js";
+import { isVisible } from "./felles/limits.js";
 import { askChoice, kopierTilUtklipp, visLenke, modalCloseTop } from "./ui/ui-modal.js";
 import { onGenreModelChanged, GENEALOGY, META_GENRE_ORDER } from "./sjangre/genre-model.js";
 import { ytSpillelisteUrl, ytSpillelisteIder, nyPlanId } from "./visning/presentasjon-modell.js";
@@ -54,7 +54,7 @@ const h = escapeHtml;
 
 // Alt heftet trenger har landet. Før det står «Laster …» i heftet, og
 // utskriftsknappen er av, så ingen printer et halvt hefte.
-const klar = () => !!(state.artistsLoaded && state.genreDescsLoaded && state.contentLoaded && state.decadesLoaded && state.techLoaded);
+const klar = () => !!(state.artistsLoaded && state.genreDescsLoaded && state.contentLoaded && state.techLoaded);
 
 const tittelNaa = () => lesUtvalg().tittel || tittelForslag;
 
@@ -93,10 +93,10 @@ function tegn() {
 // ----------------------------------------------------------------------------
 
 // Avkryssingstreet (v5.58): metasjangrene med sjangrene og artistene under,
-// så tiårene, så alt annet. Alt utvalget drar med seg står her, også det som
-// er huket bort (gjennomstreket), så det kan hukes på igjen. Opphavet står i
-// grått: «fra metasjangeren», «fra sjangeren», «utledet».
-const OPPHAV = { metasjanger: "fra metasjangeren", sjanger: "fra sjangeren", utledet: "utledet" };
+// så alt annet. Alt utvalget drar med seg står her, også det som er huket
+// bort (gjennomstreket), så det kan hukes på igjen. Opphavet står i grått:
+// «fra metasjangeren», «fra sjangeren».
+const OPPHAV = { metasjanger: "fra metasjangeren", sjanger: "fra sjangeren" };
 
 // Sammenleggbare sjangergrupper (v5.74): én metasjanger gir 40 til 90 rader,
 // så artistene under en sjanger kan legges sammen. Brukerens egne valg
@@ -144,20 +144,13 @@ function treHtml(tre) {
     const lose = F.lose.length ? `<li class="ut-lose"><ul>${F.lose.map((a) => hukRad(a, "ut-art", "", F.valgt)).join("")}</ul></li>` : "";
     return `<li class="ut-fam">${hode}<ul>${sjangre.join("")}${lose}</ul></li>`;
   });
-  const grunnlag = tre.grunnlag === "artister" ? "utledet av artistenes innflytelsesperioder"
-    : tre.grunnlag === "sjangre" ? "utledet av sjangrenes perioder" : "";
-  // Opphavet står én gang i gruppehodet (v5.74), ikke på hver tiårsrad.
-  const tiaar = tre.tiaar.length
-    ? `<li class="ut-gruppe"><span class="ut-fam-navn"><b>Tiår</b>${grunnlag ? ` <span class="muted">${h(grunnlag)}</span>` : ""}</span>` +
-      `<ul class="ut-rad">${tre.tiaar.map((x) => hukRad({ ...x, navn: `${x.tiaar}-tallet`, kilde: "" }, "ut-tiaar", "")).join("")}</ul></li>`
-    : "";
   const annet = tre.annet.length
     ? `<li class="ut-gruppe"><span class="ut-fam-navn"><b>Annet</b></span><ul>${tre.annet.map((x) => {
       const grunn = x.grunn === "skjult" ? "vises ikke for studenter" : x.grunn === "finnes-ikke" ? "finnes ikke lenger" : "";
       return hukRad({ ...x, kilde: "" }, `ut-annet${x.grunn ? " ut-mangler" : ""}`, [TYPE_ETIKETT[x.type] || "", grunn].filter(Boolean).join(" · "));
     }).join("")}</ul></li>`
     : "";
-  return familier.join("") + tiaar + annet;
+  return familier.join("") + annet;
 }
 
 function tegnDeler(u) {
@@ -365,7 +358,7 @@ function hentIndeks() {
   const artister = s.artists.filter(isVisible);
   const avtrykk = [
     artister.length, Object.keys(s.genreDescs).length, s.techItems.length,
-    Object.keys(s.decadeDescs).length, Object.keys(s.content).length, erLaerer,
+    Object.keys(s.content).length, erLaerer,
   ].join("|");
   if (!indeks || avtrykk !== indeksAvtrykk) {
     indeks = byggIndeks({ ...s, artists: artister }, { erLærer: erLaerer, skjul: SKJUL_I_STUDENTVISNING, skjulHub: SKJUL_I_HUBEN });
@@ -399,7 +392,6 @@ function tegnSok() {
     treff.push({ t: { type: "metasjanger", tittel: meta, sti: `hele metasjangeren: ${nSj} sjangre, ${nArt} artister` }, vis });
   }
   for (const t of res.grupper.flatMap((g) => g.treff)) {
-    // Samfunn og teknologi er to treff på skjermen, men ett tiår på papir.
     const vis = kanoniskVis(byggVisVerdi(t.apne) || "");
     if (!vis || sett.has(vis)) continue;
     sett.add(vis);
@@ -492,7 +484,7 @@ function artistKortHtml(k, d, kompakt, medNr) {
     ? (k.beskrivelse ? rt(k.beskrivelse) : mangler("Beskrivelsen er ikke skrevet ennå."))
     : "";
   const verk = d["artist.verk"] && k.verk.length
-    ? `<p class="h-verk"><strong>Sentrale verk</strong> ${k.verk.map((w) => `«${h(w.tittel)}»${w.aar ? ` (${w.aar})` : ""}`).join(" · ")}</p>`
+    ? `<p class="h-verk"><strong>Sentrale verk</strong> ${k.verk.map((w) => `«${h(w.tittel)}»${w.aar ? ` (${h(visAar(w.aar))})` : ""}`).join(" · ")}</p>`
     : "";
   return `<article class="h-kort h-artist">
     <h3 class="h-kort-navn">${h(k.navn)}${k.levetid ? ` <span class="h-aar">${h(k.levetid)}</span>` : ""}</h3>
@@ -508,14 +500,6 @@ function artistKortHtml(k, d, kompakt, medNr) {
   </article>`;
 }
 
-function stripeHtml(s) {
-  const celler = s.verdier.map((v, i) => {
-    const farge = v == null ? HEAT_NODATA : heatColor(s.farge, v);
-    return `<i style="background:${farge}" title="${DECADES[i]}-tallet${v != null ? ` · nivå ${v}/5` : " · ingen data"}"></i>`;
-  });
-  return `<div class="h-stripe">${celler.join("")}</div><div class="h-stripe-akse">${DECADES.map((x) => `<span>${x}</span>`).join("")}</div>`;
-}
-
 function relasjonerHtml(r) {
   const linje = (etikett, liste) => (liste.length ? `<p class="h-rel"><strong>${etikett}</strong> ${liste.map(h).join(", ")}</p>` : "");
   return linje("Vokste ut av", r.fra) + linje("Motreaksjon mot", r.mot) + linje("Førte videre til", r.til) + linje("Reaksjoner mot denne", r.motAv);
@@ -523,7 +507,6 @@ function relasjonerHtml(r) {
 
 function sjangerHodeHtml(k, d) {
   return `${d["sjanger.era"] && k.era ? `<p class="h-epoke">${h(k.era)}</p>` : ""}
-    ${d["sjanger.stripe"] && k.stripe ? stripeHtml(k.stripe) : ""}
     ${d["sjanger.relasjoner"] ? relasjonerHtml(k.relasjoner) : ""}`;
 }
 
@@ -587,9 +570,11 @@ function familieHtml(F, d, kompakt, medNr) {
   </section>`;
 }
 
+// Aksen er tidsrommene i treet (fase 2), eller hele tiår uten dem
+// (tidslinjePos i modellen). Rutenettet i sporet står ved hvert merke.
 function tidslinjeHtml(t) {
-  const pct = (aar) => ((aar - t.start) / (t.slutt - t.start)) * 100;
-  const tiaarBredde = (10 / (t.slutt - t.start)) * 100;
+  const pct = (aar) => tidslinjePos(t, aar);
+  const tiaarBredde = t.tidsrom ? 100 / Math.max(1, t.ticks.length) : (10 / (t.slutt - t.start)) * 100;
   // Fargen som variabel (v5.74): åpne perioder tones ut mot høyre i CSS, som
   // Sjangerperioder-kortet gjør på skjermen, i stedet for full farge til i dag.
   const rader = t.rader.map((r) => `<div class="h-tl-navn${r.type === "sjanger" ? " sj" : ""}" title="${h(r.navn)}">${h(r.navn)}</div>` +
@@ -599,7 +584,7 @@ function tidslinjeHtml(t) {
     <h2>Tidslinje over utvalget</h2>
     <p class="h-hint">Sjangrene som brede stolper, artistene som streker. Årstallene er innflytelsesperiodene fra kortene; en stolpe som tones ut, er fortsatt aktiv.</p>
     <div class="h-tl">
-      <div class="h-tl-akse">${t.ticks.map((x) => `<span style="left:${pct(x).toFixed(2)}%">${x}</span>`).join("")}</div>
+      <div class="h-tl-akse${t.ticks.length > 10 ? " tett" : ""}">${t.ticks.map((x) => `<span style="left:${pct(x).toFixed(2)}%">${h(visAar(x))}</span>`).join("")}</div>
       ${rader.join("")}
     </div>
   </div>`;
@@ -620,7 +605,6 @@ function tocHtml() {
     punkter.push({ navn: F.navn, linjer, ref: `familie:${F.navn}` });
   }
   if (modell.tidslinje) punkter.push({ navn: "Tidslinje over utvalget", linjer: [], ref: "tidslinje" });
-  if (modell.bakteppe.length) punkter.push({ navn: "Bakteppe", linjer: [modell.bakteppe.map((b) => `${b.tiaar}-tallet`).join(" · ")], ref: "bakteppe" });
   if (modell.innovasjoner.length) punkter.push({ navn: "Innovasjoner", linjer: [kortListe(modell.innovasjoner.map((t) => t.navn))], ref: "innovasjoner" });
   if (modell.instrumenter.length) punkter.push({ navn: "Instrumenter", linjer: [kortListe(modell.instrumenter.map((i) => i.tittel))], ref: "instrumenter" });
   for (const s of modell.sider) punkter.push({ navn: s.tittel, linjer: [], ref: `side:${s.id}` });
@@ -686,20 +670,8 @@ function seksjonHode(hva, tittel) {
   return `<header class="h-seksjon-hode">${overlinje(hva)}<h1>${h(tittel)}</h1></header>`;
 }
 
-function bakteppeHtml(d) {
-  if (!modell.bakteppe.length) return "";
-  const tekst = (t) => (t ? `<div class="rt">${formatInfoText(t, {})}</div>` : mangler("Teksten er ikke skrevet ennå."));
-  const tiaar = modell.bakteppe.map((b) => `<article class="h-tiaar">
-    <header class="h-sjanger-hode"><h2>${b.tiaar}-tallet</h2></header>
-    ${d["tiaar.samfunn"] ? `<h3 class="h-del">Samfunn</h3>${tekst(b.samfunn)}` : ""}
-    ${d["tiaar.teknologi"] ? `<h3 class="h-del">Teknologi</h3>${tekst(b.teknologi)}` : ""}
-    ${b.innovasjoner.length ? `<h3 class="h-del">Innovasjoner i tiåret</h3><p class="h-innov-liste">${b.innovasjoner.map((t) => `${h(t.navn)}${t.aar ? ` (${t.aar})` : ""}`).join(" · ")}</p>` : ""}
-  </article>`);
-  return `<section class="h-seksjon h-nyside h-bakteppe" data-toc="bakteppe" style="--farge:var(--icon-tiar)">${seksjonHode("Bakteppe", "Tiårene")}${tiaar.join("")}</section>`;
-}
-
 function techKortHtml(t, d, kompakt) {
-  const aar = [t.oppfunnet ? `oppfunnet ${t.oppfunnet}` : "", t.iBruk ? `i bruk fra ${t.iBruk}` : ""].filter(Boolean).join(" · ");
+  const aar = [t.oppfunnet ? `oppfunnet ${visAar(t.oppfunnet)}` : "", t.iBruk ? `i bruk fra ${visAar(t.iBruk)}` : ""].filter(Boolean).join(" · ");
   const fakta = [];
   if (t.hendelse) fakta.push("<b>Viktig hendelse</b>");
   else if (t.kategori) fakta.push(`<b>${h(t.kategori)}</b>`);
@@ -855,7 +827,6 @@ function tegnHefte(u) {
     forsideHtml(t, farge),
     tidslinjeSideHtml(),
     ...modell.familier.map((F) => familieHtml(F, d, kompakt, medNr)),
-    bakteppeHtml(d),
     innovasjonerHtml(d, kompakt),
     instrumenterHtml(),
     siderHtml(),
@@ -1126,7 +1097,6 @@ function init() {
       onArtists: planleggTegning,
       onGenreDescs: planleggTegning,
       onContent: planleggTegning,
-      onDecades: planleggTegning,
       onTech: planleggTegning,
       // Koblingstekstene (v5.74) bor i sin egen samling.
       onEdgeDescs: planleggTegning,

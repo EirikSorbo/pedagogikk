@@ -4,34 +4,6 @@
 //  Skilt ut fra teacher-import.js så logikken kan enhetstestes i Node.
 // ============================================================================
 
-// ---------------------------------------------------------------------------
-//  VARMEKART — fletting av rader
-// ---------------------------------------------------------------------------
-//  Varmekartet er ETT Firestore-dokument (content/varmekart) med én rad per
-//  sjanger. Import skrev tidligere heat-objektet fra fila rått over dokumentet,
-//  så en fil med bare den nye sjangerens rad slettet alle de andre radene i
-//  samme slengen. Nå flettes radene: fila overstyrer sine egne sjangre, og alt
-//  den ikke nevner, blir stående. Samme prinsipp som sjanger- og koblings-
-//  beskrivelsene, der import bare rører dokumentene som faktisk ligger i fila.
-//
-//  Rader som ikke er lister forkastes (og rapporteres) — de ville skjult hele
-//  sjangerens tall bak en ugyldig verdi. Nivåene i seg selv normaliseres ikke
-//  her; visningen (vkRow i explore-varmekart.js) godtar kun heltall 0–5 og viser resten
-//  som «ingen data».
-export function mergeHeatRows(current, incoming) {
-  const base = current && typeof current === "object" ? current : {};
-  const rows = incoming && typeof incoming === "object" ? incoming : {};
-  const heat = { ...base };
-  const written = [], skipped = [];
-  for (const [genre, row] of Object.entries(rows)) {
-    if (!Array.isArray(row)) { skipped.push(genre); continue; }
-    heat[genre] = row;
-    written.push(genre);
-  }
-  const kept = Object.keys(base).filter((g) => !written.includes(g));
-  return { heat, written, kept, skipped };
-}
-
 // Gjør sjangerbeskrivelser om til et flatt { navn: dokument }-oppslag uansett
 // kildeformat: nytt nestet { meta:{…}, main:{…}, sub:{…} }, eldre flatt
 // { navn: dokument }, eller legacy «subgenres». Nestet kjennes igjen på at ALLE
@@ -143,35 +115,9 @@ export function erDelpost(a) {
 // ---------------------------------------------------------------------------
 
 // Innholdsdeler en importfil kan bære utover artistene.
-export const CONTENT_KEYS = ["decades", "genreDescriptions", "edgeDescriptions", "tech", "pages", "varmekart", "podcasts", "referanser", "genealogy", "presentasjoner"];
-
-// Et tiårsdokument er samfunn, teknologi og kilder — ikke noe mer. Feltene
-// plukkes ut ETT FOR ETT, både på vei ut i en eksport og på vei inn fra en fil:
-// «les mer»-tekstene (societyMore/techMore) ble prøvd ut, forkastet i v4.78 og
-// slettet i v4.93, og en rå kopiering av objektet ville dratt dem inn igjen fra
-// en eldre sikkerhetskopi. Samme grunn til at den bor her og ikke i
-// teacher-import: eksport og import kan ikke drive fra hverandre.
-// `partial: true` tar KUN med feltene som faktisk har innhold.
-//
-// Importen skriver med { merge: true }, og Firestore SKRIVER en tom verdi i
-// stedet for å hoppe over den. Full form betydde derfor at en fil med bare
-// { society } nullstilte tiårets teknologitekst OG kildeliste — stille, med
-// kvitteringen «1 beskrivelse(r) importert», og uten reservetekst i koden til å
-// dekke over tapet. JSON-OPPSKRIFT.md tillater eksplisitt slike delvise filer.
-//
-// Eksporten bruker FULL form: en backup skal ha samme skjema for hvert tiår.
-export function decadeDoc(d = {}, { partial = false } = {}) {
-  const society = typeof d.society === "string" ? d.society : "";
-  const tech = typeof d.tech === "string" ? d.tech : "";
-  const kilder = Array.isArray(d.kilder) ? d.kilder : [];
-  if (!partial) return { society, tech, kilder };
-  // Samme regel som sidene og sjangerbeskrivelsene: fletting kan aldri tømme.
-  const ut = {};
-  if (society) ut.society = society;
-  if (tech) ut.tech = tech;
-  if (kilder.length) ut.kilder = kilder;
-  return ut;
-}
+// Tiårsbeskrivelsene (decades) og varmekartet (varmekart) var med til fase 2;
+// står de i en fil, hoppes de over.
+export const CONTENT_KEYS = ["genreDescriptions", "edgeDescriptions", "tech", "pages", "podcasts", "referanser", "genealogy", "presentasjoner"];
 
 // Normaliserer en innlest importfil til appens interne form, eller returnerer
 // null når formatet ikke gjenkjennes. Skilt ut fra handleImportFile (v4.52) og
@@ -183,24 +129,22 @@ export function decadeDoc(d = {}, { partial = false } = {}) {
 // En bar array leses som en ren artistliste (det eldste formatet).
 export function normalizeImportFile(raw) {
   if (Array.isArray(raw)) {
-    return { artists: raw, decades: {}, genreDescriptions: {}, tech: [] };
+    return { artists: raw, genreDescriptions: {}, tech: [] };
   }
   const harInnhold = raw && typeof raw === "object" &&
     (Array.isArray(raw.artists) || CONTENT_KEYS.some((k) => raw[k]));
   if (!harInnhold) return null;
 
-  // Filer UTEN artister godtas også — rene innholdsfiler (sider, varmekart,
+  // Filer UTEN artister godtas også — rene innholdsfiler (sider,
   // historier/beskrivelser, podkaster, sjangertreet).
   return {
     artists: Array.isArray(raw.artists) ? raw.artists : [],
-    decades: raw.decades || {},
     // Formatet er nestet pr. nivå ({ meta, main, sub }) — flat ut til
     // { navn: dokument } før skriving.
     genreDescriptions: flattenGenreDescriptions(raw.genreDescriptions || {}),
     edgeDescriptions: raw.edgeDescriptions || {},
     tech: raw.tech || [],
     pages: raw.pages || {},
-    varmekart: raw.varmekart || null,
     referanser: raw.referanser || null,
     podcasts: raw.podcasts || [],
     teacherChecks: raw.teacherChecks || null,

@@ -7,7 +7,7 @@
 // ============================================================================
 import test from "node:test";
 import assert from "node:assert/strict";
-import { validateTree, assertTreeOk } from "../../js/sjangre/genre-validate.js";
+import { validateTree, assertTreeOk, sjekkTidsrom } from "../../js/sjangre/genre-validate.js";
 import { GENEALOGY, FAMILIES, META_ORDER_HINT } from "../../js/sjangre/genealogy-data.js";
 
 const feilene = (tree) => validateTree(tree).filter((p) => p.nivå === "feil").map((p) => p.melding);
@@ -115,4 +115,51 @@ test("validateTree avviser node-ID med ugyldige tegn", () => {
   assert.ok(feil("be__op").length, "«__» er skilletegnet i edge-ID-en og må avvises");
   assert.ok(feil("Be Bop").length, "mellomrom og store bokstaver må avvises");
   assert.ok(feil("bé").length, "aksenter må avvises");
+});
+
+// --- Tidsrommene (pedagogikkappens fase 2) -----------------------------------
+//  Radene i treet er tidsrom lagret i treet. Startårene må finnes og stige,
+//  ellers ville tidslinjene gått baklengs; hull og overlapp er advarsler.
+const TIDSROM_OK = [
+  { fra: -800, til: -150, navn: "Antikken" },
+  { fra: -150, til: 1500 },
+  { fra: 1500, til: null },
+];
+const nivaa = (liste, n) => liste.filter((p) => p.nivå === n).map((p) => p.melding);
+
+test("gyldige tidsrom gir verken feil eller advarsler", () => {
+  assert.deepEqual(sjekkTidsrom(TIDSROM_OK, [{ id: "a", r: 2 }]), []);
+  assert.deepEqual(feilene({ ...ekte(), tidsrom: TIDSROM_OK }).filter((m) => /idsrom/.test(m)), []);
+});
+
+test("et tre uten tidsrom er en advarsel, ikke en feil", () => {
+  const ut = sjekkTidsrom(undefined);
+  assert.equal(nivaa(ut, "feil").length, 0);
+  assert.match(nivaa(ut, "advarsel")[0], /ingen tidsrom/);
+});
+
+test("manglende eller ugyldige årstall er feil", () => {
+  assert.match(nivaa(sjekkTidsrom("tull"), "feil")[0], /ikke en liste/);
+  assert.match(nivaa(sjekkTidsrom([{ til: 1900 }]), "feil")[0], /startår/);
+  assert.match(nivaa(sjekkTidsrom([{ fra: 0, til: 1900 }]), "feil")[0], /startår/, "år 0 finnes ikke");
+  assert.match(nivaa(sjekkTidsrom([{ fra: 1900, til: "1950" }]), "feil")[0], /sluttår/);
+  assert.match(nivaa(sjekkTidsrom([{ fra: 1950, til: 1900 }]), "feil")[0], /slutter \(1900\) før det begynner \(1950\)/);
+  assert.match(nivaa(sjekkTidsrom([{ fra: -150, til: -800 }]), "feil")[0], /800 f\.Kr\./, "f.Kr. i meldingen");
+});
+
+test("startårene må stige: to tidsrom i feil rekkefølge er en feil", () => {
+  const feil = nivaa(sjekkTidsrom([{ fra: 1900, til: 1950 }, { fra: 1800, til: null }]), "feil");
+  assert.match(feil[0], /feil rekkefølge/);
+});
+
+test("hull, overlapp og et åpent tidsrom midt i lista er advarsler", () => {
+  assert.match(nivaa(sjekkTidsrom([{ fra: 1900, til: 1940 }, { fra: 1950, til: null }]), "advarsel")[0], /^Hull/);
+  assert.match(nivaa(sjekkTidsrom([{ fra: 1900, til: 1960 }, { fra: 1950, til: null }]), "advarsel")[0], /^Overlapp/);
+  assert.match(nivaa(sjekkTidsrom([{ fra: 1900 }, { fra: 1950, til: null }]), "advarsel")[0], /mangler sluttår/);
+});
+
+test("en node under det siste tidsrommet er en advarsel", () => {
+  const adv = nivaa(sjekkTidsrom(TIDSROM_OK, [{ id: "ny", r: 3 }, { id: "gammel", r: 2.5 }]), "advarsel");
+  assert.equal(adv.length, 1);
+  assert.match(adv[0], /«ny» står på rad 4, men treet har bare 3 tidsrom/);
 });

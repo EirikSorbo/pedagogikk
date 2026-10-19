@@ -29,7 +29,20 @@ import { GENEALOGY, FAMILIES, META_ORDER_HINT } from "../../js/sjangre/genealogy
 import { rebuild } from "../../js/sjangre/genre-model.js";
 import { byggGenealogyDoc } from "../../tools/build-genealogy-doc.js";
 
-export const SEED_DOC = byggGenealogyDoc({ GENEALOGY, FAMILIES, META_ORDER_HINT });
+// Tidsrommene (pedagogikkappens fase 2) er data i treet, og frøet er fra før
+// de fantes. Testene får derfor de gamle tiårsradene som tidsrom: rad 0
+// «Røtter» (1850–1900), så ett tiår per rad fra 1900, og det siste åpent.
+// Da gir tidsromsaksen de samme grensene som tiårsaksen gjorde, og testene
+// som måler filtrer og tellinger kan regne med kjente år.
+const maksRad = Math.max(...GENEALOGY.map((n) => Math.floor(n.r || 0)));
+export const SEED_TIDSROM = [
+  { fra: 1850, til: 1900, navn: "Røtter" },
+  ...Array.from({ length: maksRad }, (_, i) => ({
+    fra: 1900 + i * 10, til: i === maksRad - 1 ? null : 1910 + i * 10,
+  })),
+];
+
+export const SEED_DOC = { ...byggGenealogyDoc({ GENEALOGY, FAMILIES, META_ORDER_HINT }), tidsrom: SEED_TIDSROM };
 rebuild(SEED_DOC);
 
 // Epoken (era) og lytteforslagene (t) flyttet UT av treet i v4.64 og bor nå i

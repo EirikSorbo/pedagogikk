@@ -12,11 +12,11 @@ import { fetchPendingEdits, voteUp, undoVoteUp, getClientId, onAuthChange, fetch
 import { subscribeSharedData, sharedStateDefaults } from "./data/shared-data.js";
 import { SKJUL_I_STUDENTVISNING } from "./felles/feature-flags.js";
 import { onGenreModelChanged } from "./sjangre/genre-model.js";
-import { instrumentsInUse, DECADES, isVisible, filterArtists, hasActiveFilters } from "./felles/limits.js";
+import { instrumentsInUse, isVisible, filterArtists, hasActiveFilters } from "./felles/limits.js";
 import { debounce, throttle, harSendtInn, normaliserReturKode, escapeHtml } from "./felles/util.js";
 import { renderSpotlightCards, renderArtistDetail, renderArtists, renderResultList, artistGalleriHtml, fillSelect } from "./ui/ui.js";
 import { CONFIGURED, $, showSetupBanner, wireFirestoreErrorBanner } from "./data/shared.js";
-import { GENEALOGY_MAIN_GENRES, GENEALOGY_META_GENRES } from "./sjangre/genre-model.js";
+import { GENEALOGY_MAIN_GENRES, GENEALOGY_META_GENRES, tidsromValg } from "./sjangre/genre-model.js";
 import { initExplore } from "./utforsk/explore.js";
 import { lesVisFraUrl, provVisMaal } from "./utforsk/explore-apne.js";
 import { initPresentasjon, presPlanTikk } from "./visning/presentasjon.js";
@@ -33,15 +33,15 @@ import { currentEntityValues } from "./forslag/entity-values.js";
 import { loadArtists, saveArtists } from "./data/artist-cache.js";
 
 const state = {
-  // De syv delte samlingene (artists, genreDescs, edgeDescs, tech, content,
-  // decades, podcasts) kommer fra shared-data.js — samme form som lærersiden og
+  // De seks delte samlingene (artists, genreDescs, edgeDescs, tech, content,
+  // podcasts) kommer fra shared-data.js — samme form som lærersiden og
   // slektstresidene, så en delt komponent aldri kan få ulikt innhold her.
   ...sharedStateDefaults(),
   pendingEdits: [],
   // Innsendinger læreren har sendt tilbake til DENNE studenten (returflyten):
   // fylt automatisk via ownerUid, eller via kode fra læreren.
   returer: [],
-  filters: { search: "", mainGenre: "", metaGenre: "", instrument: "", decade: "", showRemoved: false, priority: 0 },
+  filters: { search: "", mainGenre: "", metaGenre: "", instrument: "", tidsrom: "", showRemoved: false, priority: 0 },
   isTeacher: false,
   clientId: getClientId(),
 };
@@ -189,8 +189,7 @@ function setupExplore() {
     hasPendingEdit,
   });
 
-  // Tiår (v6.07, S1) åpner tiårsvinduet der man slapp; Lytt (U7) spillelistene.
-  document.getElementById("btn-tiar")?.addEventListener("click", () => explore.openDecadeList());
+  // Lytt (U7) åpner spillelistene.
   document.getElementById("btn-lytt")?.addEventListener("click", () => explore.openLytt());
   document.getElementById("fra-timene-liste")?.addEventListener("click", (e) => {
     const rad = e.target.closest("[data-time-id]");
@@ -456,11 +455,8 @@ function refreshFilterControls() {
   fillSelect($("#sp-sjanger"), GENEALOGY_MAIN_GENRES, { placeholder: "Sjanger" });
   fillSelect($("#sp-genre"), GENEALOGY_META_GENRES.map(g => ({ value: g, label: g })), { placeholder: "Metasjanger" });
   fillSelect($("#sp-instrument"), instrumentsInUse(state.artists, state.filters.instrument), { placeholder: "Instrument" });
-  fillSelect(
-    $("#sp-decade"),
-    DECADES.map((d) => ({ value: d, label: `${d}-tallet` })),
-    { placeholder: "Tiår" }
-  );
+  // Tidsrommene (fase 2) kommer fra treet, som de andre to nedtrekkene over.
+  fillSelect($("#sp-tidsrom"), tidsromValg(), { placeholder: "Tidsrom" });
   if (state.filters.mainGenre)  $("#sp-sjanger").value = state.filters.mainGenre;
   if (state.filters.metaGenre)    $("#sp-genre").value = state.filters.metaGenre;
 }
@@ -493,7 +489,7 @@ function setupFilters() {
     "sp-sjanger": "mainGenre",
     "sp-genre": "metaGenre",
     "sp-instrument": "instrument",
-    "sp-decade": "decade",
+    "sp-tidsrom": "tidsrom",
   };
   Object.entries(FILTER_KEYS).forEach(([id, key]) => {
     const el = document.getElementById(id);
@@ -787,8 +783,6 @@ function init() {
       explore?.renderInstrumenter?.();
       // Plateselskapskortet viser artistene med selskapet (v6.37).
       explore?.renderPlateselskaper?.();
-      // Et åpent tiårsvindu (Musikk-fanen bygges av artistene).
-      explore?.refreshDecadeView?.();
       // Utenom throttlingen: deep-linkene skal åpnes straks data finnes
       // (no-op når det ikke venter noen). provVisMaal er ?vis=-ruteren.
       applyPendingDeepLink();
@@ -812,18 +806,15 @@ function init() {
     // renderInstrumenter: en åpen Instrumenter-fane bygges av tech-kortene og
     // skal følge med (no-op når seksjonen er lukket).
     // refreshTeknologi + provVisMaal (audit v5.42 funn 18): en åpen
-    // teknologiliste og en ventende ?vis=tech/teknologi/tiår:…:tech-lenke skal
+    // teknologiliste og en ventende ?vis=tech/teknologi-lenke skal
     // følge tech-snapshotet, ikke vente på at noe annet lander.
-    onTech: () => { applyArtistSnapshot(); explore?.renderInstrumenter?.(); explore?.refreshTeknologi?.(); explore?.refreshDecadeView?.(); provVisMaal(); presPlanTikk(); visningTikk(); },
+    onTech: () => { applyArtistSnapshot(); explore?.renderInstrumenter?.(); explore?.refreshTeknologi?.(); provVisMaal(); presPlanTikk(); visningTikk(); },
     // En ventende ?vis=kobling-lenke venter på koblingstekstene.
     onEdgeDescs: () => provVisMaal(),
-    // Innholdssidene og varmekartet: re-render åpne visninger ved endring.
+    // Innholdssidene: re-render åpne visninger ved endring.
     // Instrumentsammendragene bor i content, så en åpen Instrumenter-fane
     // tegnes på nytt her også.
     onContent: () => { explore?.contentChanged?.(); explore?.renderInstrumenter?.(); provVisMaal(); presPlanTikk(); samleTikk(); visningTikk(); renderFraTimene(); },
-    // Tiårstekstene: en ?vis=tiår-lenke venter på at de har landet, og et
-    // åpent tiårsvindu skal vise den ferske teksten.
-    onDecades: () => { explore?.refreshDecadeView?.(); provVisMaal(); },
     // En åpen Podkaster-fane skal vise nye episoder uten å lukkes/åpnes.
     onPodcasts: () => explore?.renderInstrumenter?.(),
   });

@@ -2,7 +2,8 @@
 //  ENDRINGSFORSLAG (studentside)
 // ----------------------------------------------------------------------------
 //  Generisk redigerer som lar studenter foreslå endringer på artister, tech,
-//  sjangere/undersjangere og tiår-beskrivelser. Bygger et skjema dynamisk fra
+//  sjangere/undersjangere og instrumentsammendrag. (Tiårsbeskrivelsene var
+//  med til fase 2.) Bygger et skjema dynamisk fra
 //  feltspesifikasjoner, beregner differansen mot dagens verdier, og lagrer
 //  forslaget via addPendingEdit. Også: åpning for å foreslå et helt nytt
 //  innovasjonskort via addTechProposal.
@@ -12,7 +13,8 @@ import { addPendingEdit, addTechProposal, resubmitTech, resubmitPendingEdit } fr
 import { diffFields } from "../ui/ui-edit.js";
 import { modalOpen, modalClose } from "../ui/ui-modal.js";
 import { TECH_CATEGORIES, TECH_TYPES } from "../ui/ui-tech.js";
-import { INSTRUMENT_TIMELINE_GROUPS, DECADE_OPTIONS, SAMMENDRAG_MAKS } from "../felles/limits.js";
+import { INSTRUMENT_TIMELINE_GROUPS, SAMMENDRAG_MAKS } from "../felles/limits.js";
+import { AAR_MIN, AAR_MAKS, AAR_HJELP } from "../felles/aarstall.js";
 import { SOURCE_SPEC, musicSpecWithGenres, addRow, buildRows, collectRows, normalizeRows } from "../ui/row-editor.js";
 import { GENEALOGY_MAIN_GENRES } from "../sjangre/genre-model.js";
 import { apneArtistSkjema } from "../ui/artist-skjema.js";
@@ -52,13 +54,7 @@ const FIELD_SPECS = {
       { value: "", label: "Ingen / gjelder ikke ett instrument" },
       ...INSTRUMENT_TIMELINE_GROUPS.map((i) => ({ value: i, label: i })),
     ] },
-    // Tiåret styrer hvilken tiårs-tidslinje kortet havner på. Var fritekst
-    // t.o.m. v4.97; en skrivefeil («1955») ga et kort som falt ut av tidslinjen
-    // uten at noe så feil ut.
-    { key: "decade", label: "Tiår (for filtrering)", type: "select", options: [
-      { value: "", label: "Velg tiår …" },
-      ...DECADE_OPTIONS,
-    ] },
+    // (Tiåret, «decade», styrte tiårsvinduets tidslinje til fase 2.)
     // FEIL T.O.M. v4.96: adoptedYear sto her med etiketten «Oppfunnet», og
     // inventedYear — feltet kortet FAKTISK viser som «Oppfunnet» — kunne ikke
     // foreslås i det hele tatt. En student som rettet oppfinnelsesåret skrev
@@ -66,7 +62,7 @@ const FIELD_SPECS = {
     // lærerens diff-tabell kalte endringen «Oppfunnet». Etikettene her er nå
     // ordrett de samme som i lærerens editor (teacher.html).
     { key: "inventedYear", label: "Oppfunnet (år)", type: "number",
-      hint: "Året teknologien ble oppfunnet eller patentert." },
+      hint: `Året teknologien ble oppfunnet eller patentert. ${AAR_HJELP}` },
     { key: "adoptedYear", label: "Tatt i bruk (år)", type: "number",
       hint: "Året det ble tatt i bruk i nevneverdig skala." },
     { key: "adoptedLabel", label: "Tatt i bruk (kort forklaring)", type: "text", max: 150 },
@@ -81,7 +77,7 @@ const FIELD_SPECS = {
   // og lærersiden lagrer dem heller ikke på det nivået.
   subgenre: [
     { key: "description", label: "Beskrivelse", type: "textarea", full: true },
-    { key: "activeFrom", label: "Mest aktiv fra år", type: "number", levels: ["main"] },
+    { key: "activeFrom", label: "Mest aktiv fra år", type: "number", levels: ["main"], hint: AAR_HJELP },
     { key: "activeTo", label: "Mest aktiv til år (tom = fortsatt aktiv)", type: "number", levels: ["main"] },
     { key: "era", label: "Epoke med ord", type: "text", levels: ["main"], full: true, max: 60,
       hint: "Vises ordrett på sjangertidslinjen, og på sjangerkortet når årstallene over står tomme. Bruk den for nyansering av årstallene hvis nødvendig." },
@@ -93,12 +89,6 @@ const FIELD_SPECS = {
   instrument: [
     { key: "body", label: "Sammendrag av instrumentets utvikling", type: "textarea", full: true, max: SAMMENDRAG_MAKS },
     { ...KILDE_FELT, label: "Kilder *" },
-  ],
-  "decade-society": [
-    { key: "society", label: "Samfunnsutvikling", type: "textarea", full: true },
-  ],
-  "decade-tech": [
-    { key: "tech", label: "Teknologiutvikling", type: "textarea", full: true },
   ],
 };
 
@@ -112,8 +102,6 @@ const TITLES = {
   tech: "Foreslå endring på innovasjonskort",
   subgenre: "Foreslå endring på sjangerbeskrivelse",
   instrument: "Foreslå endring på instrumentsammendrag",
-  "decade-society": "Foreslå endring på samfunnsutvikling",
-  "decade-tech": "Foreslå endring på teknologiutvikling",
   "new-tech": "Foreslå nytt innovasjonskort",
 };
 
@@ -137,8 +125,8 @@ function inputForField(spec, value) {
   }
   if (spec.type === "select") {
     // En lagret verdi utenfor vokabularet beholdes som eget valg (samme vern
-    // som row-editor.js): et kort med et tiår skrevet inn før feltet ble et
-    // nedtrekk skal ikke miste det stille ved neste forslag.
+    // som row-editor.js): et kort med en verdi skrevet inn før feltet ble et
+    // nedtrekk skal ikke miste den stille ved neste forslag.
     const opts = (spec.options || []).some((o) => o.value === v) || v === ""
       ? spec.options
       : [...spec.options, { value: v, label: `${v} (utenfor lista)` }];
@@ -148,7 +136,8 @@ function inputForField(spec, value) {
     return `${labelHtml}<select id="${id}">${optsHtml}</select>${hint}</label>`;
   }
   if (spec.type === "number") {
-    return `${labelHtml}<input type="number" id="${id}" value="${escapeHtml(v)}" />${hint}</label>`;
+    // Alle tallfeltene her er årstall; år før Kristus er negative (fase 2).
+    return `${labelHtml}<input type="number" id="${id}" min="${AAR_MIN}" max="${AAR_MAKS}" value="${escapeHtml(v)}" />${hint}</label>`;
   }
   if (spec.type === "csv") {
     const display = Array.isArray(v) ? v.join(", ") : (v || "");

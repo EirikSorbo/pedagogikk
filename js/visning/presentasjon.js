@@ -54,7 +54,6 @@ const FLATE_MODAL = {
   artist: ["modal-detail", "modal-artist-detail"],
   sjanger: ["modal-sjanger"],
   tech: ["modal-tech-detail"],
-  "tiår": ["modal-decade-view"],
   historie: ["modal-historier"],
 };
 
@@ -1164,7 +1163,7 @@ function tegnPanel(panel) {
   const flate = aktivFlate();
   const seksjoner = flate ? FLATER[flate] : null;
   const harPunkter = !!topOpenModal()?.querySelector('[data-sekt="punkter"]');
-  const flateNavn = { artist: "artistkortet", sjanger: "sjangerkortet", tech: "innovasjonskortet", "tiår": "tiårsvisningen", historie: "historien" };
+  const flateNavn = { artist: "artistkortet", sjanger: "sjangerkortet", tech: "innovasjonskortet", historie: "historien" };
 
   panel.innerHTML = `
     ${seksjoner ? `

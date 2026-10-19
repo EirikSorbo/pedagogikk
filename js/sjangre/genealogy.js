@@ -18,12 +18,12 @@ import { koblingSjekketOk } from "../felles/sjekket.js";
 import { renderRichText } from "../felles/rich-text.js";
 import { punkterHtml } from "../felles/punkter.js";
 import { escapeHtml, buildKilderList } from "../felles/util.js";
+import { visSpenn } from "../felles/aarstall.js";
 import { resolveDesc, resolveDescAny, missingDesc, epokeFritekst } from "./genre-descriptions.js";
 import { modalOpen } from "../ui/ui-modal.js";
 import { renderGenreEditBtn, sekt, wireRelated, metaMerkeHtml } from "../ui/ui-helpers.js";
 import { artistsInGenre } from "../felles/limits.js";
 import { wireProposeFoot } from "../ui/ui-edit.js";
-import { heatRow, heatStripHtml, heatAxisHtml, getHeatData } from "./heat-strip.js";
 import { GENEALOGY, META_GENRE_COLOR, edgeKey, nodeColor, edgeExists } from "./genre-model.js";
 import { ordneSjangerLerret } from "../visning/pres-sjanger.js";
 
@@ -37,7 +37,7 @@ import { ordneSjangerLerret } from "../visning/pres-sjanger.js";
 // ulikt, ville editoren åpnet tom over en tekst som vises i popupen, og lagring
 // ville lagd et duplikat under labelen.
 // Epoke-linja øverst på sjangerkortet. Sannheten er de STRUKTURERTE årstallene
-// (activeFrom/activeTo), som læreren kan rette og appen kan måle mot varmekartet.
+// (activeFrom/activeTo), som læreren kan rette.
 // Fritekst-epoken er fallback for sjangre som ennå ikke har årstall.
 //
 // BEGGE kommer nå fra genreDescriptions (v4.64). Fram til da lå fritekst-epoken
@@ -51,10 +51,13 @@ import { ordneSjangerLerret } from "../visning/pres-sjanger.js";
 // endene, akkurat som på artistkortenes innflytelseslinje. (I v4.83 sto det
 // foran begge årstallene — «ca. 1923–ca. 1942» leste stotrende.) «i dag» er
 // uansett ikke omtrentlig.
+//
+// År før Kristus (fase 2) får «f.Kr.» der det trengs: «ca. 450–300 f.Kr.»,
+// «ca. 80 f.Kr.–100» (visSpenn i aarstall.js).
 export function eraYears(resolved) {
   const from = resolved?.activeFrom, to = resolved?.activeTo;
   if (!Number.isInteger(from)) return "";
-  return `ca. ${from}–${Number.isInteger(to) ? to : "i dag"}`;
+  return `ca. ${visSpenn(from, Number.isInteger(to) ? to : null, { apen: "i dag" })}`;
 }
 
 // Årstallene, eller fritekst-epoken når de mangler. Brukt av koblings-popupen,
@@ -97,28 +100,6 @@ export function resolveMainDesc(genreDescs, genreId) {
     : resolveDesc(genreDescs, genreId, "main");
 }
 
-// Varmelinja øverst på sjangerkortet: samme glidende stripe som i varmekartet,
-// med tiårene over — så man ser sjangerens tyngdepunkt gjennom historien før man
-// leser et eneste ord. Fargen følger ARVEREGELEN (nodeColor): metasjangeren
-// eier fargen, noden bærer bare fam som unntak. Å lese n.fam rått ga grå
-// stripe for 44 av 46 sjangre, mens varmekartet viste familiefargen.
-//
-// Vises kun for ekte tre-sjangre (n.g) og kun når nivåene faktisk er lastet:
-// tre.html laster ikke innhold i det hele tatt, og da er en tom grå linje verre
-// enn ingen linje. Er nivåene lastet, men sjangeren mangler rad, står stripa
-// som «ingen data» med en forklarende linje under — samme sannhet som
-// varmekartet forteller.
-function heatStripBlock(n) {
-  const heat = getHeatData();
-  if (!n.g || !heat) return "";
-  const vals = heatRow(heat, n.l);
-  const color = nodeColor(n);
-  const tom = vals.every((v) => v == null);
-  return `<div class="gx-heat">${heatAxisHtml()}${heatStripHtml(color, vals)}` +
-    (tom ? `<p class="gx-heat-missing">Ingen varmekart-nivåer for denne sjangeren ennå.</p>` : "") +
-    `</div>`;
-}
-
 // Vis sjanger-beskrivelse i #modal-sjanger uten å laste hele kartet.
 // opts: { root, genreDescs, onShowArtists }
 // Kortet som står åpent nå (label + opts), så det kan tegnes på nytt når data
@@ -133,8 +114,7 @@ let openSjanger = null;
 // `freshOpts` (valgfri) erstatter de lagrede opts før omtegningen. Uten den
 // tegnes kortet med data-referansene fra ÅPNINGSØYEBLIKKET: subscribe-
 // callbackene BYTTER referansene (state.genreDescs = descs), så de fangede
-// opts så aldri en fersk beskrivelse — bare varmestripa ble ny (den leses fra
-// modulnivå via getHeatData). Kallerne sender sjangerOpts(), som bygges fra
+// opts så aldri en fersk beskrivelse. Kallerne sender sjangerOpts(), som bygges fra
 // gjeldende state ved hvert kall.
 // Nullstiller «hvilket sjangerkort står åpent». Må kunne kalles utenfra:
 // showGenreLevelInfo i ui.js tegner i SAMME modal, og lot openSjanger stå fra
@@ -233,7 +213,7 @@ export function showSjangerInfo(label, opts = {}, { reopen = true } = {}) {
   // punktene (js/visning/pres-sjanger.js); CSS skjuler den i appen, der knappen er
   // inngangen. Et navn åpner artistkortet, som de beslektede artistene.
   const iSjangeren = n.g ? artistsInGenre(artists, n.l) : [];
-  // --sj-farge (v5.90): sjangerens farge, den samme som varmestripa, til
+  // --sj-farge (v5.90): sjangerens farge, den samme som i treet, til
   // streken og overskriften i sidespalta (se .sj-artister i styles.css).
   const artisterHtml = iSjangeren.length ? `<div class="sj-artister" style="--sj-farge:${escapeHtml(nodeColor(n))}">
       <h4 class="related-head">Artister</h4>
@@ -246,7 +226,6 @@ export function showSjangerInfo(label, opts = {}, { reopen = true } = {}) {
   // Knapperaden (Artister/Spilleliste/Tidslinje) er navigasjon og står alltid.
   mBody.innerHTML = `
     ${n.g ? metaMerkeHtml(n.g, META_GENRE_COLOR[n.g]) : ""}
-    ${sekt("stripe", heatStripBlock(n))}
     ${sekt("era", `<p class="gx-era">${escapeHtml(eraLine(resolved))}</p>`)}
     ${sekt("punkter", punkterHtml(resolved.punkter, lcSelv))}
     ${sekt("beskrivelse", `<div class="gx-desc rt">${descText ? renderRichText(descText, lcSelv) : `<span class="gx-missing">${missingDesc("main")}</span>`}</div>`)}

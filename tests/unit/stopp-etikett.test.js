@@ -49,10 +49,10 @@ test("sjanger og undersjanger: treet og de synlige artistene avgjør", () => {
   assert.equal(stoppEtikett({ vis: "undersjanger:Ukjent" }).laster, true);
 });
 
-test("tiår, lytteeksempel og ugyldige lenker", () => {
+test("lytteeksempel og ugyldige lenker, også gamle tiårsstopp (fase 2)", () => {
   medState({ ...LASTET, artists: [muddy] });
-  assert.equal(stoppEtikett({ vis: "tiår:1950:tech" }).navn, "1950-tallet (teknologi)");
-  assert.equal(stoppEtikett({ vis: "tiår:1950" }).navn, "1950-tallet (samfunn)");
+  assert.equal(stoppEtikett({ vis: "tiår:1950:tech" }).feil, "ugyldig lenke", "tiårskortene er tatt ut");
+  assert.equal(stoppEtikett({ vis: "varmekart" }).feil, "ugyldig lenke", "varmekartet også");
   assert.equal(stoppEtikett({ vis: "yt:abcdefghijk" }).navn, "Hoochie Coochie Man (Muddy Waters)");
   assert.equal(stoppEtikett({ vis: "yt:zzzzzzzzzzz" }).tekst, "Lytteeksempel (YouTube)");
   assert.equal(stoppEtikett({ vis: "" }).feil, "ugyldig lenke");

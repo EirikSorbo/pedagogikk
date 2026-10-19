@@ -21,7 +21,8 @@ import { GENEALOGY as SEED_NODES, FAMILIES as SEED_FAMILIES, META_ORDER_HINT } f
 import { byggGenealogyDoc } from "../../tools/build-genealogy-doc.js";
 import {
   rebuild, GENEALOGY, GENEALOGY_MAIN_GENRES, GENEALOGY_META_GENRES, META_GENRE_ORDER,
-  GENEALOGY_EDGES, MAIN_GENRE_INFO, META_GENRE_COLOR, DECADE_ROWS,
+  GENEALOGY_EDGES, MAIN_GENRE_INFO, META_GENRE_COLOR, TIDSROM, RAD_ANTALL,
+  tidsromEtikett, tidsromValg, normaliserTidsrom, applyGenealogyDoc,
   isMainGenre, findTreeGenreNode, canonMainGenre, genreNodeById, edgeKey,
   isGenreModelReady, onGenreModelChanged,
 } from "../../js/sjangre/genre-model.js";
@@ -96,23 +97,59 @@ test("genreNodeById slår opp på id", () => {
   assert.equal(genreNodeById("finnes-ikke"), null);
 });
 
-test("tiårsaksen dekker alle radene i treet", () => {
-  const maxRad = Math.max(...SEED_NODES.map((n) => Math.floor(n.r)));
-  assert.equal(DECADE_ROWS.length, maxRad + 1);
-  assert.equal(DECADE_ROWS[0], "Røtter");
-  assert.equal(DECADE_ROWS[1], "1900");
-  assert.equal(DECADE_ROWS[2], "1910-t");
-  assert.equal(DECADE_ROWS[maxRad], "2010-t");
+// --- Tidsrommene (pedagogikkappens fase 2) ----------------------------------
+//  Radene er tidsrom av ulik lengde, lagret i treet (tidsrom), ikke tiår
+//  regnet ut i koden. Frøet er fra før de fantes og har ingen.
+
+const TIDSROM_TEST = [
+  { fra: -800, til: -150, etikett: "ca. 800–150 f.Kr.", navn: "Antikkens Hellas" },
+  { fra: -150, til: 500 },
+  { fra: 500, til: null, navn: "Etter Romerriket" },
+];
+
+test("tidsrommene leses fra treet, og etiketten utledes når den mangler", () => {
+  rebuild({ ...SEED_DOC, tidsrom: TIDSROM_TEST });
+  assert.equal(TIDSROM.length, 3);
+  assert.deepEqual(TIDSROM[0], { fra: -800, til: -150, navn: "Antikkens Hellas", etikett: "ca. 800–150 f.Kr." });
+  assert.equal(TIDSROM[1].etikett, "150 f.Kr.–500", "f.Kr. bare der det trengs");
+  assert.equal(TIDSROM[2].etikett, "500–i dag", "åpent siste tidsrom varer til i dag");
+  assert.equal(tidsromEtikett(1), "150 f.Kr.–500");
+  assert.equal(tidsromEtikett(1.5), "150 f.Kr.–500", "en mellomrad hører til raden den står i");
+  assert.equal(tidsromEtikett(9), "", "rad uten tidsrom: ingen etikett");
+  assert.deepEqual(tidsromValg().map((v) => v.value), ["0", "1", "2"]);
+  assert.equal(tidsromValg()[0].label, "ca. 800–150 f.Kr. (Antikkens Hellas)");
+  seed();
 });
 
-test("aksen vokser med treet: en node på en ny rad gir en ny tiårsetikett", () => {
-  rebuild({
-    nodes: [{ id: "x", l: "X", f: "X", fam: "gray", r: 13, p: [], g: "Pop" }],
-    families: SEED_FAMILIES, metaOrderHint: META_ORDER_HINT,
-  });
-  assert.equal(DECADE_ROWS.length, 14);
-  assert.equal(DECADE_ROWS[13], "2020-t");
+test("RAD_ANTALL dekker både tidsrommene og den dypeste noden", () => {
+  const maxRad = Math.max(...SEED_NODES.map((n) => Math.floor(n.r)));
+  rebuild({ ...SEED_DOC, tidsrom: TIDSROM_TEST });
+  assert.equal(RAD_ANTALL, maxRad + 1, "frøet står dypere enn de tre tidsrommene");
+  rebuild({ ...SEED_DOC, tidsrom: Array.from({ length: 20 }, (_, i) => ({ fra: 1000 + i, til: 1001 + i })) });
+  assert.equal(RAD_ANTALL, 20, "flere tidsrom enn rader i treet");
   seed();
+  assert.deepEqual(TIDSROM, [], "frøet har ingen tidsrom");
+});
+
+test("normaliserTidsrom tåler søppel og tar bare med kjente felt", () => {
+  assert.deepEqual(normaliserTidsrom(null), []);
+  assert.deepEqual(normaliserTidsrom([{ fra: "1900", til: 1950.5, x: 1 }]),
+    [{ fra: null, til: null, navn: "", etikett: "" }]);
+  assert.deepEqual(normaliserTidsrom([{ fra: 1900, til: 1950, navn: " Mellomkrigstid " }]),
+    [{ fra: 1900, til: 1950, navn: "Mellomkrigstid", etikett: "1900–1950" }]);
+});
+
+test("speilet bærer tidsrommene, så en kald start får aksen med", () => {
+  const lagret = {};
+  globalThis.localStorage = { getItem: (k) => lagret[k] ?? null, setItem: (k, v) => { lagret[k] = v; } };
+  try {
+    applyGenealogyDoc({ ...SEED_DOC, tidsrom: TIDSROM_TEST });
+    const speil = JSON.parse(Object.values(lagret)[0]);
+    assert.deepEqual(speil.tidsrom, TIDSROM_TEST);
+  } finally {
+    delete globalThis.localStorage;
+    seed();
+  }
 });
 
 test("tomt tre gir tom modell og ikke-klar status, uten å kaste", () => {

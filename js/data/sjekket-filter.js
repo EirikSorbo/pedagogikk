@@ -7,8 +7,7 @@
 //
 //  Teksten tas bort, ikke strukturen: en sjanger uten sjekket beskrivelse
 //  beholder årstallene (tidslinja, sjangerperiodene) og står i treet, men
-//  beskrivelsen, punktene, lytteforslagene og kildene er borte. Et tiår
-//  mister bare den usjekkede av de to tekstene.
+//  beskrivelsen, punktene, lytteforslagene og kildene er borte.
 // ============================================================================
 
 import { GENEALOGY } from "../sjangre/genre-model.js";
@@ -59,24 +58,8 @@ export function filtrerTech(items, sjekker = {}) {
   return (items || []).filter((t) => ider.has(t.id));
 }
 
-export function filtrerDecades(map, sjekker = {}) {
-  const ut = {};
-  for (const [id, d] of Object.entries(map || {})) {
-    if (!d || typeof d !== "object") { ut[id] = d; continue; }
-    const samfunn = har(sjekker.decades, id);
-    const teknologi = har(sjekker.decadesTech, id);
-    const kopi = { ...d };
-    if (!samfunn) delete kopi.society;
-    if (!teknologi) delete kopi.tech;
-    // Kildene er felles for de to tekstene og følger med så lenge én av dem står.
-    if (!samfunn && !teknologi) delete kopi.kilder;
-    ut[id] = kopi;
-  }
-  return ut;
-}
-
 // Sidene i content som er pensuminnhold, og sjekken hver av dem følger.
-// Resten av content (sjangertreet, varmekartet, synligheten, kjøreplanene,
+// Resten av content (sjangertreet, synligheten, kjøreplanene,
 // referanselista, skriveveiledningen) er utenfor regelen. Bruksveiledningen
 // (appGuide) er unntatt fra v6.95 (brukervalg 2026-10-13): avhukingen av
 // delene styrer den alene (js/felles/guide-deler.js).
@@ -116,13 +99,6 @@ const TECH_UTENOM = new Set(["id", "status", "createdAt", "updatedAt", "proposed
 export function sjekkerEndretAvImport(fil = {}, naa = {}) {
   const ut = {};
   const legg = (kategori, id) => { (ut[kategori] ||= new Set()).add(id); };
-
-  for (const [id, d] of Object.entries(fil.decades || {})) {
-    const g = naa.decadeDescs?.[id];
-    if (endret(d, g, ["society"])) legg("decades", id);
-    if (endret(d, g, ["tech"])) legg("decadesTech", id);
-    if (endret(d, g, ["kilder"])) { legg("decades", id); legg("decadesTech", id); }
-  }
 
   for (const [navn, d] of Object.entries(fil.genreDescriptions || {})) {
     if (!d || typeof d !== "object") continue;

@@ -12,6 +12,7 @@
 // ============================================================================
 
 import { normaliserPunkter } from "../felles/punkter.js";
+import { erAar } from "../felles/aarstall.js";
 
 const LVL = { meta: "metasjanger", main: "sjanger", sub: "undersjanger" };
 
@@ -22,13 +23,13 @@ export function missingDesc(level) {
   return `Ingen beskrivelse lagt inn ennå (${LVL[level] || level})`;
 }
 
-// Årstallene er heltall i et plausibelt årsintervall, ellers null. Samme grense
-// som editoren validerer mot (1600–2100). Et tomt felt skal bety «ikke satt»,
+// Årstallene er heltall i et plausibelt årsintervall, ellers null. Samme
+// grense som editoren validerer mot (erAar i aarstall.js: fra 3000 f.Kr. til
+// 2100, fase 2; i musikkappen 1600–2100). Et tomt felt skal bety «ikke satt»,
 // og 0 er IKKE et årstall: uten denne grensen ville et streifende 0 fra en
 // import rendret «0–i dag» på sjangerkortet.
-const AAR_MIN = 1600, AAR_MAKS = 2100;
 function yr(v) {
-  return Number.isInteger(v) && v >= AAR_MIN && v <= AAR_MAKS ? v : null;
+  return erAar(v) ? v : null;
 }
 
 const TOM = { description: "", kilder: [], activeFrom: null, activeTo: null, activeToUgyldig: false, usikre: [], era: "", lytt: [], punkter: [] };
@@ -92,6 +93,13 @@ export function epokeFritekst(resolved) {
     `${fra}`, `${fra}-`, `fra${fra}`, `${fra}-tallet`,
     `${fra}-${tilTekst}`, `${fra}-idag`, `${fra}-nå`,
   ]);
+  // Før Kristus (fase 2): «ca. 450–300 f.Kr.» gjentar activeFrom -450 og
+  // activeTo -300, akkurat som årstallene på kortet sier det.
+  if (fra < 0) {
+    const bc = (x) => `${-x}`;
+    const tilBc = Number.isInteger(til) ? (til < 0 ? `${bc(til)}f.kr.` : `${til}`) : "idag";
+    for (const g of [`${bc(fra)}f.kr.`, `${bc(fra)}-${tilBc}`, `${bc(fra)}f.kr.-${tilBc}`]) gjentak.add(g);
+  }
   return gjentak.has(norm(ord)) ? "" : ord;
 }
 

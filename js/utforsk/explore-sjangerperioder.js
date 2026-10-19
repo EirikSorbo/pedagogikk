@@ -2,7 +2,7 @@
 //  SJANGERPERIODER — kortet i «Det store bildet» (v5.20)
 // ----------------------------------------------------------------------------
 //  Liggende stolper for når hver sjanger var aktiv, gruppert etter metasjanger
-//  i de samme sammenleggbare gruppene som varmekartet. Datalogikken bor i
+//  i sammenleggbare grupper. Aksen er tidsrommene i treet (fase 2). Datalogikken bor i
 //  genre-periods.js (enhetstestet); her er bare tegningen og koblingen.
 //
 //  DYNAMISK, så figuren aldri må vedlikeholdes:
@@ -20,9 +20,9 @@
 //  ved hver ombygging av treet.
 // ============================================================================
 import { escapeHtml } from "../felles/util.js";
-import { DECADES } from "../felles/limits.js";
+import { visAar } from "../felles/aarstall.js";
 import { modalOpen } from "../ui/ui-modal.js";
-import { GENEALOGY, META_GENRE_COLOR, onGenreModelChanged } from "../sjangre/genre-model.js";
+import { GENEALOGY, META_GENRE_COLOR, TIDSROM, onGenreModelChanged } from "../sjangre/genre-model.js";
 import { storyOrder } from "../felles/story-format.js";
 import { eraYears } from "../sjangre/genealogy.js";
 import { onMainGenreClick } from "./explore-context.js";
@@ -83,18 +83,11 @@ function hullHtml(r) {
     + `<span class="sp-navn">${escapeHtml(r.genre)}</span><span class="sp-mangler">${hva}</span></button>`;
 }
 
-// Tiårsstrekene i sporet og årstallsaksen under, delt av figuren og
-// metasjanger-oversikten. Med `tiarLenker` (oversikten, v6.46, brukervalg
-// 2026-10-06) er tiårene som har et tiårskort, knapper med data-tiar: den
-// felles klikklytteren i explore.js åpner tiårskortet på det tiåret, i
-// Samfunn-fanen (data-tiar-fane, v6.47). De andre (f.eks. 1890) står som tekst.
-function akseHtml(axis, { tiarLenker = false } = {}) {
-  const merke = (t) => {
-    const pos = `left:${pctAv(axis, t).toFixed(3)}%`;
-    return tiarLenker && DECADES.includes(t)
-      ? `<button type="button" class="sp-tiar" data-tiar="${t}" data-tiar-fane="society" style="${pos}" title="Åpne ${t}-tallet" aria-label="Åpne ${t}-tallet">${t}</button>`
-      : `<span style="${pos}">${t}</span>`;
-  };
+// Strekene i sporet og årstallsaksen under, delt av figuren og
+// metasjanger-oversikten: ett merke ved starten av hvert tidsrom (fase 2).
+// (I oversikten var tiårene lenker til tiårskortene, v6.46, til fase 2.)
+function akseHtml(axis) {
+  const merke = (t) => `<span style="left:${pctAv(axis, t).toFixed(3)}%">${escapeHtml(visAar(t))}</span>`;
   return {
     streker: axis.ticks.map((t) => `<span class="sp-strek" style="left:${pctAv(axis, t).toFixed(3)}%"></span>`).join(""),
     akse: `<div class="sp-akse">${axis.ticks.map(merke).join("")}</div>`,
@@ -110,8 +103,8 @@ export function periodeFigurForMeta(meta) {
   const groups = periodGroups([meta], s.genreDescs || {}, GENEALOGY, naa, familieFarge);
   const g = groups[0];
   if (!g || !g.rows.length) return { html: "", rader: [] };
-  const axis = periodAxis(groups, naa);
-  const { streker, akse } = akseHtml(axis, { tiarLenker: true });
+  const axis = periodAxis(groups, naa, TIDSROM);
+  const { streker, akse } = akseHtml(axis);
   const rader = g.rows.map((r) => (r.status === "ok" ? stolpeHtml(r, axis, naa) : hullHtml(r))).join("");
   return { html: `<div class="sp-scroll"><div class="sp-figur"><div class="sp-rader">${streker}${rader}</div>${akse}</div></div>`, rader: g.rows };
 }
@@ -157,7 +150,7 @@ function beregn() {
   const genreDescs = s.genreDescs || {};
   const groups = periodGroups(storyOrder(genreDescs), genreDescs, GENEALOGY, naa, familieFarge);
   if (!groups.length) return tilstand("Ingen sjangre å vise ennå.");
-  const axis = periodAxis(groups, naa);
+  const axis = periodAxis(groups, naa, TIDSROM);
   return { html: figurHtml(groups, axis, naa), signatur: periodSignatur(groups, axis), figur: true };
 }
 
@@ -168,7 +161,7 @@ export function renderSjangerperioderBody({ tving = false } = {}) {
   if (!tving && body.dataset.spSignatur === signatur) return;
 
   // Noe i figuren er faktisk endret: ta vare på sidelengs scroll og fokus
-  // gjennom omtegningen, så den som leser ikke kastes tilbake til 1900.
+  // gjennom omtegningen, så den som leser ikke kastes tilbake til starten.
   const aktiv = document.activeElement && body.contains(document.activeElement) ? document.activeElement : null;
   const fokus = aktiv ? { open: aktiv.dataset?.spOpen, meta: aktiv.closest(".sp-group")?.dataset.spMeta, hode: aktiv.classList.contains("sp-group-head") } : null;
   const scroll = {};

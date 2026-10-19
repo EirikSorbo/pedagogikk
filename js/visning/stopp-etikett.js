@@ -23,9 +23,9 @@ import { finnSlide, slidesLastet } from "./slides-liste.js";
 
 export const TYPE_NAVN = {
   artist: "Artist", sjanger: "Sjanger", undersjanger: "Undersjanger",
-  historie: "Historie", tech: "Innovasjon", "tiår": "Tiår", side: "Side",
+  historie: "Historie", tech: "Innovasjon", side: "Side",
   instrument: "Instrument", kobling: "Kobling", tidslinje: "Tidslinje",
-  varmekart: "Varmekart", sjangerperioder: "Sjangerperioder",
+  sjangerperioder: "Sjangerperioder",
   himmel: "Sjangerhimmel", referanser: "Referanser",
   "store-bildet": "Det store bildet", podkaster: "Podkaster",
   teknologi: "Teknologi", slektstre: "Slektstre", yt: "Lytteeksempel",
@@ -71,9 +71,6 @@ export function stoppEtikett(stopp) {
       return ut(m.id, GENEALOGY_META_GENRES.includes(m.id) ? {} : { feil: DOD });
     case "galleri":
       return ut(m.id, GENEALOGY.some((n) => n.l === m.id) ? {} : { feil: DOD });
-    case "varmekart":
-      if (!m.id) return ut(type);
-      return ut(m.id, GENEALOGY_META_GENRES.includes(m.id) ? {} : { feil: DOD });
     case "undersjanger": {
       if (!s.artistsLoaded || !s.genreDescsLoaded) return ut(m.id, { laster: true });
       // Som kortet: bare synlige artister, og uten hensyn til store og små
@@ -97,8 +94,6 @@ export function stoppEtikett(stopp) {
     }
     case "plateselskaper":
       return ut(type);
-    case "tiår":
-      return ut(`${m.id}-tallet (${m.modus === "tech" ? "teknologi" : "samfunn"})`);
     // Slide (v7.06): bare læreren kan lese dem. For andre står bare «Slide».
     case "slide": {
       const sl = finnSlide(m.id);

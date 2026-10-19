@@ -105,7 +105,8 @@ test("«Hull og skjevheter» står nederst i Mangler, ikke i Oversikten", () => 
   assert.doesNotMatch(el.innerHTML, /Hull og skjevheter/);
   const i = mangler.innerHTML.indexOf("Hull og skjevheter");
   assert.ok(i > mangler.innerHTML.indexOf("Artister uten viktighetsgrad"), "hullene skal stå etter siste mangler-punkt");
-  assert.match(mangler.innerHTML.slice(i), /Tynne tiår[\s\S]*Artister uten sjanger[\s\S]*Undersjangre uten artistkort/);
+  // Tidsrommene (fase 2; før tiårene) kommer fra treet, her test-frøets.
+  assert.match(mangler.innerHTML.slice(i), /Tynne tidsrom[\s\S]*Artister uten sjanger[\s\S]*Undersjangre uten artistkort/);
 });
 
 test("Sjangerhistorier, Kilder og Instrumenter fyller tredje rad og åpner hver sin visning", () => {

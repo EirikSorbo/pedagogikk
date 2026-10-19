@@ -143,7 +143,7 @@ function updatePrioButtons() {
 export function setupFilters() {
   $("#f-sjanger").addEventListener("change", (e) => { state.filters.mainGenre = e.target.value; renderList(); });
   $("#f-genre").addEventListener("change", (e) => { state.filters.metaGenre = e.target.value; renderList(); });
-  $("#f-decade").addEventListener("change", (e) => { state.filters.decade = e.target.value; renderList(); });
+  $("#f-tidsrom").addEventListener("change", (e) => { state.filters.tidsrom = e.target.value; renderList(); });
   $("#f-instrument").addEventListener("change", (e) => { state.filters.instrument = e.target.value; renderList(); });
   $("#f-subgenre").addEventListener("change", (e) => { state.filters.subgenre = e.target.value; renderList(); });
   const searchRender = debounce(renderList, 200);

@@ -9,6 +9,7 @@
 // ============================================================================
 
 import { escapeHtml } from "../felles/util.js";
+import { AAR_MIN, AAR_MAKS } from "../felles/aarstall.js";
 // Kategori-vokabularet er en fast konstant uten data-avhengigheter (til
 // forskjell fra sjangerlista, som må sendes inn), så det kan importeres rett
 // hit uten at row-editor blir avhengig av app-tilstand.
@@ -212,7 +213,9 @@ function inputHtml(f, values) {
   const type = f.type === "number" ? "number" : (f.type === "url" ? "url" : "text");
   let html = `<input type="${type}" class="${f.cls}" placeholder="${escapeHtml(f.ph || "")}" value="${escapeHtml(String(v))}"`;
   if (f.label) html += ` aria-label="${escapeHtml(f.label)}"`;
-  if (f.type === "number") html += ` min="1800" max="2030"`;
+  // Tallfeltene i radene er årstall (verk og lytteeksempler); år før Kristus
+  // er negative (fase 2, aarstall.js).
+  if (f.type === "number") html += ` min="${AAR_MIN}" max="${AAR_MAKS}"`;
   if (f.title) html += ` title="${escapeHtml(f.title)}"`;
   return html + ">";
 }

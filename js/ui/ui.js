@@ -19,6 +19,7 @@ import { showSjangerInfo, clearOpenSjanger } from "../sjangre/genealogy.js";
 import { GENEALOGY_MAIN_GENRES, GENEALOGY_META_GENRES, META_GENRE_COLOR, findTreeGenreNode } from "../sjangre/genre-model.js";
 import { resolveDesc, missingDesc } from "../sjangre/genre-descriptions.js";
 import { safeUrl, escapeHtml, buildKilderList } from "../felles/util.js";
+import { visAar, visSpenn } from "../felles/aarstall.js";
 import { artistStripHtml } from "./artist-strip.js";
 import {
   linkDesc,
@@ -264,8 +265,8 @@ function sessionOrderKey(id) {
 // åpner artistkortet (klikket kobles der lista tegnes: data-galleri-id).
 // Flyttet hit fra landing.js i v6.26, delt med lærersidens artistliste.
 function levetid(a) {
-  if (a.birthYear && a.deathYear) return `${a.birthYear}–${a.deathYear}`;
-  if (a.birthYear) return `f. ${a.birthYear}`;
+  if (a.birthYear && a.deathYear) return visSpenn(a.birthYear, a.deathYear);
+  if (a.birthYear) return `f. ${visAar(a.birthYear)}`;
   return "";
 }
 // `visPrioritet` (v6.31, brukervalg 2026-10-04): prioritetsmerket øverst til
@@ -663,7 +664,7 @@ export function showSubsjangerInfo(label, opts = {}) {
 function buildArtistListRows(list) {
   return list.map((a) => {
     const years = a.influenceStart
-      ? `${a.influenceStart}${a.influenceEnd ? "–" + a.influenceEnd : ""}`
+      ? (a.influenceEnd ? visSpenn(a.influenceStart, a.influenceEnd) : visAar(a.influenceStart))
       : "";
     // Bare navn og år (v5.98, brukerønske 2026-10-01): sjanger og instrument
     // står på artistkortet, ikke i lista.
@@ -848,29 +849,10 @@ function eksempelRader(par, tomTekst) {
   return { total: items.length, html: `<ul class="pl-list">${items.join("")}</ul>`, ider };
 }
 
-// Lytteeksemplene fra ett tiår (v6.05, K1 og U7): innspillingsåret, eller
-// framføringsåret når bare det er satt, innenfor tiåret. Sortert på år, så
-// navn. Bare eksempler med lenke, og hvert eksempel én gang.
-export function tiarEksempler(artists, decade) {
-  const fra = Number(decade), til = fra + 9;
-  const seen = new Set();
-  const par = [];
-  for (const a of etterNivaa((artists || []).filter(isVisible))) {
-    for (const m of (a.musicExamples || [])) {
-      const y = Number(m.year || m.performanceYear) || null;
-      if (!y || y < fra || y > til || !safeUrl(m.url)) continue;
-      const key = `${a.name.toLowerCase()}|${(m.label || m.url).toLowerCase()}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      par.push({ a, m, y });
-    }
-  }
-  return par.sort((x, z) => x.y - z.y || x.a.name.localeCompare(z.a.name, "no"));
-}
-
-// Spilleliste-popupen for et ferdig utvalg eksempler (tiårene).
-// `nivaa`: lista er laget av tiarEksempler (på viktighetsnivået), så linja om
-// nivået står øverst. Delte timer sender ikke flagget: de er timens egne.
+// Spilleliste-popupen for et ferdig utvalg eksempler (de delte timene).
+// `nivaa`: lista er filtrert på viktighetsnivået, så linja om nivået står
+// øverst. Delte timer sender ikke flagget: de er timens egne. (Tiårenes
+// spillelister, som brukte flagget, ble tatt ut i fase 2.)
 export function openEksemplerSpilleliste(title, par, { nivaa = false } = {}) {
   const { total, html, ider } = eksempelRader(par || [], "Ingen lytteeksempler ennå.");
   document.getElementById("pl-title").textContent = `${title} (${total})`;

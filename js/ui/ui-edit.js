@@ -15,7 +15,7 @@ const FIELD_LABELS = {
     name: "Navn", type: "Type", category: "Kategori", instrument: "Instrument",
     inventedYear: "Oppfunnet (år)",
     adoptedYear: "Tatt i bruk (år)",
-    adoptedLabel: "Tatt i bruk (forklaring)", decade: "Tiår", description: "Beskrivelse",
+    adoptedLabel: "Tatt i bruk (forklaring)", description: "Beskrivelse",
     imageUrl: "Bilde-URL", imageCredit: "Bildekreditering", kilder: "Kilder",
   },
   subgenre: {
@@ -25,14 +25,6 @@ const FIELD_LABELS = {
   },
   instrument: {
     body: "Sammendrag",
-    kilder: "Kilder",
-  },
-  "decade-society": {
-    society: "Samfunnsutvikling",
-    kilder: "Kilder",
-  },
-  "decade-tech": {
-    tech: "Teknologiutvikling",
     kilder: "Kilder",
   },
 };

@@ -46,14 +46,6 @@ export function currentEntityValues(state, edit) {
       // BYTTET UT lista (Firestore erstatter arrays ved merge).
       return { body: page.body || "", kilder: page.kilder || [] };
     }
-    case "decade-society": {
-      const d = state.decadeDescs[String(entityId)] || {};
-      return { society: d.society || "", kilder: d.kilder || [] };
-    }
-    case "decade-tech": {
-      const d = state.decadeDescs[String(entityId)] || {};
-      return { tech: d.tech || "", kilder: d.kilder || [] };
-    }
     default: return {};
   }
 }

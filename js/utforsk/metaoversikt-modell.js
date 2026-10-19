@@ -11,6 +11,7 @@
 // ============================================================================
 import { isVisible, byInfluenceThenName } from "../felles/limits.js";
 import { ytMaal } from "../visning/presentasjon-modell.js";
+import { visSpenn } from "../felles/aarstall.js";
 
 const lav = (s) => String(s ?? "").toLowerCase();
 
@@ -107,10 +108,11 @@ export function forbindelser(meta, genealogy, aarFor = () => null) {
 
 // Tidsrommet familien dekker, fra periodene (genre-periods.js periodGroups):
 // tidligste startår, og «i dag» når minst én periode er åpen. null uten årstall.
+// År før Kristus med «f.Kr.» (visSpenn, fase 2).
 export function tidsrom(rader) {
   const ok = (rader || []).filter((r) => r.status === "ok");
   if (!ok.length) return null;
   const fra = Math.min(...ok.map((r) => r.from));
   const aapen = ok.some((r) => r.to == null);
-  return aapen ? `${fra}–i dag` : `${fra}–${Math.max(...ok.map((r) => r.to))}`;
+  return visSpenn(fra, aapen ? null : Math.max(...ok.map((r) => r.to)), { apen: "i dag" });
 }

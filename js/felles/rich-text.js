@@ -22,7 +22,7 @@
 //  rives i to midt i teksten. `rt`-klassen henter typografien i styles.css.
 //
 //  Modulen importerer BEVISST fra util.js og ikke fra ui-helpers.js: ui-helpers
-//  importerer herfra (linkDesc/formatInfoText), og motsatt vei ville gitt en
+//  importerer herfra (linkDesc), og motsatt vei ville gitt en
 //  import-sykel.
 // ============================================================================
 

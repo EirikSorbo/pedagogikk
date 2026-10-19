@@ -17,15 +17,15 @@ import {
 } from "../data/store.js";
 import { renderArtists, fillSelect } from "../ui/ui.js";
 import { redigerNotatForKort } from "../visning/pres-notater.js";
-import { GENEALOGY_MAIN_GENRES, GENEALOGY_META_GENRES } from "../sjangre/genre-model.js";
-import { DECADES, instrumentsInUse, erTilModerasjon } from "../felles/limits.js";
+import { GENEALOGY_MAIN_GENRES, GENEALOGY_META_GENRES, tidsromValg } from "../sjangre/genre-model.js";
+import { instrumentsInUse, erTilModerasjon } from "../felles/limits.js";
 import { sharedStateDefaults } from "../data/shared-data.js";
 import { $ } from "../data/shared.js";
 import { melding, bekreft, modalOpen, modalClose, modalCloseTop, setupModal } from "../ui/ui-modal.js";
 
 export const state = {
-  // De syv delte samlingene (artists, genreDescs, edgeDescs, tech, content,
-  // decades, podcasts) kommer fra shared-data.js — samme form som forsiden og
+  // De seks delte samlingene (artists, genreDescs, edgeDescs, tech, content,
+  // podcasts) kommer fra shared-data.js — samme form som forsiden og
   // slektstresidene. artistsLoaded er en del av den: destruktive handlinger
   // (Erstatt alle / Slett alt) må vente på den, ellers bygges backupen fra en
   // tom state mens slettingen går mot serveren.
@@ -42,7 +42,7 @@ export const state = {
   // det faktisk står, ikke med de skjulte blandet inn. «Vis skjulte» slår dem
   // på igjen ved behov. Filteret bor bare i minnet, så det nullstilles ved
   // hver sidelast.
-  filters: { mainGenre: "", metaGenre: "", decade: "", instrument: "", subgenre: "", search: "", showRemoved: false, showPending: false, hideChecked: false, priority: 0 },
+  filters: { mainGenre: "", metaGenre: "", tidsrom: "", instrument: "", subgenre: "", search: "", showRemoved: false, showPending: false, hideChecked: false, priority: 0 },
   isTeacher: true,
   clientId: getClientId(),
   started: false,
@@ -95,7 +95,7 @@ export const handlers = {
 
 // Sett/fjern «sjekket» for et innholdselement. Artistkort bor på artist-
 // dokumentet (teacherChecked); alle andre kategorier er navnelister i
-// config/teacherChecks (genres/subgenres/metaGenres/tech/decades/decadesTech/pages/plateselskaper).
+// config/teacherChecks (genres/subgenres/metaGenres/tech/edges/pages/plateselskaper).
 // Deterministisk (on), så optimistiske knapper i detaljmodalene og Skrivebordet
 // aldri kommer i utakt. Delt av teacher-desk og detaljvisningenes Sjekk-knapp.
 export function setContentCheck(category, id, on) {
@@ -122,7 +122,7 @@ export function setContentCheck(category, id, on) {
 // åpnet NESTE i samme modal innen 800 ms, lukket den gamle timeren den nye
 // editoren midt i utfyllingen. openAdminModal og hver nye lukkEtter rydder
 // modalens forrige timer. `handling` er det som skjer når tiden er ute
-// (standard: lukk modalen; tiårsmodalen bytter i stedet tilbake til visning).
+// (standard: lukk modalen).
 const lukkeTimere = new Map();
 export function avbrytLukkEtter(id) {
   clearTimeout(lukkeTimere.get(id));
@@ -198,11 +198,9 @@ export function renderAll() {
 export function refreshControls() {
   fillSelect($("#f-sjanger"), GENEALOGY_MAIN_GENRES, { placeholder: "Alle sjangre" });
   fillSelect($("#f-genre"), GENEALOGY_META_GENRES, { placeholder: "Alle metasjangre" });
-  fillSelect(
-    $("#f-decade"),
-    DECADES.map((d) => ({ value: d, label: `${d}-tallet` })),
-    { placeholder: "Alle tiår" }
-  );
+  // Tidsrommene (fase 2) kommer fra treet, så nedtrekket fylles på nytt når
+  // det lander, og valget settes tilbake under.
+  fillSelect($("#f-tidsrom"), tidsromValg(), { placeholder: "Alle tidsrom" });
   fillSelect($("#f-instrument"), instrumentsInUse(state.artists, state.filters.instrument), { placeholder: "Alle instrumenter" });
   const allSubs = [...new Set(
     (state.artists || []).flatMap((a) => [...(a.mainGenre || []), ...(a.subGenre || [])])
@@ -211,4 +209,5 @@ export function refreshControls() {
   if (state.filters.mainGenre)  $("#f-sjanger").value = state.filters.mainGenre;
   if (state.filters.metaGenre)    $("#f-genre").value = state.filters.metaGenre;
   if (state.filters.subgenre) $("#f-subgenre").value = state.filters.subgenre;
+  if (state.filters.tidsrom !== "") $("#f-tidsrom").value = state.filters.tidsrom;
 }

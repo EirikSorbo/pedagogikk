@@ -89,8 +89,8 @@ test("funn 21: lukketimerne på lærersiden huskes og avbrytes", () => {
   for (const f of ["js/laerer/teacher-artists.js", "js/laerer/teacher-content.js"]) {
     assert.doesNotMatch(les(f), /setTimeout\(\(\) => closeAdminModal\(/, `${f}: uavbrutt lukketimer`);
   }
-  assert.equal(antall(les("js/laerer/teacher-artists.js") + les("js/laerer/teacher-content.js"), /lukkEtter\("modal-/g), 4,
-    "kobling, sjanger, innovasjonskort og tiår");
+  assert.equal(antall(les("js/laerer/teacher-artists.js") + les("js/laerer/teacher-content.js"), /lukkEtter\("modal-/g), 3,
+    "kobling, sjanger og innovasjonskort (tiårsmodalen ble tatt ut i fase 2)");
   // Artistskjemaet (v6.96) har sitt eget vindu og sin egen vakt: timeren
   // lukker bare skjemaet den ble satt for.
   const skjema = les("js/ui/artist-skjema.js");
@@ -135,7 +135,7 @@ test("funn 26: én eksportvakt dekker alle samlingene, også før de automatiske
   const src = les("js/laerer/teacher-import.js");
   const vakt = kropp(src, "async function kanEksportere(");
   for (const flagg of ["artistsLoaded", "contentLoaded", "genreDescsLoaded", "edgeDescsLoaded",
-    "techLoaded", "decadesLoaded", "podcastsLoaded", "teacherChecksLoaded"]) {
+    "techLoaded", "podcastsLoaded", "teacherChecksLoaded"]) {
     assert.ok(vakt.includes(`state.${flagg}`), `vakten mangler ${flagg}`);
   }
   // Fra v6.25 appens egen bekreftelse (bekreft), og vakten er async.
@@ -145,7 +145,7 @@ test("funn 26: én eksportvakt dekker alle samlingene, også før de automatiske
   assert.equal(antall(src, /downloadJson\(buildExportData\(\)/g), 3,
     "ny eksportvei? Den må også gå via kanEksportere");
   const shared = les("js/data/shared-data.js");
-  for (const flagg of ["edgeDescsLoaded", "techLoaded", "decadesLoaded", "podcastsLoaded"]) {
+  for (const flagg of ["edgeDescsLoaded", "techLoaded", "podcastsLoaded"]) {
     assert.match(shared, new RegExp(`${flagg}: false,`), `${flagg} mangler i standardverdiene`);
     assert.match(shared, new RegExp(`state\\.${flagg} = true;`), `${flagg} settes aldri`);
   }
@@ -155,7 +155,7 @@ test("funn 26: én eksportvakt dekker alle samlingene, også før de automatiske
 test("funn 28: «skriver til» vises bare der ID-en er et lesbart navn", () => {
   const src = les("js/laerer/teacher-review.js");
   const liste = src.match(/const navnebasert = \[([^\]]*)\]/)?.[1] || "";
-  for (const t of ["subgenre", "instrument", "decade-society", "decade-tech"]) {
+  for (const t of ["subgenre", "instrument"]) {
     assert.ok(liste.includes(`"${t}"`), `${t} mangler`);
   }
   for (const t of ["artist", "tech"]) {
@@ -169,10 +169,12 @@ test("funn 30: koblinger med kilder men uten tekst følger med i eksport og impo
   assert.match(src, /\.filter\(\(\[, data\]\) => data && \(data\.description \|\| \(data\.kilder \|\| \[\]\)\.length\)\)/);
 });
 
-test("funn 31: historiestripene bruker varmekartets tomhets-predikat", () => {
+// Funn 31 gjaldt varmestripene over historiene. De ble tatt ut med
+// varmekartet i fase 2; over historien står nå epokene som bobler.
+test("fase 2: historien viser epokene i retningen, ikke varmestriper", () => {
   const src = les("js/utforsk/explore-innhold.js");
-  assert.match(src, /const hasData = !!heat && Object\.keys\(heat\)\.length > 0;/);
-  assert.match(src, /: hasData \? heatBlockHtml\(/);
+  assert.doesNotMatch(src, /heatRow|heatBlockHtml|content\?\.varmekart/);
+  assert.match(src, /class="tag hist-epoke" data-sjanger=/);
 });
 
 test("funn 33: instrumentkortet viser ferske lister", () => {

@@ -2,7 +2,7 @@
 //  UTSKRIFT — ren modell (v5.56)
 // ----------------------------------------------------------------------------
 //  Studentenes eget hefte (brukerbestilling 2026-09-25): et utvalg av kort
-//  (artister, sjangre, undersjangre, tiår, innovasjoner, instrumenter,
+//  (artister, sjangre, undersjangre, innovasjoner, instrumenter,
 //  historier og innholdssider) settes sammen til én lesbar struktur som
 //  utskrift.html tegner, og som nettleseren lagrer som PDF. Modulen er DOM-
 //  fri og Node-testbar: utvalget, dataene og flaggene kommer inn som
@@ -15,7 +15,7 @@
 //
 //  Rekkefølgen er selv et pedagogisk valg: metasjangrene i den kuraterte
 //  rekkefølgen (STORY_ORDER, deretter treets), sjangrene i den rekkefølgen
-//  de oppsto, artistene kronologisk etter innflytelsesår. Tiår, innovasjoner,
+//  de oppsto, artistene kronologisk etter innflytelsesår. Innovasjoner,
 //  instrumenter og sider står som bakteppe etter sjangrene; lyttelista
 //  bakerst. Kommer utvalget fra en kjøreplan, kan lærerens rekkefølge
 //  beholdes (form.rekkefolge = "valgt").
@@ -29,11 +29,10 @@
 //  har VALGT pluss det valget DRAR MED SEG, minus det studenten har huket
 //  bort (fravalg). En metasjanger («metasjanger:Blues», bare i heftet, ikke
 //  en ?vis=-type) drar inn alle sjangrene i treet og alle synlige artister
-//  med metasjangeren; en sjanger drar inn artistene sine; artistene drar inn
-//  tiårene innflytelsesperiodene faller i (sjangrenes perioder bare når
-//  utvalget ikke har artister). Undersjangrene følger artistene via ordlista.
-//  Alt utledet regnes på nytt ved hver endring, så en artist som legges til
-//  senere får tiårene sine av seg selv. Et bortvalg tar posten ut av heftet,
+//  med metasjangeren; en sjanger drar inn artistene sine. Undersjangrene
+//  følger artistene via ordlista. (Artistene dro også inn tiårene sine til
+//  tiårskortene ble tatt ut i fase 2.) Alt utledet regnes på nytt ved hver
+//  endring. Et bortvalg tar posten ut av heftet,
 //  men ikke ut av lista: den står igjen avhuket som et mulig alternativ
 //  (brukervalg 2026-09-25, v5.59), og kan hukes på igjen. Avkryssingen på en
 //  metasjanger eller sjanger tar med seg det den drar inn (barnAv); det
@@ -44,22 +43,23 @@
 // ============================================================================
 
 import { parseVisVerdi, byggVisVerdi } from "../felles/vis-lenke.js";
-import { DECADES, isVisible, INSTRUMENT_TIMELINE_GROUPS, INSTRUMENT_TITLE, instrumentPageId, decadesForArtist, decadesForRange, instrumenterFor } from "../felles/limits.js";
+import { isVisible, INSTRUMENT_TIMELINE_GROUPS, INSTRUMENT_TITLE, instrumentPageId, instrumenterFor } from "../felles/limits.js";
 import { resolveSpan } from "../felles/timeline-lanes.js";
-import { GENEALOGY, GENEALOGY_META_GENRES, GENEALOGY_ROOT_GENRES, META_GENRE_ORDER, META_GENRE_COLOR, FAMILIES, nodeColor, edgeKey } from "../sjangre/genre-model.js";
+import { GENEALOGY, GENEALOGY_META_GENRES, GENEALOGY_ROOT_GENRES, META_GENRE_ORDER, META_GENRE_COLOR, FAMILIES, TIDSROM, edgeKey } from "../sjangre/genre-model.js";
+import { visAar, visSpenn } from "../felles/aarstall.js";
+import { aksePos, tidsromGrenser } from "../felles/tidsakse.js";
 import { resolveDesc, resolveDescAny, epokeFritekst } from "../sjangre/genre-descriptions.js";
 import { STORY_ORDER, STORY_SKJULT, storyFor, pageFor, stripGenrePath } from "../felles/story-format.js";
-import { heatRow } from "../sjangre/heat-strip.js";
 import { ytMaal, finnLytteeksempel } from "../visning/presentasjon-modell.js";
 import { normaliserPunkter } from "../felles/punkter.js";
 import { safeUrl } from "../felles/util.js";
 
-// Måltypene som kan stå i et hefte. Resten av vis-typene (varmekart,
-// tidslinje, koblinger, podkaster …) er skjermflater uten
+// Måltypene som kan stå i et hefte. Resten av vis-typene (tidslinje,
+// koblinger, podkaster …) er skjermflater uten
 // papirform og hoppes stille over.
 // Et lytteeksempel («yt:<video>», v5.77) er også med: det blir en linje i
 // lyttelista bakerst, også når artisten ikke er med i heftet.
-export const UTSKRIFT_TYPER = new Set(["artist", "sjanger", "undersjanger", "tiår", "tech", "instrument", "historie", "side", "yt"]);
+export const UTSKRIFT_TYPER = new Set(["artist", "sjanger", "undersjanger", "tech", "instrument", "historie", "side", "yt"]);
 
 // Innholdssidene som kan stå i et hefte. Bruksveiledningen («guide»/
 // «appGuide») er en manual for appen, ikke pensum, og holdes utenfor.
@@ -77,7 +77,7 @@ export const UNDERSJANGRE_LOSE = "Undersjangre";
 
 export const TYPE_ETIKETT = {
   metasjanger: "Metasjanger",
-  artist: "Artist", sjanger: "Sjanger", undersjanger: "Undersjanger", "tiår": "Tiår",
+  artist: "Artist", sjanger: "Sjanger", undersjanger: "Undersjanger",
   tech: "Innovasjon", instrument: "Instrument", historie: "Historie", side: "Side", yt: "Lytteeksempel",
 };
 
@@ -99,19 +99,13 @@ export function parseUtskriftVis(vis) {
 // ---------------------------------------------------------------------------
 
 // Den kanoniske formen av en vis-verdi i utvalget, eller null når verdien
-// ikke kan stå i et hefte. Tiåret mister modusen (samfunn/teknologi er to
-// faner på skjermen, men ett oppslag på papir), så «tiår:1950:tech» og
-// «tiår:1950» er samme kort.
+// ikke kan stå i et hefte.
 export function kanoniskVis(vis) {
   const m = parseUtskriftVis(vis);
   if (!m) return null;
   if (m.hva === "metasjanger") return `${META_PREFIKS}${m.id}`;
   if (!UTSKRIFT_TYPER.has(m.hva) || !m.id) return null;
   if (m.hva === "side" && !SIDER_I_HEFTET[m.id]) return null;
-  if (m.hva === "tiår") {
-    const d = Number(m.id);
-    return DECADES.includes(d) ? `tiår:${d}` : null;
-  }
   return byggVisVerdi({ hva: m.hva, id: m.id });
 }
 
@@ -180,7 +174,6 @@ export const DELER = [
     { id: "artist.lytte", navn: "Lytteeksempler" },
   ] },
   { gruppe: "Sjangerkort", valg: [
-    { id: "sjanger.stripe", navn: "Varmestripe" },
     { id: "sjanger.era", navn: "Epoke" },
     { id: "sjanger.punkter", navn: "Oppsummering i punkter", punkter: true },
     { id: "sjanger.beskrivelse", navn: "Beskrivelse" },
@@ -195,11 +188,6 @@ export const DELER = [
     { id: "tech.fakta", navn: "Årstall og kategori" },
     { id: "tech.punkter", navn: "Oppsummering i punkter", punkter: true },
     { id: "tech.beskrivelse", navn: "Beskrivelse" },
-  ] },
-  { gruppe: "Tiår", valg: [
-    { id: "tiaar.samfunn", navn: "Samfunn" },
-    { id: "tiaar.teknologi", navn: "Teknologi" },
-    { id: "tiaar.innovasjoner", navn: "Innovasjonene i tiåret" },
   ] },
   { gruppe: "Foran og bak", valg: [
     { id: "foran.tidslinje", navn: "Tidslinje over utvalget" },
@@ -262,7 +250,7 @@ export function normaliserLagret(raa) {
 // lenkekobling, så regelen står også her.
 function eraTekst(r) {
   const fra = r?.activeFrom, til = r?.activeTo;
-  const aar = Number.isInteger(fra) ? `ca. ${fra}–${Number.isInteger(til) ? til : "i dag"}` : "";
+  const aar = Number.isInteger(fra) ? `ca. ${visSpenn(fra, Number.isInteger(til) ? til : null, { apen: "i dag" })}` : "";
   // Friteksten bare når den sier noe årstallene ikke sier (v5.74).
   const ord = epokeFritekst(r);
   if (!aar) return ord;
@@ -271,26 +259,26 @@ function eraTekst(r) {
 }
 
 // Levetid og innflytelse som på artistkortet (factsLines i ui-helpers.js).
+// År før Kristus med «f.Kr.» (visSpenn, fase 2).
 function levetid(a) {
-  if (a.birthYear && a.deathYear) return `${a.birthYear}–${a.deathYear}`;
-  if (a.birthYear) return `${a.birthYear}–`;
-  if (a.deathYear) return `?–${a.deathYear}`;
+  if (a.birthYear || a.deathYear) return visSpenn(a.birthYear || null, a.deathYear || null);
   return "";
 }
 
 function innflytelse(a) {
   if (!a.influenceStart) return "";
   const p = (!a.influenceEnd || a.influenceEnd === a.influenceStart)
-    ? `${a.influenceStart}`
-    : `${a.influenceStart}–${a.influenceEnd}`;
+    ? visAar(a.influenceStart)
+    : visSpenn(a.influenceStart, a.influenceEnd);
   return `ca. ${p}`;
 }
 
-// Sjangerkortets reserve-sortering når årstallene mangler: treets tiårsrad
-// (rad 1 = 1900, se buildDecadeRows i genre-model.js). Røttene (rad 0) først.
+// Sjangerkortets reserve-sortering når årstallene mangler: startåret til
+// tidsrommet noden står i (fase 2; før tiåret, rad 1 = 1900). En rad uten
+// tidsrom sorteres etter radnummeret, etter alle tidsrommene.
 function radAar(n) {
   const r = Math.floor(Number(n?.r) || 0);
-  return r >= 1 ? 1900 + (r - 1) * 10 : 1850;
+  return Number.isInteger(TIDSROM[r]?.fra) ? TIDSROM[r].fra : 9000 + r;
 }
 
 const kreditt = (raa) => String(raa || "").replace(/^Foto:\s*/i, "").trim();
@@ -341,7 +329,7 @@ function familieForUndersjanger(navn, artists) {
 
 // Utvalget som gir hele pensumet i ett hefte: metasjangrene i pensumet (den
 // kuraterte rekkefølgen, uten STORY_SKJULT: Pop og Rock er utenfor MUR114),
-// som drar inn sjangrene, artistene og tiårene; røttene i treet; alle aktive
+// som drar inn sjangrene og artistene; røttene i treet; alle aktive
 // innovasjonskort; og instrumentsammendragene som er skrevet. Historiene og
 // innholdssidene holdes utenfor (de er lærerstoff og skjult for studenter).
 // Metasjangrene i pensumet, i den kuraterte rekkefølgen: STORY_ORDER først,
@@ -408,18 +396,16 @@ export function alleUnder(vis, artists) {
 }
 
 // Alle kandidatene med opphav, i rekkefølge: de valgte først (i valgets
-// rekkefølge), så det metasjangrene drar inn, så det sjangrene drar inn, så
-// tiårene. `artists` er de synlige artistene. Returnerer
-//   kilde     Map vis → "valgt" | "metasjanger" | "sjanger" | "utledet"
-//   grunnlag  hva tiårene er utledet av: "artister", "sjangre" eller null
+// rekkefølge), så det metasjangrene drar inn, så det sjangrene drar inn.
+// `artists` er de synlige artistene. Returnerer
+//   kilde     Map vis → "valgt" | "metasjanger" | "sjanger"
 // Utvidelsen ser BORT fra bortvalgene (v5.59): en avhuket sjanger står i
 // lista med artistene sine avhuket under seg, så de kan hukes på igjen.
-// Bare tiårene følger det som faktisk er huket på. Metasjangrene utledes
-// aldri, de velges bare.
-export function utvidUtvalg(valg, fravalg, artists, naa = new Date().getFullYear(), genreDescs = {}) {
+// Metasjangrene utledes aldri, de velges bare. (Tiårene ble utledet av
+// artistenes perioder, «utledet», til de ble tatt ut i fase 2.)
+export function utvidUtvalg(valg, fravalg, artists) {
   const kilde = new Map();
   const legg = (vis, k) => { if (!kilde.has(vis)) kilde.set(vis, k); };
-  const bort = new Set(fravalg || []);
   const liste = normaliserUtvalg(valg);
   for (const v of liste) legg(v, "valgt");
 
@@ -434,26 +420,7 @@ export function utvidUtvalg(valg, fravalg, artists, naa = new Date().getFullYear
     for (const b of barnAv(vis, artists)) legg(b, "sjanger");
   }
 
-  const effArtister = artists.filter((a) => kilde.has(`artist:${a.id}`) && !bort.has(`artist:${a.id}`));
-  const tiaar = new Set();
-  let grunnlag = null;
-  if (effArtister.length) {
-    grunnlag = "artister";
-    for (const a of effArtister) for (const t of decadesForArtist(a, naa)) tiaar.add(t);
-  } else {
-    for (const [vis] of kilde) {
-      const m = parseUtskriftVis(vis);
-      if (m?.hva !== "sjanger" || bort.has(vis)) continue;
-      const n = finnNode(m.id);
-      if (!n) continue;
-      const r = resolveDescAny(genreDescs, [n.l, n.f], "main");
-      if (!Number.isInteger(r.activeFrom)) continue;
-      grunnlag = "sjangre";
-      for (const t of decadesForRange(r.activeFrom, Number.isInteger(r.activeTo) ? r.activeTo : naa)) tiaar.add(t);
-    }
-  }
-  for (const t of [...tiaar].sort((a, b) => a - b)) if (DECADES.includes(t)) legg(`tiår:${t}`, "utledet");
-  return { kilde, grunnlag };
+  return { kilde };
 }
 
 // ---------------------------------------------------------------------------
@@ -461,11 +428,11 @@ export function utvidUtvalg(valg, fravalg, artists, naa = new Date().getFullYear
 // ---------------------------------------------------------------------------
 
 // utvalg: vis-verdier, eller { valg, fravalg }. data: sidens state (artists,
-// genreDescs, content, decadeDescs, techItems). Returnerer heftets struktur:
+// genreDescs, content, techItems). Returnerer heftets struktur:
 //   familier[]     én per metasjanger: hodeKort (tre-noden med samme navn),
 //                  sjangre[] (hver med artister[]), loseArtister[] (artister
 //                  uten valgt sjangerkort), ordliste[], historie
-//   bakteppe[]     tiårene, innovasjoner[], instrumenter[], sider[]
+//   innovasjoner[], instrumenter[], sider[]   bakteppet etter familiene
 //   lytteliste[]   nummererte lytteeksempler i heftets rekkefølge
 //   tidslinje      radene til figuren foran, eller null
 //   tre            avkryssingstreet til panelet: ALLE kandidatene, også de
@@ -485,9 +452,7 @@ export function settSammen(utvalg, data = {}, valg = {}) {
   const artists = (data.artists || []).filter(isVisible);
   const genreDescs = data.genreDescs || {};
   const content = data.content || {};
-  const decadeDescs = data.decadeDescs || {};
   const tech = (data.techItems || []).filter((t) => t && (t.status || "active") === "active");
-  const heat = content?.varmekart?.heat || null;
   const punkterOk = !punkterSkjult;
   const historierOk = erLaerer || !skjul.metasjangerhistorier;
   // Koblingstekstene (v5.74): strekene inn i og ut av sjangeren i slektstreet,
@@ -499,7 +464,7 @@ export function settSammen(utvalg, data = {}, valg = {}) {
   const valgtRekke = f.rekkefolge === "valgt";
   const byId = Object.fromEntries(GENEALOGY.map((n) => [n.id, n]));
 
-  const { kilde, grunnlag } = utvidUtvalg(eksplisitt, fravalg, artists, naa, genreDescs);
+  const { kilde } = utvidUtvalg(eksplisitt, fravalg, artists);
   const bort = new Set(fravalg);
   const kandidater = [...kilde.keys()];
   const liste = kandidater.filter((v) => !bort.has(v));
@@ -550,7 +515,7 @@ export function settSammen(utvalg, data = {}, valg = {}) {
       lytte: (a.musicExamples || [])
         .filter((m) => m && safeUrl(m.url))
         .map((m) => ({ nr: 0, label: m.label || "Lytt", year: heltall(m.year), performanceYear: heltall(m.performanceYear), url: safeUrl(m.url) })),
-      span, tiaar: decadesForArtist(a, naa),
+      span,
       sort: [span ? span.start : 9999, a.name || ""],
     };
   }
@@ -562,7 +527,6 @@ export function settSammen(utvalg, data = {}, valg = {}) {
       vis, id: n.id, navn: n.f || n.l, label: n.l, familie: n.g || ROTTER,
       med: !bort.has(vis), kilde: kilde.get(vis),
       era: eraTekst(r), fra, til, apen: fra != null && til == null,
-      stripe: heat && n.g ? { farge: nodeColor(n), verdier: heatRow(heat, n.l) } : null,
       relasjoner: {
         fra: (n.p || []).map((id) => byId[id]?.f || id),
         til: GENEALOGY.filter((x) => (x.p || []).includes(n.id)).map((x) => x.f),
@@ -595,7 +559,7 @@ export function settSammen(utvalg, data = {}, valg = {}) {
   }
 
   // --- Slå opp hver kandidat -------------------------------------------------
-  const metaValgt = [], artistKort = [], sjangerKort = [], underValgt = [], tiaarKand = [];
+  const metaValgt = [], artistKort = [], sjangerKort = [], underValgt = [];
   const techKort = [], instrValgt = [], histValgt = [], sideValgt = [], lytteValgt = [];
   for (const vis of kandidater) {
     const m = parseUtskriftVis(vis);
@@ -621,9 +585,6 @@ export function settSammen(utvalg, data = {}, valg = {}) {
         else if (med) mangler.push({ vis, grunn: "finnes-ikke" });
         break;
       }
-      case "tiår":
-        tiaarKand.push({ vis, tiaar: Number(m.id), med, kilde: kilde.get(vis) });
-        break;
       case "tech": {
         const t = tech.find((x) => x.id === m.id);
         if (t) techKort.push(lagTechKort(t, vis)); else if (med) mangler.push({ vis, grunn: "finnes-ikke" });
@@ -807,27 +768,6 @@ export function settSammen(utvalg, data = {}, valg = {}) {
   }
 
   // --- Bakteppet ------------------------------------------------------------
-  const tiaarMed = tiaarKand.filter((t) => t.med);
-  const tiaarListe = (valgtRekke ? tiaarMed : [...tiaarMed].sort((a, b) => a.tiaar - b.tiaar)).map((t) => t.tiaar);
-  const tiaarFor = (t) => {
-    const dec = Number(t.decade);
-    if (Number.isInteger(dec) && dec > 0) return dec;
-    return Number.isInteger(t.adoptedYear) ? Math.floor(t.adoptedYear / 10) * 10 : null;
-  };
-  const bakteppe = tiaarListe.map((tiaar) => {
-    const desc = decadeDescs[String(tiaar)] || {};
-    return {
-      vis: `tiår:${tiaar}`, tiaar,
-      samfunn: d["tiaar.samfunn"] ? String(desc.society || "") : "",
-      teknologi: d["tiaar.teknologi"] ? String(desc.tech || "") : "",
-      innovasjoner: d["tiaar.innovasjoner"]
-        ? tech.filter((t) => t.type !== "hendelse" && tiaarFor(t) === tiaar)
-          .map((t) => ({ navn: t.name || "(uten navn)", aar: heltall(t.adoptedYear) ?? heltall(t.inventedYear) }))
-          .sort((a, b) => (a.aar ?? 9999) - (b.aar ?? 9999) || a.navn.localeCompare(b.navn, "no"))
-        : [],
-    };
-  });
-
   const innovasjoner = ordne(medBare(techKort));
   const instrMed = medBare(instrValgt).map((i) => i.gruppe);
   const instrListe = valgtRekke ? instrMed : INSTRUMENT_TIMELINE_GROUPS.filter((g) => instrMed.includes(g));
@@ -862,20 +802,31 @@ export function settSammen(utvalg, data = {}, valg = {}) {
       apen: rader.some((r) => r.apen),
     };
   }
+  // Aksen er tidsrommene i treet (fase 2), som tidslinjene i appen: hvert
+  // tidsrom like bredt, med et merke ved starten av hvert. Uten tidsrom er den
+  // lineær i hele tiår fra den tidligste perioden, som før. `pos` (under)
+  // plasserer et år på begge slags akser.
   let tidslinje = null;
   if (d["foran.tidslinje"] && rader.length) {
-    const start = Math.min(1900, Math.floor(Math.min(...rader.map((r) => r.fra)) / 10) * 10);
-    const slutt = naa + 5;
-    const ticks = [];
-    for (let t = start; t <= Math.floor(naa / 10) * 10; t += 10) ticks.push(t);
+    const grenser = tidsromGrenser(TIDSROM, naa);
+    let start, slutt, ticks;
+    if (grenser.length) {
+      start = grenser[0].start;
+      slutt = grenser[grenser.length - 1].slutt;
+      ticks = grenser.map((g) => g.start);
+    } else {
+      start = Math.floor(Math.min(...rader.map((r) => r.fra)) / 10) * 10;
+      slutt = naa + 5;
+      ticks = [];
+      for (let t = start; t <= Math.floor(naa / 10) * 10; t += 10) ticks.push(t);
+    }
     tidslinje = {
-      start, slutt, ticks,
+      start, slutt, ticks, tidsrom: grenser.length ? TIDSROM : null, naa,
       rader: rader.map((r) => ({ ...r, fra: Math.max(start, Math.min(r.fra, naa)), til: Math.max(start, Math.min(r.til, naa)) })),
     };
   }
 
-  // --- Treet: tiår og «annet» -------------------------------------------------
-  const treTiaar = [...tiaarKand].sort((a, b) => a.tiaar - b.tiaar);
+  // --- Treet: «annet» --------------------------------------------------------
   const treAnnet = [
     ...techKort.map((t) => ({ vis: t.vis, navn: t.navn, type: "tech", med: t.med })),
     ...instrValgt.map((i) => ({ vis: i.vis, navn: INSTRUMENT_TITLE[i.gruppe] || i.gruppe, type: "instrument", med: i.med })),
@@ -891,27 +842,33 @@ export function settSammen(utvalg, data = {}, valg = {}) {
     // statuslinja sa «2 metasjangre» når én var med (audit v5.93 funn 3).
     metasjangre: metaValgt.filter((n) => !bort.has(`${META_PREFIKS}${n}`)).length,
     sjangre: medBare(sjangerKort).length, artister: medBare(artistKort).length, undersjangre: medBare(underValgt).length,
-    tiaar: tiaarMed.length, innovasjoner: medBare(techKort).length, instrumenter: instrMed.length,
+    innovasjoner: medBare(techKort).length, instrumenter: instrMed.length,
     historier: familieListe.filter((F) => F.historie).length, sider: sideMed.length,
     lytteeksempler: medBare(lytteValgt).length,
     bortvalgt: kandidater.filter((v) => bort.has(v)).length,
   };
-  // Kortene utenom tiårene. Et LITE hefte (v5.74) får kompakt forside uten
-  // egen innholdsfortegnelse: ett artistkort skal ikke koste tre ark. Tiårene
-  // teller ikke, for én artist drar alltid inn to til fire av dem.
+  // Kortene. Et LITE hefte (v5.74) får kompakt forside uten egen
+  // innholdsfortegnelse: ett artistkort skal ikke koste tre ark.
   const kort = tellinger.sjangre + tellinger.artister + tellinger.innovasjoner
     + tellinger.instrumenter + tellinger.historier + tellinger.sider;
 
   return {
     valg: liste, eksplisitt, fravalg, deler: d, form: f, punkterOk, historierOk,
     kort, liten: kort <= LITEN_GRENSE,
-    familier: familieListe, bakteppe, innovasjoner, instrumenter, sider,
+    familier: familieListe, innovasjoner, instrumenter, sider,
     lytteliste, tidslinje, tellinger, aarsspenn, mangler,
-    tre: { familier: treFamilier, tiaar: treTiaar, grunnlag, annet: treAnnet },
+    tre: { familier: treFamilier, annet: treAnnet },
     // Tomt hefte = ingenting huket på som gir sider. Metasjangeren selv er
     // bare en gruppe; lista kan dessuten ha avhukede poster.
     tom: liste.every((v) => v.startsWith(META_PREFIKS)),
   };
+}
+
+// Plassen til et år på heftets tidslinje, i prosent av sporet: på
+// tidsromsaksen når treet har tidsrom, ellers lineært.
+export function tidslinjePos(t, aar) {
+  if (t?.tidsrom) return aksePos(t.tidsrom, aar, t.naa) * 100;
+  return ((aar - t.start) / (t.slutt - t.start)) * 100;
 }
 
 // ---------------------------------------------------------------------------
@@ -921,7 +878,7 @@ export function settSammen(utvalg, data = {}, valg = {}) {
 const TELLE_ORD = [
   ["metasjangre", "metasjanger", "metasjangre"],
   ["sjangre", "sjanger", "sjangre"], ["artister", "artist", "artister"],
-  ["undersjangre", "undersjanger", "undersjangre"], ["tiaar", "tiår", "tiår"],
+  ["undersjangre", "undersjanger", "undersjangre"],
   ["innovasjoner", "innovasjon", "innovasjoner"], ["instrumenter", "instrument", "instrumenter"],
   ["historier", "historie", "historier"], ["sider", "side", "sider"],
   ["lytteeksempler", "lytteeksempel", "lytteeksempler"],
@@ -929,15 +886,16 @@ const TELLE_ORD = [
 
 // Grovt sideanslag fra tellingene alene (v5.74), for «Velg alt»-dialogen der
 // heftet ikke er tegnet ennå. Koeffisientene er målt mot et ferdig hefte
-// (Blues: 25 artister, 3 sjangre og 12 tiår ga 24 sider). Det ekte anslaget
+// (Blues: 25 artister og 3 sjangre, med 12 tiår som nå er tatt ut, ga 24
+// sider). Det ekte anslaget
 // måles på skjermen etter tegning (sideanslag i js/utskrift.js).
 export function anslagSider(t = {}) {
   const n = (k) => Number(t[k]) || 0;
   const kort = n("artister") + n("sjangre") + n("innovasjoner") + n("instrumenter") + n("historier") + n("sider");
-  if (!kort && !n("tiaar") && !n("lytteeksempler")) return 0;
+  if (!kort && !n("lytteeksempler")) return 0;
   const front = kort <= LITEN_GRENSE ? 1 : 2;
   const sider = front
-    + n("artister") * 0.42 + n("sjangre") * 0.35 + n("tiaar") * 0.75
+    + n("artister") * 0.42 + n("sjangre") * 0.35
     + n("innovasjoner") * 0.3 + n("instrumenter") * 0.6 + n("historier") * 1.5 + n("sider") * 1.2
     + (n("artister") ? 0.5 + n("artister") * 0.02 : 0)
     + n("lytteeksempler") * 0.03;
@@ -945,8 +903,7 @@ export function anslagSider(t = {}) {
 }
 
 // Heftet som kjøreplan (v5.74, lærerens «Lag kjøreplan av utvalget»): ett
-// stopp per kort, i heftets rekkefølge. Tiårene får samfunnsvisningen, som
-// er tiårskortets første fane. Hvert mål én gang.
+// stopp per kort, i heftets rekkefølge. Hvert mål én gang.
 export function planFraModell(modell) {
   const ut = [];
   const legg = (vis) => { if (vis && !ut.includes(vis)) ut.push(vis); };
@@ -959,7 +916,6 @@ export function planFraModell(modell) {
     }
     for (const a of F.loseArtister) legg(a.vis);
   }
-  for (const b of modell?.bakteppe || []) legg(`tiår:${b.tiaar}:society`);
   for (const t of modell?.innovasjoner || []) legg(t.vis);
   for (const i of modell?.instrumenter || []) legg(i.vis);
   for (const s of modell?.sider || []) legg(s.vis);
@@ -968,7 +924,7 @@ export function planFraModell(modell) {
   return ut.map((vis) => ({ vis }));
 }
 
-// «2 sjangre · 5 artister · 1 tiår · 2 innovasjoner»
+// «2 sjangre · 5 artister · 2 innovasjoner»
 export function tellingerTekst(tellinger = {}) {
   return TELLE_ORD
     .filter(([k]) => tellinger[k] > 0)
@@ -982,16 +938,9 @@ function listeTekst(navn) {
   return `${navn.slice(0, -1).join(", ")} og ${navn[navn.length - 1]}`;
 }
 
-// «1950-tallet», «1950- og 1960-tallet», «1950-, 1960- og 1970-tallet»
-function tiaarTekst(tiaar) {
-  const t = [...new Set(tiaar)].sort((a, b) => a - b);
-  if (t.length === 1) return `${t[0]}-tallet`;
-  return `${t.slice(0, -1).map((x) => `${x}-`).join(", ")} og ${t[t.length - 1]}-tallet`;
-}
-
 // Tittelforslaget (brukerens regler 2026-09-25): kjøreplanens tittel når
 // utvalget kom derfra; én metasjanger med årsspenn; flere metasjangre listet
-// (høyst tre); bare tiår; ellers «Pensumutdrag». Studentens egen tittel
+// (høyst tre); ellers «Pensumutdrag». Studentens egen tittel
 // overstyrer alltid (feltet på utskriftssiden).
 export function foreslaaTittel(modell, { planTittel = "" } = {}) {
   const plan = normaliserTittel(planTittel);
@@ -1001,17 +950,14 @@ export function foreslaaTittel(modell, { planTittel = "" } = {}) {
     const navn = fam[0].navn;
     const s = modell.aarsspenn;
     if (!s) return normaliserTittel(navn);
-    if (s.apen || s.til == null) return normaliserTittel(`${navn} fra ${s.fra}`);
-    if (s.fra === s.til) return normaliserTittel(`${navn} ${s.fra}`);
-    return normaliserTittel(`${navn} ${s.fra}–${s.til}`);
+    if (s.apen || s.til == null) return normaliserTittel(`${navn} fra ${visAar(s.fra)}`);
+    return normaliserTittel(`${navn} ${visSpenn(s.fra, s.til)}`);
   }
   if (fam.length >= 2) {
     const navn = fam.map((F) => F.navn);
     const tekst = navn.length <= 3 ? listeTekst(navn) : `${navn.slice(0, 3).join(", ")} og ${navn.length - 3} til`;
     return normaliserTittel(tekst);
   }
-  const tiaar = (modell?.bakteppe || []).map((b) => b.tiaar);
-  if (tiaar.length) return normaliserTittel(tiaarTekst(tiaar));
   if (modell?.innovasjoner?.length) return "Innovasjoner";
   if (modell?.instrumenter?.length) return "Instrumentene";
   const lytte = modell?.lytteliste || [];

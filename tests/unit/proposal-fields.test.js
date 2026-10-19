@@ -23,7 +23,7 @@ test("artist-hvitelisten inneholder de reelle innholdsfeltene", () => {
   }
 });
 
-test("tech/subgenre/decade-hvitelistene utelater status og andre systemfelter", () => {
+test("tech/subgenre-hvitelistene utelater status og andre systemfelter", () => {
   assert.equal(PROPOSABLE_KEYS.tech.includes("status"), false);
   // v4.97: BEGGE årstallene må være foreslåbare. Fram til da sto kun
   // adoptedYear i lista, med etiketten «Oppfunnet» i skjemaet — en student som
@@ -39,10 +39,11 @@ test("tech/subgenre/decade-hvitelistene utelater status og andre systemfelter", 
   for (const key of FORBIDDEN) {
     assert.equal(PROPOSABLE_KEYS.subgenre.includes(key), false, `subgenre skal ikke tillate ${key}`);
   }
-  // «Les mer»-feltene ble fjernet i v4.78 (kildehenvisningene overtok rollen)
-  // og slettet helt i v4.93 — de finnes ikke lenger i data, eksport eller kode.
-  assert.deepEqual(PROPOSABLE_KEYS["decade-society"], ["society"]);
-  assert.deepEqual(PROPOSABLE_KEYS["decade-tech"], ["tech"]);
+  // Tiårstekstene (decade-society/decade-tech) og tiåret på innovasjonskortet
+  // ble tatt ut i fase 2: ingen av dem kan foreslås lenger.
+  assert.equal("decade-society" in PROPOSABLE_KEYS, false);
+  assert.equal("decade-tech" in PROPOSABLE_KEYS, false);
+  assert.equal(PROPOSABLE_KEYS.tech.includes("decade"), false);
 });
 
 test("proposableKeysFor gir tom liste for ukjent entityType", () => {
@@ -99,8 +100,6 @@ test("currentEntityValues dekker alle foreslåbare felter", async () => {
   const grener = {
     subgenre: ["description", "kilder", "activeFrom", "activeTo", "era"],
     instrument: ["body", "kilder"],
-    "decade-society": ["society"],
-    "decade-tech": ["tech"],
   };
   for (const [type, felter] of Object.entries(grener)) {
     // Hver gren skal nevne hvert foreslåbart felt for sin entityType.
@@ -279,7 +278,8 @@ test("SKJUL_I_HUBEN stemmer med kortene i «Det store bildet»", async () => {
   // Brukervalg 2026-09-10: de tre visualiseringene, og fra v5.20 sjanger-
   // perioder som fjerde synlige kort.
   const synlige = ider.filter((id) => !SKJUL_I_HUBEN[id]).sort();
-  assert.deepEqual(synlige, ["sb-sjangerperioder", "sb-slektstre", "sb-tidslinje", "sb-varmekart"]);
+  // (Varmekartet var det fjerde til det ble tatt ut i fase 2.)
+  assert.deepEqual(synlige, ["sb-sjangerperioder", "sb-slektstre", "sb-tidslinje"]);
 
   // Huben må være PÅ, ellers ser studenten ingen av dem uansett.
   assert.equal(SKJUL_I_STUDENTVISNING.storeBildet, false);
@@ -369,7 +369,7 @@ test("funn 48: pendingEdits-reglene, PROPOSABLE_KEYS og FIELD_SPECS har de samme
   // FIELD_SPECS (skjemaet) har nøyaktig de foreslåbare feltene for hver type.
   const proposals = les("js/forslag/proposals.js");
   const specs = proposals.slice(proposals.indexOf("FIELD_SPECS = {"));
-  for (const type of ["tech", "subgenre", "instrument", "decade-society", "decade-tech"]) {
+  for (const type of ["tech", "subgenre", "instrument"]) {
     const navn = type.includes("-") ? `"${type}"` : type;
     const start = specs.indexOf(`\n  ${navn}: [`);
     assert.ok(start >= 0, `FIELD_SPECS mangler ${type}`);

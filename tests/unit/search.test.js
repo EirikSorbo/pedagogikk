@@ -32,9 +32,10 @@ const STATE = {
       category: "Opptak og avspilling", adoptedLabel: "fra ca. 1910" },
     { id: "t2", name: "Woodstock", type: "hendelse", description: "Festivalen i 1969." },
   ],
+  // Tiårstekstene ble tatt ut i fase 2. De ligger her for å vise at en
+  // gammel state med dem ikke gir poster i indeksen.
   decadeDescs: {
     1950: { society: "Borgerrettskampen tar form.", tech: "Grammofonen møter LP-en." },
-    1960: { society: "" },
   },
   genreDescs: {
     Bebop: { main: { description: "Rask jazz for lytting, ikke dans.", era: "1940-tallet" } },
@@ -73,8 +74,8 @@ test("indeksen dekker alt innholdet, én post per ting", () => {
   assert.equal(t.artist, 4, "alle artistene for læreren");
   assert.equal(t.tech, 1);
   assert.equal(t.hendelse, 1, "hendelser skilles fra innovasjoner");
-  assert.equal(t.samfunn, 1, "tomt samfunnsfelt gir ingen post");
-  assert.equal(t.teknologi, 1);
+  assert.equal(t.samfunn, undefined, "tiårstekstene er tatt ut (fase 2)");
+  assert.equal(t.teknologi, undefined);
   assert.equal(t.undersjanger, 1, "kun sub-navn som ikke alt er en tre-node");
   assert.equal(t.historie, 1);
   assert.equal(t.kobling, 1);
@@ -157,20 +158,18 @@ test("ett tegn søker ikke", () => {
 test("titteltreff slår teksttreff, og gruppen med det beste treffet kommer først", () => {
   const indeks = byggIndeks(STATE, { erLærer: true });
   const res = sok(indeks, "grammofon");
-  // «Grammofonen» (tittel) foran tiårsteksten som bare nevner ordet.
+  // «Grammofonen» (tittel) foran en tekst som bare nevner ordet.
   assert.equal(res.grupper[0].type, "tech");
   assert.equal(res.grupper[0].treff[0].tittel, "Grammofonen");
   const tech = finn(indeks, "tech", "Grammofonen");
-  const tiar = finn(indeks, "teknologi", "1950-tallet");
-  assert.ok(sok([tech, tiar], "grammofon").grupper[0].type === "tech");
+  const kobling = { ...finn(indeks, "kobling", "Blues → R&B"), nTekst: "grammofonen nevnes i teksten" };
+  assert.ok(sok([kobling, tech], "grammofon").grupper[0].type === "tech");
 });
 
 test("hvert treff vet hvordan det åpnes", () => {
   const indeks = byggIndeks(STATE, { erLærer: true });
   assert.deepEqual(finn(indeks, "artist", "Muddy Waters").apne, { hva: "artist", id: "a1" });
   assert.deepEqual(finn(indeks, "tech", "Grammofonen").apne, { hva: "tech", id: "t1" });
-  assert.deepEqual(finn(indeks, "samfunn", "1950-tallet").apne, { hva: "tiår", id: "1950", modus: "society" });
-  assert.deepEqual(finn(indeks, "teknologi", "1950-tallet").apne, { hva: "tiår", id: "1950", modus: "tech" });
   assert.deepEqual(finn(indeks, "undersjanger", "Delta blues").apne, { hva: "undersjanger", id: "Delta blues" });
   assert.deepEqual(finn(indeks, "historie", "Historien om Blues").apne, { hva: "historie", id: "Blues" });
   assert.deepEqual(finn(indeks, "kobling", "Blues → R&B").apne, { hva: "kobling", id: "blues__rnb" });

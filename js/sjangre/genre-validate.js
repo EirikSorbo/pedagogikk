@@ -10,6 +10,8 @@
 //  DOM, så de kan kjøres i node.
 // ============================================================================
 
+import { erAar, visAar } from "../felles/aarstall.js";
+
 // Returnerer en liste med problemer. Tom liste = treet er i orden.
 // Hvert problem: { nivå: "feil" | "advarsel", melding }
 export function validateTree(tree) {
@@ -76,8 +78,49 @@ export function validateTree(tree) {
     }
   }
 
+  problemer.push(...sjekkTidsrom(tree.tidsrom, nodes));
   problemer.push(...finnSykler(nodes, idSett));
   return problemer;
+}
+
+// Tidsrommene (fase 2): radene i treet. Hvert tidsrom må ha et startår, og
+// startårene må stige: tidsaksen (js/felles/tidsakse.js) plasserer årene i
+// den rekkefølgen, og to tidsrom i feil rekkefølge ville sendt tidslinjene
+// baklengs. Et hull eller en overlapp mellom to tidsrom er bare en advarsel:
+// aksen tåler det, men læreren mente det sjelden. Mangler lista helt, tegnes
+// treet uten etiketter på radene.
+export function sjekkTidsrom(tidsrom, nodes = []) {
+  const ut = [];
+  const feil = (melding) => ut.push({ nivå: "feil", melding });
+  const advar = (melding) => ut.push({ nivå: "advarsel", melding });
+  if (tidsrom == null) {
+    advar("Treet har ingen tidsrom (tidsrom), så radene står uten årstall.");
+    return ut;
+  }
+  if (!Array.isArray(tidsrom)) { feil("Tidsrommene (tidsrom) er ikke en liste."); return ut; }
+  tidsrom.forEach((t, i) => {
+    const hvem = `Tidsrom ${i + 1}${t?.etikett ? ` («${t.etikett}»)` : ""}`;
+    if (!t || typeof t !== "object") { feil(`${hvem} er ikke et objekt.`); return; }
+    if (!erAar(t.fra)) feil(`${hvem} mangler et gyldig startår (fra).`);
+    if (t.til != null && !erAar(t.til)) feil(`${hvem} har et ugyldig sluttår (til).`);
+    if (erAar(t.fra) && erAar(t.til) && t.til <= t.fra) feil(`${hvem} slutter (${visAar(t.til)}) før det begynner (${visAar(t.fra)}).`);
+    if (t.til == null && i < tidsrom.length - 1) advar(`${hvem} mangler sluttår, men er ikke det siste. Det slutter der neste begynner.`);
+    const neste = tidsrom[i + 1];
+    if (!neste) return;
+    if (erAar(t.fra) && erAar(neste.fra) && neste.fra <= t.fra) {
+      feil(`Tidsrommene står i feil rekkefølge: ${i + 2} begynner (${visAar(neste.fra)}) før eller samtidig med ${i + 1} (${visAar(t.fra)}).`);
+    } else if (erAar(t.til) && erAar(neste.fra) && t.til !== neste.fra) {
+      advar(`${t.til < neste.fra ? "Hull" : "Overlapp"} mellom tidsrom ${i + 1} (til ${visAar(t.til)}) og ${i + 2} (fra ${visAar(neste.fra)}).`);
+    }
+  });
+  if (tidsrom.length) {
+    for (const n of nodes) {
+      if (Number.isFinite(n?.r) && Math.floor(n.r) >= tidsrom.length) {
+        advar(`«${n.id}» står på rad ${Math.floor(n.r) + 1}, men treet har bare ${tidsrom.length} tidsrom.`);
+      }
+    }
+  }
+  return ut;
 }
 
 // Sykel = en node som er sin egen stamfar. Ville fått ane-oppslaget i kartet til

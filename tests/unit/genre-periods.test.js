@@ -115,7 +115,7 @@ test("egen farge per stolpe også når en familie vokser forbi paletten", () => 
   assert.equal(periodColor(0), PERIOD_COLORS[0]);
 });
 
-test("aksen følger dataene: tidlig start drar den bakover, i dag setter slutten", () => {
+test("uten tidsrom følger aksen dataene: tidlig start drar den bakover, i dag setter slutten", () => {
   const a = periodAxis([{ meta: "X", rows: [
     { status: "ok", from: 1885, to: 1950 }, { status: "ok", from: 1990, to: null },
   ] }], NAA);
@@ -124,9 +124,20 @@ test("aksen følger dataene: tidlig start drar den bakover, i dag setter slutten
   assert.equal(a.ticks.at(-1), 2020, "siste tiårsmerke er siste hele tiår");
   assert.equal(pctAv(a, a.start), 0);
   assert.equal(pctAv(a, a.slutt), 100);
-  assert.equal(periodAxis([{ meta: "X", rows: [{ status: "ok", from: 1935, to: 1960 }] }], NAA).start, 1900,
-    "aksen starter aldri senere enn 1900, som varmekartet");
-  assert.equal(periodAxis([{ meta: "X", rows: [{ status: "mangler", from: null, to: null }] }], NAA).start, 1900);
+  // Før Kristus (fase 2): steget vokser, så det blir høyst femten merker.
+  const lang = periodAxis([{ meta: "X", rows: [{ status: "ok", from: -427, to: -347 }] }], NAA);
+  assert.ok(lang.start <= -427 && lang.ticks.length <= 16, `${lang.start} / ${lang.ticks.length} merker`);
+});
+
+test("med tidsrom er aksen tidsrommene: like brede, ett merke ved starten av hvert", () => {
+  const T = [{ fra: -800, til: -150 }, { fra: -150, til: 1500 }, { fra: 1500, til: null }];
+  const a = periodAxis([{ meta: "X", rows: [{ status: "ok", from: 1935, to: 1960 }] }], NAA, T);
+  assert.deepEqual(a.ticks, [-800, -150, 1500]);
+  assert.equal(a.start, -800);
+  assert.equal(pctAv(a, -800), 0);
+  assert.ok(Math.abs(pctAv(a, -150) - 100 / 3) < 1e-9, "hvert tidsrom er en tredel");
+  assert.ok(Math.abs(pctAv(a, 1500) - 200 / 3) < 1e-9);
+  assert.equal(pctAv(a, NAA), 100, "siste tidsrom varer til i dag");
 });
 
 test("signaturen endres bare når figuren endres, ikke når bare beskrivelsesteksten gjør det", () => {

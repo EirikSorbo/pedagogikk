@@ -5,7 +5,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { timeStopp, delteTimer, ytSpillelisteIder } from "../../js/visning/presentasjon-modell.js";
-import { tiarEksempler, spillAlleHtml, artistGalleriHtml } from "../../js/ui/ui.js";
+import { spillAlleHtml, artistGalleriHtml } from "../../js/ui/ui.js";
 import { iSpalter } from "../../js/utforsk/explore-sjanger.js";
 import { timeEksempler, timeTilgjengelig } from "../../js/utforsk/explore-timer.js";
 import { SKJUL_I_STUDENTVISNING } from "../../js/felles/feature-flags.js";
@@ -18,8 +18,8 @@ const id = (n) => `vid${String(n).padStart(8, "0")}`;   // 11 tegn, gyldig YouTu
 //  «Fra timene» (U1)
 // ---------------------------------------------------------------------------
 test("timeStopp: gyldige mål, hvert én gang, i rekkefølgen de ble vist", () => {
-  assert.deepEqual(timeStopp(["artist:a1", "tull", "artist:a1", "tiår:1960", 7, null]),
-    [{ vis: "artist:a1" }, { vis: "tiår:1960" }]);
+  assert.deepEqual(timeStopp(["artist:a1", "tull", "artist:a1", "tidslinje", "tiår:1960", 7, null]),
+    [{ vis: "artist:a1" }, { vis: "tidslinje" }], "tiår er ikke et mål lenger (fase 2)");
   assert.deepEqual(timeStopp(null), []);
 });
 
@@ -58,24 +58,8 @@ test("timeTilgjengelig: studenten får bare delte timer, og bare med bryteren p�
 });
 
 // ---------------------------------------------------------------------------
-//  Tiår og «Spill alle»
+//  «Spill alle» (tiårenes spillelister, tiarEksempler, ble tatt ut i fase 2)
 // ---------------------------------------------------------------------------
-test("tiarEksempler: innspillingsåret (ellers framføringsåret) i tiåret, bare med lenke, sortert på år", () => {
-  const artister = [
-    { id: "a", name: "B-artist", status: "active", musicExamples: [
-      { url: yt(id(1)), label: "Seksti", year: 1965 },
-      { url: yt(id(2)), label: "Sytti", year: 1971 },
-      { url: "", label: "Uten lenke", year: 1962 },
-    ] },
-    { id: "b", name: "A-artist", status: "active", musicExamples: [
-      { url: yt(id(3)), label: "Framført", performanceYear: 1961 },
-      { url: yt(id(3)), label: "Framført", performanceYear: 1961 },
-    ] },
-    { id: "c", name: "Skjult", status: "active", priority: -1, musicExamples: [{ url: yt(id(4)), label: "Skjult", year: 1963 }] },
-  ];
-  assert.deepEqual(tiarEksempler(artister, 1960).map((p) => p.m.label), ["Framført", "Seksti"]);
-});
-
 // v6.21–v6.23: knappene sier hvilke rader de spiller, og radnumrene følger
 // lista (Fable F5: før talte de bare videoene).
 test("spillAlleHtml: spennene er radnumrene i lista, og rader uten video hoppes over", () => {

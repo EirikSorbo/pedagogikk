@@ -12,15 +12,12 @@ test("vis-verdi: rundtur for alle måltypene", () => {
     { hva: "historie", id: "Hip-hop" },
     { hva: "historie" },
     { hva: "tech", id: "t42" },
-    { hva: "tiår", id: "1950", modus: "society" },
-    { hva: "tiår", id: "1950", modus: "tech" },
     { hva: "side", id: "rotter" },
     { hva: "side", id: "omHistorie" },
     { hva: "side", id: "guide" },
     { hva: "instrument", id: "Gitar" },
     { hva: "kobling", id: "blues__jazz" },
     { hva: "tidslinje" },
-    { hva: "varmekart" },
     { hva: "sjangerperioder" },
     { hva: "himmel" },
     { hva: "referanser" },
@@ -29,7 +26,6 @@ test("vis-verdi: rundtur for alle måltypene", () => {
     { hva: "teknologi" },
     { hva: "teknologi", id: "Opptak og avspilling" },
     { hva: "slektstre" },
-    { hva: "varmekart", id: "Country" },
     { hva: "yt", id: "dQw4w9WgXcQ" },
     { hva: "yt", id: "dQw4w9WgXcQ", modus: "PLabc123456789" },
   ];
@@ -48,13 +44,16 @@ test("parseVisVerdi: ukjent, tom og ødelagt verdi ignoreres stille", () => {
   assert.equal(parseVisVerdi(42), null);
   // Type-token alene uten kjent navn — ikke et mål.
   assert.equal(parseVisVerdi(":id"), null);
+  // Tiårskortene og varmekartet er tatt ut (fase 2): gamle lenker er ukjente.
+  assert.equal(parseVisVerdi("tiår:1950:society"), null);
+  assert.equal(parseVisVerdi("varmekart:Country"), null);
 });
 
 test("byggVisVerdi: nekter det parseren ville lest feil", () => {
   // Kolon i navnet ville flyttet resten inn i modus-plassen.
   assert.equal(byggVisVerdi({ hva: "sjanger", id: "Rock: the sequel" }), null);
   // Modus uten id ville blitt lest som id.
-  assert.equal(byggVisVerdi({ hva: "tiår", modus: "society" }), null);
+  assert.equal(byggVisVerdi({ hva: "teknologi", modus: "x" }), null);
   assert.equal(byggVisVerdi({ hva: "ukjent", id: "x" }), null);
   assert.equal(byggVisVerdi(), null);
 });
@@ -62,7 +61,7 @@ test("byggVisVerdi: nekter det parseren ville lest feil", () => {
 test("VIS_TYPER dekker søkets hva-nøkler", () => {
   // Ruteren (explore-apne) og søket deler dør, så lenkene må minst kunne
   // uttrykke alt søket kan åpne.
-  for (const hva of ["artist", "sjanger", "undersjanger", "historie", "tech", "tiår", "side", "instrument", "kobling"]) {
+  for (const hva of ["artist", "sjanger", "undersjanger", "historie", "tech", "side", "instrument", "kobling"]) {
     assert.ok(VIS_TYPER.has(hva), `${hva} må være en gyldig lenketype`);
   }
 });

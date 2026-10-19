@@ -72,9 +72,7 @@ test("spillelistene og artistkortet: nivået i byggerne, merket på kortet", () 
   assert.match(ui, /const genreArtists = etterNivaa\(/, "sjangerens spilleliste");
   assert.match(ui, /export function countArtistExamples\(list\) \{\n  return playlistRows\(\[\.\.\.etterNivaa\(list\)\]/);
   assert.match(ui, /export function openArtistsPlaylistModal\(title, list\) \{\n  const \{ total, html, ider \} = playlistRows\(\[\.\.\.etterNivaa\(list\)\]/);
-  assert.match(ui, /for \(const a of etterNivaa\(\(artists \|\| \[\]\)\.filter\(isVisible\)\)\)/, "tiårenes lister");
   assert.match(ui, /\$\{sekt\("tags", `<div class="meta" style="margin-bottom:12px">\$\{prioMerkeHtml\(a\)\}\$\{metaRader\(a\)\}<\/div>`\)\}/);
-  assert.match(les("js/utforsk/explore-lytt.js"), /openEksemplerSpilleliste\(`Spilleliste: \$\{x\.d\}-tallet`, x\.par, \{ nivaa: true \}\)/);
 });
 
 test("merket i toppfeltet startes på forsiden, i slektstreet og på lærersiden", () => {

@@ -11,7 +11,6 @@ import {
   subscribeTimeforslag,
   subscribeNotater,
   subscribePendingEdits,
-  mergeVarmekartRows,
   deleteTech,
   onAuthChange,
   signInWithGoogle,
@@ -28,9 +27,7 @@ import { lesVisFraUrl, provVisMaal } from "./utforsk/explore-apne.js";
 import { state, ctx, renderAll, refreshControls, openAdminModal, setContentCheck, guardTeacherAction, setupModals } from "./laerer/teacher-state.js";
 import { openDetail, addMainGenreCheckToggle, openOversikt, openMangler, oppdaterOversiktPlateselskaper, setupFilters, openNyArtist } from "./laerer/teacher-artists.js";
 import {
-  openSingleDecadeModal,
   openSingleSubgenreModal,
-  setupDecadeSingleSave,
   setupSubgenreSingleSave,
   setupEdgeSingleSave,
   openTechAdmin,
@@ -60,7 +57,7 @@ import { renderDesk } from "./laerer/teacher-desk.js";
 import { setupDataButtons, setupImportChoice } from "./laerer/teacher-import.js";
 import { setupFormatBars } from "./ui/format-bar.js";
 import { GENRE_ADMIN_HTML, openGenreAdmin, setupGenreAdmin, refreshGenreAdmin } from "./laerer/teacher-genres.js";
-import { melding, bekreft } from "./ui/ui-modal.js";
+import { bekreft } from "./ui/ui-modal.js";
 
 // ----------------------------------------------------------------------------
 //  Innlogging
@@ -167,14 +164,13 @@ function startAppInner() {
   initVisning();
   setupDataButtons();
   setupImportChoice();
-  setupDecadeSingleSave();
   setupPendingEditsUi();
   setupSubgenreSingleSave();
   setupEdgeSingleSave();
   setupStoryEditor();
   setupReferanseEditor();
   // Formatlinja over alle tekstfelter merket med data-format (beskrivelser,
-  // tiårstekster, koblingstekster). Historie-editoren har sin egen i HTML-en.
+  // koblingstekster). Historie-editoren har sin egen i HTML-en.
   setupFormatBars();
 
   ctx.explore = initExplore({
@@ -192,25 +188,9 @@ function startAppInner() {
     // Frittstående referanser har ikke noe kort å åpne fra Referanser-lista;
     // læreren får redigeringslista i stedet, med den valgte raden uthevet.
     onReferanseEdit: (fokus) => openReferanseEditor(fokus),
-    // Varmekart-redigering: celleklikk sender hele den nye raden hit. Vi FLETTER
-    // den ene raden inn i det som ligger i Firestore (mergeVarmekartRows leser
-    // fersk fra serveren først), så et klikk aldri kan slette de andre sjangrene
-    // — heller ikke før content-snapshotet har landet, eller fra to faner
-    // samtidig. Guarden hindrer dessuten redigering mot en tom/villedende
-    // celleverdi før innholdet er lastet.
-    onHeatEdit: (genre, values) => {
-      if (!state.contentLoaded) {
-        melding("Varmekartet er ikke ferdig innlastet ennå. Vent et øyeblikk og prøv igjen.");
-        return Promise.resolve();
-      }
-      return mergeVarmekartRows({ [genre]: values });
-    },
     onMainGenreCheck: (genre) => addMainGenreCheckToggle(genre),
     getCheckedState: () => state.teacherChecks,
     onTechAdmin: () => openTechAdmin(),
-    // Tiårsvinduets fanene (v6.07): Rediger åpner lærerens tiårsmodal på
-    // samme tiår og samme tekst (samfunn eller teknologi).
-    onDecadeEdit: (decade, mode) => openSingleDecadeModal(decade, mode),
     // Sjekk-knapp i detaljvisningene (sjanger, historie, røtter, innovasjonskort).
     onCheck: (category, id, on) => setContentCheck(category, id, on),
     onTechEdit: (t, preset) => openTechEditor(t, preset),
@@ -244,10 +224,7 @@ function startAppInner() {
   // «Ta med i utskriften» i kortenes tittellinje + merket på skriverikonet (v5.56).
   initUtskriftValg({ hentData: () => state });
 
-  // Tiår-kortet (v6.07, S1) åpner det samme tiårsvinduet som studentene ser;
-  // «Rediger» i fanene fører til lærerens tiårsmodal (onDecadeEdit over).
   // Lytt (U7) åpner spillelistene.
-  $("#btn-t-tiar")?.addEventListener("click", () => ctx.explore.openDecadeList());
   $("#btn-t-lytt")?.addEventListener("click", () => ctx.explore.openLytt());
   // Tidslinje-inngang fra artistlistas filterrad (samme delte modal som fra
   // Sjangre-modalen — én implementasjon i explore-tidslinje.js).
@@ -319,8 +296,6 @@ function startAppInner() {
       // Plateselskapskortet viser artistene med selskapet (v6.37).
       ctx.explore?.renderPlateselskaper?.();
       oppdaterOversiktPlateselskaper();
-      // Et åpent tiårsvindu (Musikk-fanen bygges av artistene).
-      ctx.explore?.refreshDecadeView?.();
       // En åpen kjøreplan-kladd med «laster …»-stopp (audit v5.42 funn 8).
       visningTikk();
       provVisMaal();
@@ -329,7 +304,7 @@ function startAppInner() {
     // gang (beskrivelsene bor i egen samling — content-snapshotet dekker dem ikke).
     onGenreDescs: () => { refreshDesk(); ctx.explore?.genreDescsChanged?.(); visningTikk(); provVisMaal(); },
     onContent: () => {
-      // Åpne innholdsvisninger (sider/varmekart/instrumentsammendrag)
+      // Åpne innholdsvisninger (sider/instrumentsammendrag)
       // re-rendres så import/redigering slår gjennom umiddelbart.
       ctx.explore?.contentChanged?.();
       if (document.getElementById("modal-laerer-handbok")?.classList.contains("open")) tegnLaererHandbok();
@@ -344,9 +319,6 @@ function startAppInner() {
       provVisMaal();
     },
     onPodcasts: () => { renderPodkastAdmin(); ctx.explore?.renderInstrumenter?.(); },
-    // Tiårstekstene (v6.23, Fable F2): «Rediger» i tiårsfanene lagrer oppå
-    // tiårsvinduet, som skal vise den nye teksten når læreren går tilbake.
-    onDecades: () => { ctx.explore?.refreshDecadeView?.(); provVisMaal(); },
     // ?vis=-lenker til en sjangerkobling venter på koblingstekstene.
     onEdgeDescs: () => provVisMaal(),
     // Åpne teknologi-visninger (admin-lista, innovasjonskortet og en åpen
@@ -357,7 +329,6 @@ function startAppInner() {
       ctx.explore?.refreshTechDetail?.();
       ctx.explore?.refreshTeknologi?.();
       ctx.explore?.renderInstrumenter?.();
-      ctx.explore?.refreshDecadeView?.();
       refreshDesk();
       visningTikk();
       provVisMaal();

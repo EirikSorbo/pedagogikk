@@ -1,29 +1,28 @@
 // ============================================================================
 //  LÆRER — INNHOLDSREDIGERING
 // ----------------------------------------------------------------------------
-//  Tiår- og sjangerbeskrivelser (enkeltmodaler), teknologi-admin og podkast-
+//  Sjangerbeskrivelser (enkeltmodaler), teknologi-admin og podkast-
 //  administrasjon. Deler tilstand/eksplore via teacher-state.
 // ============================================================================
 
-import { state, ctx, openAdminModal, closeAdminModal, lukkEtter, avbrytLukkEtter, setContentCheck, guardTeacherAction } from "./teacher-state.js";
-import { saveDecadeDesc, saveGenreDescLevel, saveEdgeDesc, saveStoryBody, clearStory, savePage, deletePage, saveReferanser, addTech, updateTech, deleteTech, addPodcast, updatePodcast, deletePodcast, reorderPodcasts, runMigrationPlan } from "../data/store.js";
+import { state, ctx, openAdminModal, closeAdminModal, lukkEtter, setContentCheck, guardTeacherAction } from "./teacher-state.js";
+import { saveGenreDescLevel, saveEdgeDesc, saveStoryBody, clearStory, savePage, deletePage, saveReferanser, addTech, updateTech, deleteTech, addPodcast, updatePodcast, deletePodcast, reorderPodcasts, runMigrationPlan } from "../data/store.js";
 import { planSubRename } from "../sjangre/genre-migrate.js";
 import { flyttPodkast } from "../felles/podkast-rekkefolge.js";
 import { resolveMainDesc } from "../sjangre/genealogy.js";
-import { dropboxDirectUrl, escapeHtml, buildKilderList } from "../felles/util.js";
-import { GENEALOGY, edgeKey } from "../sjangre/genre-model.js";
+import { dropboxDirectUrl, escapeHtml } from "../felles/util.js";
+import { GENEALOGY, edgeKey, TIDSROM } from "../sjangre/genre-model.js";
 import { storyFor, pageFor } from "../felles/story-format.js";
 import { renderRichText } from "../felles/rich-text.js";
 import { wrapSelection, prefixLines } from "../ui/format-bar.js";
 import { buildMainGenreList, fillSelect } from "../ui/ui.js";
-import { renderDecadeSections, renderDecadeRibbon } from "../ui/ui-timeline.js";
 import { techImage } from "../ui/ui-tech.js";
 import { resolveDesc } from "../sjangre/genre-descriptions.js";
-import { renderPodcastList, wirePlayerCloseGuard, wireCharCount, checkBtnHtml, toggleCheckBtn, teacherActionRow, wireTeacherRow, techFactsLines, ICONS, fyllPunktfelt, lesPunktfelt } from "../ui/ui-helpers.js";
+import { renderPodcastList, wirePlayerCloseGuard, wireCharCount, checkBtnHtml, toggleCheckBtn, techFactsLines, ICONS, fyllPunktfelt, lesPunktfelt } from "../ui/ui-helpers.js";
 import { redigerNotatForKort } from "../visning/pres-notater.js";
-import { DECADES, DECADE_OPTIONS, INSTRUMENT_TIMELINE_GROUPS, INSTRUMENT_TITLE, instrumentPageId, SAMMENDRAG_MAKS } from "../felles/limits.js";
+import { INSTRUMENT_TIMELINE_GROUPS, INSTRUMENT_TITLE, instrumentPageId, SAMMENDRAG_MAKS } from "../felles/limits.js";
 import { FAKTA_FELT, rensFakta, plateselskapForSide } from "../felles/plateselskaper.js";
-import { heatRow, getHeatData } from "../sjangre/heat-strip.js";
+import { erAar, visSpenn } from "../felles/aarstall.js";
 
 const LEVEL_LABEL = { meta: "metasjanger", main: "sjanger", sub: "undersjanger" };
 import { wireAllLinks } from "../felles/linkify.js";
@@ -32,102 +31,10 @@ import { SOURCE_SPEC, addRow, buildRows, collectRows, normalizeSources } from ".
 import { melding, bekreft, setupModal, modalOpen, sporTekst } from "../ui/ui-modal.js";
 
 // ----------------------------------------------------------------------------
-//  Tiår- og sjangerbeskrivelser (enkeltmodaler)
+//  Sjangerbeskrivelser (enkeltmodaler)
 // ----------------------------------------------------------------------------
-
-let teacherContextMode = "society";
-
-// Delt render for lærer-tiårsmodalen (tekst + tidslinjer + les-mer + kilder-
-// visning). Brukt av openSingleDecadeModal OG etter lagring, så visningen ikke
-// blir stående med utdaterte les-mer-knapper/kilder etter at læreren har lagret.
-function renderDecadeSingleSections(decadeId, desc, isSociety) {
-  renderDecadeSections(
-    {
-      societyEl: $("#ds-society-text"), techEl: $("#ds-tech-text"),
-      techTl: $("#ds-tech-timeline"),
-    },
-    desc, decadeId, state.techItems,
-    {
-      isSociety,
-      onTechClick: (t) => ctx.explore.openTechDetail(t),
-    }
-  );
-  const kilderEl = $("#ds-kilder-view");
-  if (kilderEl) kilderEl.innerHTML = buildKilderList(desc.kilder, "Kilder");
-}
-
-export function openSingleDecadeModal(decadeId, mode) {
-  if (mode) teacherContextMode = mode;
-  const d = Number(decadeId);
-  const desc = state.decadeDescs[String(d)] || {};
-  const modal = $("#modal-decade-single");
-  const isSociety = teacherContextMode === "society";
-  $("#decade-single-title").textContent = isSociety ? "Samfunn" : "Teknologi";
-  const heading = $("#ds-decade");
-  if (heading) heading.textContent = `${d}-tallet`;
-
-  // Teknologi har en ekstra inngang til alle innovasjonskortene. Læreren får
-  // samme kortliste som studentene (openTeknologi), og «Rediger kort» inne i
-  // den fører videre til admin-lista.
-  const extra = $("#ds-extra");
-  if (extra) {
-    if (isSociety) {
-      extra.innerHTML = "";
-    } else {
-      extra.innerHTML = `<button class="btn ghost" id="ds-btn-innovasjon" style="width:100%;margin:0 0 12px">Vis teknologi-kort</button>`;
-      extra.querySelector("#ds-btn-innovasjon").addEventListener("click", () => ctx.explore.openTeknologi());
-    }
-  }
-
-  // Samme tidslinje-stripe som studentvisningen. Bytte av tiår i redigerings-
-  // modus varsler først — ulagrede endringer forkastes ved re-render.
-  renderDecadeRibbon($("#ds-ribbon"), d, async (y) => {
-    const editing = $("#ds-edit").style.display !== "none";
-    if (editing && !(await bekreft("Endringer som ikke er lagret, går tapt.", { tittel: "Bytte tiår?", ja: "Bytt tiår", farlig: true }))) return;
-    openSingleDecadeModal(y, teacherContextMode);
-  });
-
-  // Sjekk + Rediger som ikonknapper (samme rad som alle andre kort). Samfunn og
-  // teknologi sjekkes hver for seg (teacherChecks.decades / decadesTech) — samme
-  // to kort som på Skrivebordet — så knappen følger hvilket aspekt som vises.
-  // Notater (v6.58): ÉN nøkkel («tiår:1950») for begge aspektene — samfunn og
-  // teknologi er samme tiår, bare to faner i samme kort.
-  const checkField = isSociety ? "decades" : "decadesTech";
-  const actions = $("#ds-actions");
-  if (actions) {
-    actions.innerHTML = teacherActionRow({
-      checked: (state.teacherChecks?.[checkField] || []).includes(String(d)),
-      edit: true, del: false, notat: true,
-    });
-    wireTeacherRow(actions, {
-      onCheck: (on) => setContentCheck(checkField, String(d), on),
-      onEdit: () => {
-        avbrytLukkEtter("modal-decade-single");
-        $("#ds-view").style.display = "none";
-        $("#ds-edit").style.display = "";
-      },
-      onNotat: () => redigerNotatForKort("tiår", String(d), `${d}-tallet`),
-    });
-  }
-
-  $("#ds-society-section").style.display = isSociety ? "" : "none";
-  $("#ds-tech-section").style.display = isSociety ? "none" : "";
-  renderDecadeSingleSections(d, desc, isSociety);
-
-  $("#ds-society").value = desc.society || "";
-  $("#ds-tech").value = desc.tech || "";
-  buildDecadeKilderRows(desc.kilder || []);
-  $("#ds-msg").textContent = "";
-
-  $("#ds-edit-society").style.display = isSociety ? "" : "none";
-  $("#ds-edit-tech").style.display = isSociety ? "none" : "";
-
-  $("#ds-view").style.display = "";
-  $("#ds-edit").style.display = "none";
-
-  modal.dataset.decade = decadeId;
-  openAdminModal("modal-decade-single");
-}
+//  (Tiårsmodalen, samfunn og teknologi per tiår, ble tatt ut i fase 2 sammen
+//  med tiårskortene.)
 
 // Main-nivået går via genealogy.js sin resolveMainDesc — SAMME funksjon som
 // sjanger-popupen viser fra, så editoren aldri åpner tom over en tekst som
@@ -144,9 +51,9 @@ export function openSingleSubgenreModal(subgenreId, level = "sub") {
   $("#ss-desc").value = resolved.description || "";
   $("#ss-msg").textContent = "";
   buildKilderRows($("#ss-kilder-rows"), resolved.kilder);
-  // Epoke-feltene gjelder bare tre-sjangre. Hint-linja viser hvilke tiår
-  // varmekartet faktisk har tall for, så læreren ser epoken og pensumdekningen
-  // side om side når de spriker (de måler ulike ting — se Oppskrift-fila).
+  // Epoke-feltene gjelder bare tre-sjangre. Hint-linja viser tidsrommet
+  // noden står i i treet, så læreren ser årstallene og raden side om side
+  // når de spriker.
   const epokeWrap = $("#ss-epoke-wrap");
   if (epokeWrap) {
     const isMain = level === "main";
@@ -211,19 +118,16 @@ function collectUsikreRows() {
     .filter(Boolean);
 }
 
-// Sammenligningsgrunnlaget under epoke-feltene: tiårsspennet varmekartet har
-// verdier i. Fram til v4.64 viste linja også «Treets era-tekst: …», fordi
-// friteksten lå på treets node og altså i en HELT annen editor. Nå står den i
-// skjemaet rett over, og krysshenvisningen er unødvendig.
+// Sammenligningsgrunnlaget under epoke-feltene: tidsrommet noden står i i
+// treet (fase 2; før var det tiårsspennet varmekartet hadde verdier i).
+// Årstallene her og raden i treet måler ikke det samme, men spriker de mye,
+// står epoken trolig på feil rad.
 function epokeHint(genreId) {
   const node = GENEALOGY.find((n) => n.l === genreId || n.f === genreId);
-  const deler = [];
-  const vals = heatRow(getHeatData(), node?.l || genreId);
-  const varme = vals.map((v, i) => (v > 0 ? DECADES[i] : null)).filter((d) => d !== null);
-  deler.push(varme.length
-    ? `Varmekartet har artister ${varme[0]}–${varme[varme.length - 1]}`
-    : "Varmekartet har ingen artister på denne sjangeren");
-  return deler.join(" · ");
+  const rom = node ? TIDSROM[Math.floor(Number(node.r) || 0)] : null;
+  if (!rom) return "Epoken står på en rad uten tidsrom i treet.";
+  const spenn = visSpenn(rom.fra, rom.til, { apen: "i dag" });
+  return `Står i tidsrommet ${rom.navn ? `«${rom.navn}», ` : ""}${spenn} i treet. År før Kristus skrives med minus foran (-427).`;
 }
 
 // Rediger beskrivelsen for én kobling (strek i slektstreet). Doc-ID i
@@ -268,10 +172,6 @@ export function setupEdgeSingleSave() {
   });
 }
 
-function buildDecadeKilderRows(kilder) {
-  buildKilderRows($("#ds-kilder-rows"), kilder);
-}
-
 // Kilder-radene bruker den delte row-editor.js (samme SOURCE_SPEC som student-
 // og lærer-artistskjemaet). Tar HELE kildeobjektet: en variant som bare bar
 // text/url strøk kategori, forfatter og årstall fra samtlige kilder ved neste
@@ -282,8 +182,8 @@ function addKilderRow(wrap, kilde = {}) {
 }
 
 // Bygg kilderadene fra en lagret liste: normaliserer (strenger/gamle former)
-// og garanterer minst én tom rad. Samme rute for sjanger-, koblings- og
-// tiårseditoren, så ingen av dem kan miste et felt de andre bevarer.
+// og garanterer minst én tom rad. Samme rute for sjanger- og
+// koblingseditoren, så ingen av dem kan miste et felt den andre bevarer.
 function buildKilderRows(wrap, kilder) {
   if (!wrap) return;
   wrap.innerHTML = "";
@@ -321,11 +221,13 @@ export function setupSubgenreSingleSave() {
     // ikke 0 — null lar sjangerkortet falle tilbake på fritekst-epoken.
     const data = { description, kilder, usikre: collectUsikreRows() };
     if (level === "main") {
+      // Samme grenser som resten av appen (aarstall.js); år før Kristus er
+      // negative tall (fase 2).
       const num = (sel) => {
         const raw = $(sel).value.trim();
         if (!raw) return null;
         const v = parseInt(raw, 10);
-        return Number.isInteger(v) && v >= 1600 && v <= 2100 ? v : null;
+        return erAar(v) ? v : null;
       };
       const from = num("#ss-active-from"), to = num("#ss-active-to");
       if (from !== null && to !== null && to < from) {
@@ -380,40 +282,6 @@ async function gaNyttNavnUndersjanger(fra) {
   } catch (err) {
     melding(`Navnebyttet ble ikke gjort (${err?.message || err}). Ingenting er endret, siden alt skrives samlet.`);
   }
-}
-
-export function setupDecadeSingleSave() {
-  // Rediger-knappen bor i #ds-actions-raden og kobles per åpning
-  // (openSingleDecadeModal) — ingen statisk knapp lenger.
-  const addKilderBtn = $("#ds-add-kilder");
-  if (addKilderBtn) addKilderBtn.addEventListener("click", () => addKilderRow($("#ds-kilder-rows")));
-
-  $("#ds-save").addEventListener("click", async () => {
-    const modal = $("#modal-decade-single");
-    const decadeId = modal.dataset.decade;
-    const society = $("#ds-society").value.trim();
-    const tech = $("#ds-tech").value.trim();
-    const kilder = collectKilderRows($("#ds-kilder-rows"));
-    const msg = $("#ds-msg");
-    try {
-      await saveDecadeDesc(decadeId, { society, tech, kilder });
-      msg.textContent = "Lagret ✓";
-      msg.className = "form-msg ok";
-
-      // Re-render fra de nettopp lagrede verdiene (også les-mer-knapper og
-      // kilder — ikke bare tekst/tidslinjer som før, som ga stale visning).
-      renderDecadeSingleSections(decadeId, { society, tech, kilder }, teacherContextMode === "society");
-
-      lukkEtter("modal-decade-single", 800, () => {
-        $("#ds-view").style.display = "";
-        $("#ds-edit").style.display = "none";
-        msg.textContent = "";
-      });
-    } catch (err) {
-      msg.textContent = "Feil: " + err.message;
-      msg.className = "form-msg error";
-    }
-  });
 }
 
 // ----------------------------------------------------------------------------
@@ -549,10 +417,6 @@ function fillTechForm(t, preset = null) {
   document.getElementById("tech-invented").value = t ? t.inventedYear || "" : "";
   document.getElementById("tech-adopted").value = t ? t.adoptedYear || "" : "";
   document.getElementById("tech-adopted-label").value = t ? t.adoptedLabel || "" : "";
-  // Tiåret er et nedtrekk fra v4.98 — fyll FØR verdien settes, ellers finnes
-  // ikke opsjonen ennå og feltet står tomt (samme rekkefølge som instrument).
-  fillSelect(document.getElementById("tech-decade"), DECADE_OPTIONS, { placeholder: "Velg tiår …" });
-  document.getElementById("tech-decade").value = t ? t.decade || "" : "";
   document.getElementById("tech-desc").value = t ? t.description || "" : "";
   fyllPunktfelt(document.getElementById("tech-punkter"), t?.punkter);
   document.getElementById("tech-image-url").value = t ? t.imageUrl || "" : "";
@@ -595,7 +459,6 @@ export function setupTechAdmin() {
       inventedYear: parseInt(document.getElementById("tech-invented").value) || null,
       adoptedYear: parseInt(document.getElementById("tech-adopted").value) || null,
       adoptedLabel: document.getElementById("tech-adopted-label").value.trim(),
-      decade: document.getElementById("tech-decade").value.trim(),
       description: document.getElementById("tech-desc").value.trim(),
       imageUrl: document.getElementById("tech-image-url").value.trim(),
       imageCredit: document.getElementById("tech-image-credit").value.trim(),
@@ -763,7 +626,6 @@ function referanseRader() {
 // content-snapshotet har landet, fylles skjemaet fra en tom state, og en
 // lagring ERSTATTER dokumentet med det tomme skjemaet. pageFor kan dessuten
 // ikke skille «laster» fra «finnes ikke», så statuslinja lyver også.
-// Varmekartet har nøyaktig denne vakten av nøyaktig denne grunnen.
 function innholdKlart() {
   if (state.contentLoaded) return true;
   melding("Innholdet laster fortsatt. Vent et øyeblikk og prøv igjen, ellers kan du komme til å overskrive tekst som ikke har rukket å vises.");

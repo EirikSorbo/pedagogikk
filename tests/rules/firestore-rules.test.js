@@ -174,11 +174,18 @@ test("lærer kan endre alt; innlogget ikke-lærer (Google) kan ikke", async () =
   await assertFails(otherUserDb().collection("artists").doc("a4").update({ status: "removed" }));
 });
 
-test("kun lærer kan skrive config/decades/genreDescriptions/podcasts/content", async () => {
-  for (const col of ["config", "decades", "genreDescriptions", "podcasts", "content"]) {
+test("kun lærer kan skrive config/genreDescriptions/podcasts/content", async () => {
+  for (const col of ["config", "genreDescriptions", "podcasts", "content"]) {
     await assertFails(anonDb().collection(col).doc("x").set({ a: 1 }));
     await assertSucceeds(teacherDb().collection(col).doc("x").set({ a: 1 }));
   }
+});
+
+// Tiårsbeskrivelsene ble tatt ut i fase 2 (pedagogikkappen): samlingen har
+// ingen regel lenger, og er dermed stengt også for læreren.
+test("decades er stengt for alle (fase 2)", async () => {
+  await assertFails(teacherDb().collection("decades").doc("1950").set({ society: "x" }));
+  await assertFails(anonDb().collection("decades").doc("1950").get());
 });
 
 test("tech-forslag: anonym kan opprette pending, ikke aktivt; uinnlogget avvises", async () => {
@@ -229,13 +236,14 @@ test("pendingEdits: alle entityTyper kan opprettes slik editoren skriver dem", a
     entityType: "instrument", entityId: "instrument-gitar", entityName: "Gitarens utvikling",
     proposedFields: { body: "x".repeat(19000) }, proposedBy: "Anonym",
   }));
-  await assertSucceeds(db.collection("pendingEdits").add({
+  // Tiårsforslagene ble tatt ut i fase 2: typen og feltene avvises.
+  await assertFails(db.collection("pendingEdits").add({
     entityType: "decade-society", entityId: "1950", entityName: "1950-tallet — samfunn",
-    proposedFields: { society: "x".repeat(19000) }, proposedBy: "Anonym",
+    proposedFields: { society: "Ny tekst" }, proposedBy: "Anonym",
   }));
-  await assertSucceeds(db.collection("pendingEdits").add({
-    entityType: "decade-tech", entityId: "1950", entityName: "1950-tallet — teknologi",
-    proposedFields: { tech: "Ny tekst" }, proposedBy: "Anonym",
+  await assertFails(db.collection("pendingEdits").add({
+    entityType: "tech", entityId: "t1", entityName: "Mikrofon",
+    proposedFields: { decade: "1930" }, proposedBy: "Anonym",
   }));
 });
 
@@ -246,10 +254,6 @@ test("pendingEdits: ukjent proposedFields-nøkkel og oppblåste felter avvises",
   await assertFails(db.collection("pendingEdits").add({ ...base, proposedFields: { smuglet: "x".repeat(100) } }));
   await assertFails(db.collection("pendingEdits").add({ ...base, proposedFields: { description: "x".repeat(5001) } }));
   await assertFails(db.collection("pendingEdits").add({ ...base, proposedFields: { kilder: Array.from({ length: 51 }, () => ({ text: "k" })) } }));
-  await assertFails(db.collection("pendingEdits").add({
-    entityType: "decade-society", entityId: "1950", proposedBy: "Anonym",
-    proposedFields: { society: "x".repeat(20001) },
-  }));
   await assertFails(db.collection("pendingEdits").add({
     entityType: "instrument", entityId: "instrument-gitar", proposedBy: "Anonym",
     proposedFields: { body: "x".repeat(20001) },

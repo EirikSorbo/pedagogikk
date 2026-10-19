@@ -10,14 +10,13 @@
 //    sjangerbeskrivelser   teacherChecks.genres (treets sjangre) og .subgenres
 //    sjangerhistoriene     teacherChecks.metaGenres
 //    koblingstekstene      teacherChecks.edges
-//    tiårstekstene         teacherChecks.decades (samfunn) og .decadesTech
 //    sidene                teacherChecks.pages: Røtter, Om historie og
 //                          instrumenttekstene
 //    plateselskapene       teacherChecks.plateselskaper
 //  Utenfor regelen med vilje: podkastene og «Fra timene» (læreren publiserer
 //  dem selv), skriveveiledningen (hjelp til skjemaet, ikke pensum),
 //  bruksveiledningen (v6.95: delene hukes av hver for seg),
-//  varmekartet og sjangertreet (tall og struktur), og det som bygges av
+//  sjangertreet med tidsrommene (struktur), og det som bygges av
 //  innholdet over (tidslinja, slektstreet, sjangerperiodene, referansene).
 //
 //  Lærersiden ser alltid alt (settSjekketLaerer). Lerretet følger studentene,

@@ -16,8 +16,8 @@ import { parseVisVerdi } from "../felles/vis-lenke.js";
 import { finnSelskapId } from "../felles/plateselskaper.js";
 
 // Flatene som styres av detaljnivået, med seksjonene i visningsrekkefølge.
-// Navnene vises i tannhjul-panelet. Flater som ikke står her (varmekart,
-// tidslinje, sider …) viser alltid alt.
+// Navnene vises i tannhjul-panelet. Flater som ikke står her (tidslinje,
+// sider …) viser alltid alt.
 export const FLATER = {
   artist: [
     { id: "bilde", navn: "Bilde" },
@@ -31,7 +31,6 @@ export const FLATER = {
     { id: "beslektede", navn: "Beslektede artister" },
   ],
   sjanger: [
-    { id: "stripe", navn: "Varmestripe" },
     { id: "era", navn: "Epoke" },
     { id: "punkter", navn: "Oppsummering i punkter" },
     { id: "beskrivelse", navn: "Beskrivelse" },
@@ -47,15 +46,10 @@ export const FLATER = {
     // v6.07 (K6): artistene som nevner innovasjonen.
     { id: "artister", navn: "Artister som nevner den" },
   ],
-  // Tiårsvinduet med faner (v6.07, S1): musikkfanens sjangre og artister, og
-  // teknologifanens liste over innovasjonskortene i høyrespalta.
-  tiår: [
-    { id: "tekst", navn: "Teksten" },
-    { id: "tidslinje", navn: "Tidslinjen" },
-    { id: "musikk", navn: "Musikken (sjangre, artister, lytting)" },
-  ],
+  // Tiårsvinduet og varmestripene er tatt ut (fase 2). Over historien står
+  // epokene i retningen som bobler (familie).
   historie: [
-    { id: "striper", navn: "Varmestriper" },
+    { id: "familie", navn: "Epokene i retningen" },
     { id: "tekst", navn: "Historien" },
   ],
 };
@@ -83,21 +77,16 @@ export const NIVAA_SEKT = {
   // Artistene i sjangeren (v5.89, brukerønske 2026-09-29) står som navneliste
   // til høyre fra nivå 2, også på nivå 3; punktene blir stående til venstre.
   sjanger: {
-    1: ["stripe", "era"],
-    2: ["stripe", "era", "punkter", "beskrivelse", "relasjoner", "artister"],
+    1: ["era"],
+    2: ["era", "punkter", "beskrivelse", "relasjoner", "artister"],
   },
   tech: {
     1: ["bilde", "fakta"],
     2: ["bilde", "fakta", "punkter", "beskrivelse"],
   },
-  // Tiårstekstene ER poengene man snakker til, så de står fra nivå 1.
-  tiår: {
-    1: ["tekst", "tidslinje", "musikk"],
-    2: ["tekst", "tidslinje", "musikk"],
-  },
   historie: {
-    1: ["striper"],
-    2: ["striper", "tekst"],
+    1: ["familie"],
+    2: ["familie", "tekst"],
   },
 };
 
@@ -232,7 +221,7 @@ export function formatTid(sek) {
 // ----------------------------------------------------------------------------
 //  Kjøreplaner (fase 4, v5.25): forberedte stopp læreren blar gjennom med
 //  piltaster eller klikker. Lagres samlet i ETT Firestore-dokument
-//  (content/presentasjoner, husets varmekart-mønster): { planer: { <id>:
+//  (content/presentasjoner): { planer: { <id>:
 //  { tittel, laget, stopp: [{ vis, nivaa?, unntak? }] } } }. `vis` er samme
 //  verdi som ?vis=-lenkene (vis-lenke.js), så et stopp ER en dyp lenke.
 // ----------------------------------------------------------------------------
@@ -463,7 +452,6 @@ export const OVERSIKT_KATEGORIER = [
   { id: "artister", navn: "Artister" },
   { id: "lytteeksempler", navn: "Lytteeksempler" },
   { id: "sjangre", navn: "Sjangre" },
-  { id: "tiaar", navn: "Tiår" },
   { id: "teknologi", navn: "Teknologi" },
   { id: "instrumenter", navn: "Instrumenter" },
   { id: "oversikter", navn: "Oversikter" },
@@ -513,16 +501,6 @@ function oversiktPunkt(m, oppslag) {
       const navn = (id) => oppslag.nodeNavn?.(id) || id || "?";
       return { kat: "sjangre", tekst: `${navn(fra)} → ${navn(til)}` };
     }
-    case "tiår": {
-      // Fanene (v6.07): teknologi, samfunn, musikk. Uten modus = samfunn.
-      const fane = m.modus === "tech" ? "teknologi" : m.modus === "musikk" ? "musikk" : "samfunn";
-      const aar = Number(m.id);
-      return {
-        kat: "tiaar", tekst: `${m.id}-tallet`, detalj: fane,
-        // Tiårene i tidsrekkefølge, og fanene i fanerekkefølgen innenfor tiåret.
-        sort: (Number.isFinite(aar) ? aar : 9999) * 3 + ({ teknologi: 0, samfunn: 1, musikk: 2 })[fane],
-      };
-    }
     case "tech": {
       const t = (oppslag.tech || []).find((x) => x.id === m.id);
       return t ? { kat: "teknologi", tekst: t.name } : null;
@@ -531,8 +509,6 @@ function oversiktPunkt(m, oppslag) {
       return { kat: "teknologi", tekst: m.id ? `Teknologi: ${m.id}` : "Teknologioversikten" };
     case "instrument":
       return { kat: "instrumenter", tekst: m.id || "Instrumentene" };
-    case "varmekart":
-      return { kat: "oversikter", tekst: m.id ? `Varmekartet: ${m.id}` : "Varmekartet" };
     case "side":
       return { kat: "oversikter", tekst: SIDE_NAVN[m.id] || "Slik bruker du appen" };
     // Slides (v7.06) er lærerens private sider og står aldri på oversikten
@@ -551,7 +527,7 @@ function oversiktPunkt(m, oppslag) {
 // { artister, tech, nodeNavn(id) }. Hvert mål står én gang (samme kort i
 // samme modus to ganger i planen er ett punkt), og `stopp` er indeksen til
 // FØRSTE forekomst i planen, så et klikk kan hoppe dit. Innenfor en kategori
-// sorteres alfabetisk (tiårene i tidsrekkefølge). Tomme kategorier utelates.
+// sorteres alfabetisk. Tomme kategorier utelates.
 export function planOversikt(stopp, oppslag = {}) {
   const grupper = new Map(OVERSIKT_KATEGORIER.map((k) => [k.id, []]));
   // Nøkkel → punktet: et mål som står flere ganger, er ett punkt, men husker
@@ -561,8 +537,7 @@ export function planOversikt(stopp, oppslag = {}) {
   (Array.isArray(stopp) ? stopp : []).forEach((s, i) => {
     const m = parseVisVerdi(s?.vis);
     if (!m) return;
-    // Tiårets samfunnsvisning har to skrivemåter (uten modus og «society»).
-    const modus = m.hva === "tiår" ? (["tech", "musikk"].includes(m.modus) ? m.modus : "") : (m.modus || "");
+    const modus = m.modus || "";
     const nokkel = [m.hva, m.id || "", modus, m.ekstra || ""].join(":");
     if (sett.has(nokkel)) { sett.get(nokkel).stoppene.push(i); return; }
     const p = oversiktPunkt(m, oppslag);
@@ -903,15 +878,15 @@ export function artistPlassering(sekt) {
 }
 
 // ----------------------------------------------------------------------------
-//  Sjangerkortets lerret (v5.89, brukerønske 2026-09-29): varmestripa øverst
+//  Sjangerkortets lerret (v5.89, brukerønske 2026-09-29): epokelinja øverst
 //  over hele bredden, artistene i sjangeren (navnelista) i en egen spalte til
 //  høyre, og resten (punkter eller beskrivelse, «Hør etter», slektskap) til
-//  venstre. Epokelinja står under stripa som bildetekst (v5.91), så punktene
-//  og «Artister»-overskriften begynner på samme linje. DOM-flyttingen bor i
+//  venstre, så punktene og «Artister»-overskriften begynner på samme linje.
+//  (Varmestripa sto over epokelinja til fase 2.) DOM-flyttingen bor i
 //  js/visning/pres-sjanger.js.
 // ----------------------------------------------------------------------------
 export function sjangerPlassering(sekt) {
-  if (sekt === "stripe" || sekt === "era") return "topp";
+  if (sekt === "era") return "topp";
   if (sekt === "artister") return "hoyre";
   return "venstre";
 }
@@ -954,12 +929,12 @@ export const LERRET_KANAL = "pensum-lerret";
 // studentenes fornavn, kjøreplan-editoren og tastoversikten er styring.
 // Dialoger uten id (spørsmål og bekreftelser) holdes også utenfor. Fra v7.01
 // også innstillingene (de viser lærerkontoen) og lærerhåndboken.
-export const LERRET_PRIVAT = new Set(["modal-timeliste", "modal-pres-taster", "modal-visning", "modal-vk-edit", "modal-proposal", "modal-settings", "modal-laerer-handbok"]);
+export const LERRET_PRIVAT = new Set(["modal-timeliste", "modal-pres-taster", "modal-visning", "modal-proposal", "modal-settings", "modal-laerer-handbok"]);
 
-// Notatene følger kortet: artist, sjanger, innovasjon og tiår. Nøkkelen er
-// dokument-id-en i notater-samlingen. Tiåret har ett notat for begge fanene,
-// og id-en kodes, så en skråstrek i et sjangernavn ikke lager en understi.
-export const NOTAT_TYPER = ["artist", "sjanger", "tech", "tiår"];
+// Notatene følger kortet: artist, sjanger og innovasjon. Nøkkelen er
+// dokument-id-en i notater-samlingen, og id-en kodes, så en skråstrek i et
+// sjangernavn ikke lager en understi. (Tiårskortet hadde notat til fase 2.)
+export const NOTAT_TYPER = ["artist", "sjanger", "tech"];
 
 export function notatNokkel(vis) {
   const m = parseVisVerdi(vis);

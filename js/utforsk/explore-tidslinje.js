@@ -8,8 +8,10 @@
 import { escapeHtml, safeUrl } from "../felles/util.js";
 import { modalOpen } from "../ui/ui-modal.js";
 import { isVisible } from "../felles/limits.js";
-import { META_GENRE_ORDER, META_GENRE_COLOR, MAIN_GENRE_INFO, FAMILIES, canonMainGenre } from "../sjangre/genre-model.js";
+import { META_GENRE_ORDER, META_GENRE_COLOR, MAIN_GENRE_INFO, FAMILIES, TIDSROM, canonMainGenre } from "../sjangre/genre-model.js";
 import { resolveSpan, packLanes, timelineBounds } from "../felles/timeline-lanes.js";
+import { aksePos, tidsromGrenser } from "../felles/tidsakse.js";
+import { visAar, visSpenn } from "../felles/aarstall.js";
 import { imgTag } from "../ui/ui-helpers.js";
 import { opts, getState } from "../data/app-state.js";
 import { groupColor, metaGroupHeadHtml, wireMetaAccordion, metaOversiktLenkeHtml } from "../ui/ui-metagruppe.js";
@@ -18,7 +20,8 @@ import { groupColor, metaGroupHeadHtml, wireMetaAccordion, metaOversiktLenkeHtml
 //  Artisttidslinje: når var artistene aktive? Pakket bane-tidslinje gruppert
 //  etter artistens eget metasjangerfelt (S5, v6.05) og deretter per
 //  tre-sjanger, i metasjanger-akkordeon (samme mønster og fargespråk som
-//  varmekartet). Hver sjangerseksjon har i tillegg sin egen trekant og starter
+//  sjangerperiodene). Aksen er tidsrommene i treet (fase 2): hvert like
+//  bredt, som radene i treet. Hver sjangerseksjon har i tillegg sin egen trekant og starter
 //  lukket, så en åpen metagruppe først viser en ryddig sjangerliste med antall.
 //  `focus` er valgfritt: { genre } åpner den metagruppen + seksjonen og
 //  scroller dit; { artistId } åpner artistens gruppe/seksjoner og uthever
@@ -147,17 +150,28 @@ export function openTidslinje(focus = {}) {
       (a === UTEN) - (b === UTEN) || earliest(a) - earliest(b) || a.localeCompare(b, "no"));
   };
 
-  // Felles tidsakse over alt innhold, i hele tiår.
-  const allSpans = [...groups.values()].flatMap((secs) => [...secs.values()].flat()).map((i) => i.span);
-  const { y0, y1 } = timelineBounds(allSpans, nowYear);
-  const pctOf = (y) => ((y - y0) / (y1 - y0)) * 100;
-  const decades = [];
-  for (let d = y0; d <= y1 - 10; d += 10) decades.push(d);
+  // Felles tidsakse over alt innhold: tidsrommene i treet (fase 2), med et
+  // merke ved starten av hvert. Uten tidsrom (et tre fra før fase 2) er aksen
+  // lineær i hele tiår, som før.
+  const grenser = tidsromGrenser(TIDSROM, nowYear);
+  let pctOf, merker;
+  if (grenser.length) {
+    pctOf = (y) => aksePos(TIDSROM, y, nowYear) * 100;
+    merker = grenser.map((g) => g.start);
+  } else {
+    const allSpans = [...groups.values()].flatMap((secs) => [...secs.values()].flat()).map((i) => i.span);
+    const { y0, y1 } = timelineBounds(allSpans, nowYear);
+    pctOf = (y) => ((y - y0) / (y1 - y0)) * 100;
+    merker = [];
+    for (let d = y0; d <= y1 - 10; d += 10) merker.push(d);
+  }
 
-  const gridHtml = decades.map((d) =>
+  const gridHtml = merker.map((d) =>
     `<div style="position:absolute;top:0;bottom:0;left:${pctOf(d).toFixed(2)}%;width:1px;background:var(--line)"></div>`).join("");
-  const axisHtml = `<div style="position:relative;height:16px;margin-bottom:4px">` + decades.map((d) =>
-    `<span style="position:absolute;left:${pctOf(d).toFixed(2)}%;font-size:0.68rem;color:var(--muted);transform:translateX(-3px)">${d}</span>`).join("") + `</div>`;
+  const axisHtml = `<div style="position:relative;height:16px;margin-bottom:4px">` + merker.map((d) =>
+    // Det første årstallet står i venstre kant og ville blitt klippet av
+    // rullefeltet om det ble flyttet til venstre som de andre.
+    `<span style="position:absolute;left:${pctOf(d).toFixed(2)}%;font-size:0.68rem;color:var(--muted);transform:translateX(${pctOf(d) > 0 ? "-3px" : "0"});white-space:nowrap">${escapeHtml(visAar(d))}</span>`).join("") + `</div>`;
 
   // Fokus: hvilken metagruppe skal stå åpen? (standard: den første). En
   // sjanger åpner sin egen metasjanger når den har en seksjon der, ellers den
@@ -174,7 +188,8 @@ export function openTidslinje(focus = {}) {
     if (a && groups.has(a.metaGenre || "Andre")) focusMeta = a.metaGenre || "Andre";
   }
 
-  let html = `<div style="overflow-x:auto"><div style="min-width:720px">` + axisHtml;
+  // Bredere med tidsrom: seksten årstall som «800 f.Kr.» trenger plassen.
+  let html = `<div style="overflow-x:auto"><div style="min-width:${grenser.length > 12 ? 960 : 720}px">` + axisHtml;
   let groupIdx = 0;
   for (const meta of metaOrder) {
     const secs = groups.get(meta);
@@ -197,7 +212,10 @@ export function openTidslinje(focus = {}) {
       const label = isUten ? "Uten sjanger i treet" : key;
       const rowColor = isUten ? FAMILIES.gray?.stroke || "#9bada1" : (MAIN_GENRE_INFO[key]?.color || gColor);
       const secItems = secs.get(key);
-      const lanes = packLanes(secItems);
+      // Banene pakkes i AKSENS enhet (prosent), ikke i år: på tidsromsaksen er
+      // et år i antikken mye smalere enn et år i dag. 2 % luft og minst 5 %
+      // bredde (navnet) tilsvarer de 3 og 6 årene på den gamle tiårsaksen.
+      const lanes = packLanes(secItems.map((i) => ({ ...i, aar: i.span, span: { start: pctOf(i.span.start), end: pctOf(i.span.end) } })), { gap: 2, minSpan: 5 });
       const secCount = new Set(secItems.map((i) => i.id)).size;
       // Seksjonene starter lukket; fokus åpner den relevante (sjanger-inngang
       // treffer én seksjon, artist-inngang alle seksjonene artisten står i).
@@ -214,11 +232,11 @@ export function openTidslinje(focus = {}) {
       html += `<div style="position:relative;height:${lanes.length * 25}px">${gridHtml}`;
       lanes.forEach((lane, li) => {
         for (const it of lane) {
-          const left = pctOf(it.span.start);
-          const width = Math.max(pctOf(it.visualEnd) - left, 1.2);
-          const openEnd = it.span.open;
+          const left = it.span.start;
+          const width = Math.max(it.visualEnd - left, 1.2);
+          const openEnd = it.aar.open;
           const multi = (sectionsPerArtist.get(it.id) || 1) > 1;
-          const yearsTxt = `${it.span.start}${openEnd ? " → pågår / sluttår ikke satt" : "–" + it.span.end}`;
+          const yearsTxt = openEnd ? `${visAar(it.aar.start)} → pågår / sluttår ikke satt` : visSpenn(it.aar.start, it.aar.end);
           // aria-label i stedet for title: hover-kortet (bilde + navn + periode)
           // tegnes selv, og nettleserens egen title-boble ville lagt seg oppå.
           // Perioden bæres videre i data-years, så kortet slipper å regne den ut på nytt.

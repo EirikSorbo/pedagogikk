@@ -3,8 +3,8 @@
 // ----------------------------------------------------------------------------
 //  To deler: innboksen (nye artistforslag + endringsforslag → eksisterende
 //  flater) og sjekk-fremdrift per innholdskategori (artistkort, sjangre,
-//  undersjangre, sjangerhistorier, innovasjonskort, tiår (samfunn), tiår
-//  (teknologi), sjangerkoblinger, og fra v6.89 sidene og plateselskapene) —
+//  undersjangre, sjangerhistorier, innovasjonskort, sjangerkoblinger, og fra
+//  v6.89 sidene og plateselskapene) —
 //  x/y sjekket med utvidbar liste over de usjekkede. Artistkort sjekkes via
 //  teacherChecked på artist-dokumentet; alle andre kategorier er navnelister
 //  i config/teacherChecks (config/* er lærer-skrivbart, så ingen regelendring).
@@ -18,10 +18,10 @@ import { state, ctx, renderList, setContentCheck } from "./teacher-state.js";
 
 import { renderPendingEditsList } from "./teacher-review.js";
 import { openDetail } from "./teacher-artists.js";
-import { openSingleEdgeModal, openSingleDecadeModal } from "./teacher-content.js";
+import { openSingleEdgeModal } from "./teacher-content.js";
 import { GENEALOGY_EDGES, GENEALOGY_MAIN_GENRES, edgeKey, isMainGenre, genreNodeById } from "../sjangre/genre-model.js";
 import { storyOrder, pageFor } from "../felles/story-format.js";
-import { DECADES, isVisible, erTilModerasjon, INSTRUMENT_TIMELINE_GROUPS, INSTRUMENT_TITLE, instrumentPageId } from "../felles/limits.js";
+import { isVisible, erTilModerasjon, INSTRUMENT_TIMELINE_GROUPS, INSTRUMENT_TITLE, instrumentPageId } from "../felles/limits.js";
 import { selskaperSortert, plateselskapSideId } from "../felles/plateselskaper.js";
 import { pct } from "../ui/ui-helpers.js";
 import { escapeHtml } from "../felles/util.js";
@@ -97,16 +97,6 @@ function buildCategories() {
       key: "tech", label: "Innovasjonskort",
       items: activeTech.map((t) => ({ id: t.id, name: t.name || "(uten navn)" })),
       checkedSet: set("tech"),
-    },
-    {
-      key: "decades", label: "Tiår (samfunn)",
-      items: DECADES.map((d) => ({ id: String(d), name: `${d}-tallet` })),
-      checkedSet: set("decades"),
-    },
-    {
-      key: "decadesTech", label: "Tiår (teknologi)",
-      items: DECADES.map((d) => ({ id: String(d), name: `${d}-tallet` })),
-      checkedSet: set("decadesTech"),
     },
     {
       key: "edges", label: "Sjangerkoblinger",
@@ -350,7 +340,7 @@ function sjekketRegelHtml(v) {
     <p class="muted desk-synlighet-hint">${paa
       ? "På: studentene ser bare det du har sjekket, også på lerretet. «Vis innhold som er skjult for studentene» i visningen viser alt for økta."
       : "Av: studentene ser også det du ikke har sjekket."}
-      For sjangrene, undersjangrene og tiårene er det teksten som skjules, ikke sjangeren eller tiåret.</p>
+      For sjangrene og undersjangrene er det teksten som skjules, ikke sjangeren.</p>
     <ul class="desk-sjekket-liste">${rader}</ul>
   </div>`;
 }
@@ -505,16 +495,6 @@ function openItem(key, id) {
       if (t) ctx.explore?.openTechDetail(t);
       break;
     }
-    // Åpner lærerens tiårsmodal rett på det aktuelle tiåret (før: generell
-    // tiårsliste som ignorerte hvilken rad man klikket). Samfunn og teknologi
-    // har hver sin sjekk-liste (to faner i samme tiårskort) — åpne modalen i
-    // riktig modus.
-    case "decades":
-      openSingleDecadeModal(id, "society");
-      break;
-    case "decadesTech":
-      openSingleDecadeModal(id, "tech");
-      break;
     case "edges": {
       const [from, to] = id.split("__");
       openSingleEdgeModal(from, to);

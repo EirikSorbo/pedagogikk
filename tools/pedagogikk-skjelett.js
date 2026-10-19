@@ -59,9 +59,11 @@ export const RETNINGER = [
 ];
 
 // Tidsrommene (radene i treet). Ulik lengde med vilje: lange sprang i
-// antikken og middelalderen, kortere der det skjer mest. Fra fase 2 er dette
-// data i Firestore; før det viser treet fortsatt tiårsetiketter på radene.
-// År før Kristus er negative tall.
+// antikken og middelalderen, kortere der det skjer mest. Fra fase 2 er de
+// data i treet (content/genealogy.tidsrom, se genre-model.js): importfila
+// tar dem med, og læreren endrer dem videre under «Tidsrom» i sjangertre-
+// editoren. `rad` er bare en lesehjelp her; i dokumentet er raden plassen i
+// lista. År før Kristus er negative tall.
 export const TIDSROM = [
   { rad: 0,  fra: -800, til: -150, etikett: "ca. 800–150 f.Kr.", navn: "Antikkens Hellas" },
   { rad: 1,  fra: -150, til: 500,  etikett: "150 f.Kr.–500",     navn: "Romertiden" },

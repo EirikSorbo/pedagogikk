@@ -2,18 +2,27 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   INSTRUMENTS,
-  DECADES,
-  DECADE_OPTIONS,
   GENDERS,
   isVisible,
   erTilModerasjon,
-  decadesForRange,
-  decadesForArtist,
+  tidsromForArtist,
   computeCounts,
   genderDistribution,
   filterArtists,
+  hasActiveFilters,
 } from "../../js/felles/limits.js";
+import { rebuild } from "../../js/sjangre/genre-model.js";
 import { lesJs } from "../helpers/js-filer.js";
+
+// Tidsrommene (fase 2; før tiårene 1900–2020) kommer fra treet. Testene
+// bygger modellen med fem kjente tidsrom, så filtrene og tellingene kan
+// regnes for hånd:
+//   0: 800–150 f.Kr.   1: 150 f.Kr.–1900   2: 1900–1950   3: 1950–2000   4: 2000–i dag
+const T = [
+  { fra: -800, til: -150, navn: "Antikken" }, { fra: -150, til: 1900 },
+  { fra: 1900, til: 1950 }, { fra: 1950, til: 2000 }, { fra: 2000, til: null },
+];
+rebuild({ nodes: [], tidsrom: T });
 
 const kilde = (f) => lesJs(f);
 
@@ -66,18 +75,6 @@ test("GENDERS: verdiene ligger fast, etikettene er de synlige", () => {
   assert.equal(new Set(GENDERS.map((g) => g.label)).size, GENDERS.length, "etikettene må være unike");
 });
 
-// Tiårs-nedtrekket på teknologikortene (v4.98). Verdien MÅ være en streng:
-// buildTechTimeline filtrerer med `t.decade === String(decadeId)`, så et tall
-// ville tømt tiårets tidslinje uten noen feilmelding.
-test("DECADE_OPTIONS: strengverdier, «-tallet»-etiketter, dekker alle tiårene", () => {
-  assert.equal(DECADE_OPTIONS.length, DECADES.length);
-  for (const o of DECADE_OPTIONS) {
-    assert.equal(typeof o.value, "string", `${o.label} må ha strengverdi`);
-  }
-  assert.deepEqual(DECADE_OPTIONS.map((o) => o.value), DECADES.map(String));
-  assert.deepEqual(DECADE_OPTIONS[0], { value: "1900", label: "1900-tallet" });
-});
-
 test("isVisible: aktiv og ikke lærer-skjult", () => {
   assert.equal(isVisible({ status: "active" }), true);
   assert.equal(isVisible({ status: "active", priority: 2 }), true);
@@ -86,36 +83,30 @@ test("isVisible: aktiv og ikke lærer-skjult", () => {
   assert.equal(isVisible({ status: "removed" }), false);
 });
 
-test("decadesForRange spenner alle tiår", () => {
-  assert.deepEqual(decadesForRange(1955, 1972), [1950, 1960, 1970]);
-  assert.deepEqual(decadesForRange(1955), [1950]);
-  assert.deepEqual(decadesForRange(null), []);
-  assert.deepEqual(decadesForRange(1970, 1960), []); // slutt før start → tomt
-});
-
-test("decadesForArtist: tom influenceEnd løper til i dag", () => {
-  // Kjernen i v3.95: uten sluttår skal artisten telle i ALLE tiår fra start og
-  // fram til nå — ikke bare i startåret sitt, slik decadesForRange alene gjør.
-  assert.deepEqual(
-    decadesForArtist({ influenceStart: 1997 }, 2026),
-    [1990, 2000, 2010, 2020]);
-  assert.deepEqual(
-    decadesForArtist({ influenceStart: 2012 }, 2026),
-    [2010, 2020]);
+test("tidsromForArtist: tom influenceEnd løper til i dag", () => {
+  // Kjernen i v3.95: uten sluttår skal artisten telle i ALLE tidsrom fra start
+  // og fram til nå — ikke bare i startåret sitt.
+  assert.deepEqual(tidsromForArtist({ influenceStart: 1997 }, 2026), [3, 4]);
+  assert.deepEqual(tidsromForArtist({ influenceStart: 2012 }, 2026), [4]);
 
   // Satt sluttår avslutter som før.
-  assert.deepEqual(
-    decadesForArtist({ influenceStart: 1955, influenceEnd: 1972 }, 2026),
-    [1950, 1960, 1970]);
+  assert.deepEqual(tidsromForArtist({ influenceStart: 1955, influenceEnd: 1972 }, 2026), [3]);
 
   // Dødsåret er tak når influenceEnd mangler — en avdød artist «pågår» ikke.
-  assert.deepEqual(
-    decadesForArtist({ influenceStart: 1936, deathYear: 1938 }, 2026),
-    [1930]);
+  assert.deepEqual(tidsromForArtist({ influenceStart: 1936, deathYear: 1938 }, 2026), [2]);
+
+  // Før Kristus (fase 2): Platon i Akademiet, ca. 387–347 f.Kr.
+  assert.deepEqual(tidsromForArtist({ influenceStart: -387, influenceEnd: -347 }, 2026), [0]);
+
+  // Hele år i begge ender: 1900–1950 berører også tidsrommet som begynner i
+  // 1950 (samme regel som tiårene hadde).
+  assert.deepEqual(tidsromForArtist({ influenceStart: 1900, influenceEnd: 1950 }, 2026), [2, 3]);
 
   // Uten startår kan artisten ikke plasseres i det hele tatt.
-  assert.deepEqual(decadesForArtist({}, 2026), []);
-  assert.deepEqual(decadesForArtist({ influenceEnd: 1980 }, 2026), []);
+  assert.deepEqual(tidsromForArtist({}, 2026), []);
+  assert.deepEqual(tidsromForArtist({ influenceEnd: 1980 }, 2026), []);
+  // Uten tidsrom i treet finnes det ingen akse å plassere på.
+  assert.deepEqual(tidsromForArtist({ influenceStart: 1955 }, 2026, []), []);
 });
 
 test("computeCounts teller kun synlige", () => {
@@ -127,7 +118,7 @@ test("computeCounts teller kun synlige", () => {
   const c = computeCounts(artists);
   assert.equal(c.total, 1);
   assert.equal(c.perMetaGenre.Blues, 1);
-  assert.equal(c.perDecade[1930], 1);
+  assert.equal(c.perTidsrom[2], 1, "1930 er i tidsrommet 1900–1950");
 });
 
 test("genderDistribution: ukjente kategorier telles som ukjent, ikke som ikke-binær", () => {
@@ -143,13 +134,11 @@ test("genderDistribution: ukjente kategorier telles som ukjent, ikke som ikke-bi
   assert.equal(d.total, 4);
 });
 
-test("vokabularene bor i koden: INSTRUMENTS-konstanten og DECADES", () => {
+test("vokabularet bor i koden: INSTRUMENTS-konstanten", () => {
   assert.ok(INSTRUMENTS.includes("Gitar"));
   assert.ok(INSTRUMENTS.includes("Tangenter"));
   assert.ok(INSTRUMENTS.includes("Saksofon"));
   assert.equal(new Set(INSTRUMENTS).size, INSTRUMENTS.length, "ingen duplikater");
-  assert.equal(DECADES[0], 1900);
-  assert.equal(DECADES[DECADES.length - 1], 2020);
 });
 
 test("filterArtists: sjanger matcher case-insensitivt i main/sub/meta", () => {
@@ -161,34 +150,38 @@ test("filterArtists: sjanger matcher case-insensitivt i main/sub/meta", () => {
   assert.deepEqual(filterArtists(list, { metaGenre: "Jazz" }).map((a) => a.name), ["B"]);
 });
 
-test("filterArtists: prioritet, instrument, tiår og søk", () => {
+test("filterArtists: prioritet, instrument, tidsrom og søk", () => {
   // deathYear på Robert Johnson er ikke pynt: uten den ville han (start 1936,
   // ingen influenceEnd) regnes som pågående helt fram til i dag etter v3.95, og
-  // tiårsfilteret under ville ikke lenger prøve det det skal prøve.
+  // tidsromsfilteret under ville ikke lenger prøve det det skal prøve.
   const list = [
     { name: "Robert Johnson", metaGenre: "Blues", instrument: "Gitar", priority: 3, mainGenre: [], subGenre: [], geography: "Mississippi", influenceStart: 1936, deathYear: 1938 },
     { name: "Bill Evans", metaGenre: "Jazz", instrument: "Piano", priority: 1, mainGenre: [], subGenre: [], geography: "New Jersey", influenceStart: 1958, influenceEnd: 1980 },
   ];
   assert.deepEqual(filterArtists(list, { priority: 3 }).map((a) => a.name), ["Robert Johnson"]);
   assert.deepEqual(filterArtists(list, { instrument: "Piano" }).map((a) => a.name), ["Bill Evans"]);
-  assert.deepEqual(filterArtists(list, { decade: 1950 }).map((a) => a.name), ["Bill Evans"]);
+  assert.deepEqual(filterArtists(list, { tidsrom: "3" }).map((a) => a.name), ["Bill Evans"]);
+  assert.deepEqual(filterArtists(list, { tidsrom: "2" }).map((a) => a.name), ["Robert Johnson"]);
+  // «0» er det første tidsrommet, et ekte valg, ikke «ingen filter».
+  assert.deepEqual(filterArtists(list, { tidsrom: "0" }).map((a) => a.name), []);
+  assert.equal(hasActiveFilters({ tidsrom: "0" }), true);
+  assert.equal(hasActiveFilters({ tidsrom: "" }), false);
   assert.deepEqual(filterArtists(list, { search: "mississippi" }).map((a) => a.name), ["Robert Johnson"]);
   assert.equal(filterArtists(list, {}).length, 2); // ingen filtre → alt
 });
 
-test("filterArtists: artist uten sluttår er med i alle tiår fram til nå", () => {
+test("filterArtists: artist uten sluttår er med i alle tidsrom fram til nå", () => {
   // Regresjonsvakt for v3.95. Før falt tiårsfilteret tilbake på startåret, så
   // en pågående artist var USYNLIG i alle tiår etter debuten sin.
   const list = [
-    { name: "Beyoncé", mainGenre: [], subGenre: [], influenceStart: 1997 },
-    { name: "Bessie Smith", mainGenre: [], subGenre: [], influenceStart: 1923, influenceEnd: 1933 },
+    { name: "Grethe", mainGenre: [], subGenre: [], influenceStart: 1997 },
+    { name: "Anna Sethne", mainGenre: [], subGenre: [], influenceStart: 1923, influenceEnd: 1933 },
   ];
-  const nyeTiår = [1990, 2000, 2010, 2020];
-  for (const d of nyeTiår) {
-    assert.deepEqual(filterArtists(list, { decade: d }).map((a) => a.name), ["Beyoncé"], `tiår ${d}`);
+  for (const i of ["3", "4"]) {
+    assert.deepEqual(filterArtists(list, { tidsrom: i }).map((a) => a.name), ["Grethe"], `tidsrom ${i}`);
   }
-  assert.deepEqual(filterArtists(list, { decade: 1920 }).map((a) => a.name), ["Bessie Smith"]);
-  assert.deepEqual(filterArtists(list, { decade: 1960 }).map((a) => a.name), []);
+  assert.deepEqual(filterArtists(list, { tidsrom: "2" }).map((a) => a.name), ["Anna Sethne"]);
+  assert.deepEqual(filterArtists(list, { tidsrom: "1" }).map((a) => a.name), []);
 });
 
 // --- Sjangernavn som finnes på TO nivåer -----------------------------------

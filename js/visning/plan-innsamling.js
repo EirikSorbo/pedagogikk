@@ -293,8 +293,8 @@ const spillerPlan = () => !!aktivPlanId();
 let sisteInnslag = null;
 
 // kilde: "apning" (modalOpen under opptak), "endring" (data-vis endret seg i
-// en åpen modal under opptak — læreren VALGTE noe: sjangergruppe i
-// varmekartet, instrumentfane, historie-chip), "plukk" (plussknappen).
+// en åpen modal under opptak — læreren VALGTE noe: instrumentfane,
+// historie-chip), "plukk" (plussknappen).
 function leggTil(vis, kilde) {
   if (!økt || (kilde !== "plukk" && økt.modus !== "opptak")) return;
   const siste = sisteVis(økt);
@@ -302,9 +302,9 @@ function leggTil(vis, kilde) {
   if (kilde !== "plukk" && siste === vis) return;
   // Erstatningsregelen (v5.28): et VALG rett etter en åpning av samme flate
   // presiserer stoppet i stedet for å legge til et nytt. Åpner læreren
-  // varmekartet (standard: første gruppe) og velger Country, blir stoppet
-  // «varmekart:Country» — ikke standardvisningen pluss valget. Neste valg på
-  // samme flate er derimot et nytt stopp (Blues, så Country = to poenger).
+  // historiene og velger en retning, blir stoppet «historie:<retning>» — ikke
+  // oversikten pluss valget. Neste valg på samme flate er derimot et nytt
+  // stopp (to retninger = to poenger).
   const hva = parseVisVerdi(vis)?.hva || "";
   if (kilde === "endring" && sisteInnslag && sisteInnslag.kilde === "apning"
       && sisteInnslag.hva === hva && siste === sisteInnslag.vis) {
@@ -335,8 +335,8 @@ function angreSiste() {
   endret(økt);
 }
 
-// Opptak: data-vis ENDRET seg i en åpen modal — læreren valgte noe (sjanger-
-// gruppe i varmekartet, instrumentfane, historie-chip, tiår i båndet).
+// Opptak: data-vis ENDRET seg i en åpen modal — læreren valgte noe
+// (instrumentfane, historie-chip).
 // Observatøren dekker alle flater som oppdaterer målet sitt, også framtidige.
 let visObservator = null;
 

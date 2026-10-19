@@ -26,6 +26,7 @@
 // ============================================================================
 
 import { computeColumns, LAYOUT_WIDTH } from "./genre-layout.js";
+import { visSpenn } from "../felles/aarstall.js";
 
 // --- Modelltilstanden (byttes av rebuild) -----------------------------------
 
@@ -101,10 +102,20 @@ let META_GENRES = [];
 // utakt om hvor en sjanger hører hjemme vannrett.
 let LAYOUT_X = new Map();
 
-// Tiårsaksen treet tegnes på: rad → etikett. Utledes av nodene, så en sjanger
-// på en ny rad (2020-tallet) utvider aksen av seg selv i stedet for å havne
-// utenfor et hardkodet endepunkt.
-export let DECADE_ROWS = [];
+// Tidsrommene treet tegnes på (fase 2): rad r i treet er TIDSROM[r], et
+// tidsrom av fri lengde, { fra, til, navn, etikett }. Før var radene tiår
+// regnet ut i koden (rad 1 = 1900, ti år per rad); nå er de DATA i
+// dokumentet (content/genealogy.tidsrom), og læreren endrer dem i
+// sjangertre-editoren. År før Kristus er negative tall. til = null betyr
+// «til i dag». etikett er lagret tekst («ca. 800–150 f.Kr.»), ellers
+// utledet av årstallene. js/felles/tidsakse.js gjør lista til en akse for
+// tidslinjene, stripene og filtrene.
+//
+// Lista er dataene, ikke treets dybde: står en node på en rad uten tidsrom,
+// tegnes raden uten etikett, og valideringen sier fra. RAD_ANTALL er
+// antallet rader treet trenger, så tegningen og editoren rekker begge.
+export let TIDSROM = [];
+export let RAD_ANTALL = 0;
 
 let mainGenreSet = new Set();
 let mainGenreCanon = new Map();
@@ -121,15 +132,18 @@ export function isGenreModelReady() { return ready; }
 
 // --- Avledningene ------------------------------------------------------------
 
-// Rad → tiårsetikett. Rad 0 er røttene (før innspillingenes tid), rad 1 er
-// 1900, og hver rad etter det er et tiår. Genereres så langt nodene rekker.
-function buildDecadeRows(nodes) {
-  const maxRow = nodes.reduce((m, n) => Math.max(m, Math.floor(n.r || 0)), 0);
-  const rows = ["Røtter"];
-  for (let r = 1; r <= Math.max(maxRow, 1); r++) {
-    rows.push(r === 1 ? "1900" : `${1900 + (r - 1) * 10}-t`);
-  }
-  return rows;
+// Tidsrommene slik dokumentet har dem, renset: heltall eller null for
+// årstallene, og en etikett som alltid er satt når årstallene er det.
+// Ukjente felt følger ikke med.
+export function normaliserTidsrom(raa) {
+  if (!Array.isArray(raa)) return [];
+  return raa.map((t) => {
+    const fra = Number.isInteger(t?.fra) ? t.fra : null;
+    const til = Number.isInteger(t?.til) ? t.til : null;
+    const navn = typeof t?.navn === "string" ? t.navn.trim() : "";
+    const egen = typeof t?.etikett === "string" ? t.etikett.trim() : "";
+    return { fra, til, navn, etikett: egen || visSpenn(fra, til, { apen: "i dag" }) };
+  });
 }
 
 // Bygger hele modellen fra et treobjekt: { nodes, families, metaOrderHint }.
@@ -218,7 +232,9 @@ export function rebuild(tree) {
   }));
 
   LAYOUT_X = computeColumns(GENEALOGY, META_GENRES, { width: LAYOUT_WIDTH });
-  DECADE_ROWS = buildDecadeRows(GENEALOGY);
+  TIDSROM = normaliserTidsrom(tree?.tidsrom);
+  RAD_ANTALL = Math.max(TIDSROM.length,
+    GENEALOGY.reduce((m, n) => Math.max(m, Math.floor(Number(n.r) || 0) + 1), 0));
   mainGenreSet = new Set(GENEALOGY_MAIN_GENRES.map((g) => g.toLowerCase()));
   mainGenreCanon = new Map(GENEALOGY_MAIN_GENRES.map((g) => [g.toLowerCase(), g]));
   nodeIndex = new Map(GENEALOGY.map((n) => [n.id, n]));
@@ -289,6 +305,19 @@ export function layoutX(id) {
   return Number.isFinite(v) ? v : LAYOUT_WIDTH / 2;
 }
 
+// Tidsrommene som valg i et nedtrekk (artistfiltrene). Verdien er indeksen
+// som tekst, så «0» (det første tidsrommet) er et gyldig valg og tom streng
+// betyr «alle».
+export function tidsromValg() {
+  return TIDSROM.map((t, i) => ({ value: String(i), label: t.navn ? `${t.etikett} (${t.navn})` : t.etikett }));
+}
+
+// Etiketten til rad r («1790–1850»), eller tom streng for en rad uten
+// tidsrom. Desimalrader (yOffset er lagt til) hører til raden de står i.
+export function tidsromEtikett(r) {
+  return TIDSROM[Math.floor(Number(r) || 0)]?.etikett || "";
+}
+
 // Node-oppslag på id. Bygges av rebuild, så kallere slipper å lage sin egen Map
 // på modulnivå (som ville frosset ved import-tid).
 export function genreNodeById(id) {
@@ -353,11 +382,14 @@ export function applyGenealogyDoc(doc) {
   // kolonnerekkefølgen — og dermed hele kartets venstre-mot-høyre — tilbake til
   // den pedagogiske ved kald start, altså en helt annen plassering enn den
   // læreren har satt.
+  // Tidsrommene (fase 2) likeså: uten dem tegnet en kald start treet uten
+  // akse og tidslinjene uten noe å plassere artistene på.
   const speilbart = {
     nodes: doc.nodes,
     families: doc.families,
     metaOrderHint: doc.metaOrderHint,
     metaGenres: doc.metaGenres,
+    tidsrom: doc.tidsrom,
     version: doc.version,
   };
   const json = JSON.stringify(speilbart);

@@ -313,7 +313,7 @@ function kladdIndeksNaa() {
   const avtrykk = [
     s.slides.map((x) => `${x.id}@${x.oppdatert}`).join(","),
     (s.artists || []).length, Object.keys(s.genreDescs || {}).length, (s.techItems || []).length,
-    Object.keys(s.decadeDescs || {}).length, Object.keys(s.content || {}).length,
+    Object.keys(s.content || {}).length,
     Object.keys(s.edgeDescs || {}).length, !!s.isTeacher,
   ].join("|");
   if (!kladdIndeks || avtrykk !== kladdAvtrykk) {
@@ -480,10 +480,10 @@ function byggModal() {
         </label>
       </div>
       <div id="pres-adm-stopp" style="margin-top:10px"></div>
-      <p class="muted pres-adm-hint">Et oversiktskort over innholdet, gruppert etter artister, lytteeksempler, sjangre, tiår og så videre, legges automatisk først og sist i avspillingen. Dra radene for å endre rekkefølgen.</p>
+      <p class="muted pres-adm-hint">Et oversiktskort over innholdet, gruppert etter artister, lytteeksempler, sjangre og så videre, legges automatisk først og sist i avspillingen. Dra radene for å endre rekkefølgen.</p>
       <div class="pres-adm-sok">
         <input type="search" id="pres-adm-sok" class="sok-felt" autocomplete="off" enterkeyhint="search"
-          placeholder="Legg til stopp: søk etter artist, sjanger, tiår, innovasjon …" aria-label="Legg til stopp" />
+          placeholder="Legg til stopp: søk etter artist, sjanger, innovasjon …" aria-label="Legg til stopp" />
         <div id="pres-adm-sok-treff" class="pres-adm-sok-treff" aria-live="polite"></div>
       </div>
       <div class="pres-adm-leggtil">

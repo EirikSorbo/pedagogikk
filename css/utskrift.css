@@ -147,7 +147,10 @@
    Lemon Jefferson» ikke kuttes. */
 .h-tl { display: grid; grid-template-columns: 42mm 1fr; row-gap: 1.6mm; font-size: 8pt; }
 .h-tl-akse { grid-column: 2; position: relative; height: 4mm; font-size: 6.5pt; color: var(--h-demp2); border-bottom: 0.4pt solid var(--h-linje); margin-bottom: 1mm; }
-.h-tl-akse span { position: absolute; top: 0; transform: translateX(-50%); }
+.h-tl-akse span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+/* Tidsromsaksen (fase 2) har seksten merker, og «800 f.Kr.» er bredt: da
+   står bare annethvert årstall, mens strekene står ved alle. */
+.h-tl-akse.tett span:nth-child(even) { visibility: hidden; }
 .h-tl-navn { color: var(--h-tekst); padding-right: 3mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .h-tl-navn.sj { font-weight: 600; }
 .h-tl-spor { position: relative; height: 4mm; background-image: linear-gradient(to right, var(--h-linje) 0, var(--h-linje) 0.3pt, transparent 0.3pt); background-repeat: repeat-x; }
@@ -175,10 +178,6 @@
 .h-familie-hode h1, .h-seksjon-hode h1 { font-size: 22pt; line-height: 1.1; margin-bottom: 1.5mm; }
 .h-sjanger { margin-top: 9mm; }
 .h-sjanger-hode h2 { font-size: 17pt; line-height: 1.12; margin-bottom: 1.5mm; }
-.h-stripe { display: grid; grid-template-columns: repeat(13, 1fr); gap: 0.5mm; height: 4mm; margin-bottom: 1mm; }
-.h-stripe i { display: block; border-radius: 0.6mm; }
-.h-stripe-akse { display: grid; grid-template-columns: repeat(13, 1fr); font-size: 6.5pt; color: var(--h-demp2); margin-bottom: 3mm; }
-.h-stripe-akse span:nth-child(even) { visibility: hidden; }
 .h-rel { font-size: 9.5pt; margin-bottom: 1mm; }
 .h-rel strong { font-weight: 600; color: var(--h-demp); }
 .h-historie { margin: 4mm 0 8mm; }
@@ -241,12 +240,9 @@
 .h-qr-rad { display: flex; gap: 5mm; align-items: center; }
 .h-lytte-alle-tekst { margin: 0 0 1mm; font-size: 9.5pt; }
 
-/* Tiår, instrumenter, sider */
+/* Instrumenter, sider (tiårene, bakteppet, ble tatt ut i fase 2) */
 .h-seksjon { margin-top: 2mm; }
-.h-tiaar { margin-top: 7mm; }
-.h-tiaar .h-sjanger-hode { margin-bottom: 3mm; }
 .h-del { font-size: 11pt; margin: 5mm 0 2mm; padding-bottom: 1mm; border-bottom: 0.4pt solid var(--h-linje); }
-.h-innov-liste { font-size: 9.5pt; color: var(--h-demp); }
 .h-instrument { margin-top: 6mm; }
 .h-instrument h2 { font-size: 15pt; margin-bottom: 2.5mm; }
 

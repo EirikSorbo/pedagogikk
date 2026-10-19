@@ -14,15 +14,12 @@ import { showSubsjangerInfo } from "../ui/ui.js";
 import { setupModal, initModalHeaders, modalClose, modalBytt, visValgtFane } from "../ui/ui-modal.js";
 import { SKJUL_I_STUDENTVISNING, SKJUL_I_HUBEN } from "../felles/feature-flags.js";
 import { refreshSjangerInfo } from "../sjangre/genealogy.js";
-import { setHeatData } from "../sjangre/heat-strip.js";
 import { MODAL_HTML } from "./explore-modals.js";
 import { opts, setOpts, getState } from "../data/app-state.js";
 import { registrerNavigasjon, sjangerOpts, onMainGenreClick, buildLinkCtx, showArtistsForSjanger, showArtistsForInstrument } from "./explore-context.js";
-import { openVarmekart, renderVarmekartBody } from "./explore-varmekart.js";
 import { openSjangerperioder, renderSjangerperioderBody } from "./explore-sjangerperioder.js";
 import { openTidslinje, hideTidTip, tidslinjeHarSjanger } from "./explore-tidslinje.js";
 import { openTechDetail, refreshTechDetail, openTeknologi, renderTeknologiList, refreshTeknologi } from "./explore-tech.js";
-import { openDecadeList, openDecade, refreshDecadeView } from "./explore-decade.js";
 import { openLytt } from "./explore-lytt.js";
 import { openTime } from "./explore-timer.js";
 import { openReferanser, renderReferanser, antallKilder } from "./explore-referanser.js";
@@ -86,15 +83,8 @@ export function genreDescsChanged() {
 // celleklikk): re-rendrer innholdsvisninger som står åpne, så endringen
 // slår gjennom uten å lukke/åpne modalen.
 export function contentChanged() {
-  // Varmenivåene legges igjen i heat-strip.js, der sjangerkortet (genealogy.js)
-  // henter dem. Kortet bygges et lag UNDER app-laget og kan ikke lese state
-  // herfra — explore-context importerer genealogy, så en import den andre veien
-  // ville lukket sirkelen. Dette er første og eneste snapshot-punktet, så linja
-  // på kortet er fersk fra første lasting og etter hver redigering.
-  setHeatData(getState().content?.varmekart?.heat || null);
   oppdaterInnganger();
-  // Står et sjangerkort åpent, tegnes det på nytt — da følger varmelinja med når
-  // læreren endrer nivåer, i stedet for å vise gamle tall til kortet lukkes.
+  // Står et sjangerkort åpent, tegnes det på nytt.
   // sjangerOpts() sendes med så omtegningen leser GJELDENDE state: de fangede
   // opts fra åpningsøyeblikket pekte på utbyttede referanser og viste aldri en
   // fersk beskrivelse.
@@ -109,11 +99,6 @@ export function contentChanged() {
     renderRotterChips();
   }
   if (isOpen("modal-app-guide")) renderPage("appGuide", "app-guide-body", "app-guide-extra");
-  if (isOpen("modal-varmekart")) renderVarmekartBody();
-  // Historien (v5.34, audit-funn 8): varmestripene over fortellingen leser
-  // samme heat-data som varmekartet, og lærerens celleklikk skal synes der
-  // også — kortet var den eneste innholdsvisningen uten snapshot-gren, så
-  // stripa og nivåvelgeren motsa hverandre etter lagring.
   if (isOpen("modal-historier")) refreshHistorie();
   // Sjangerperioder: treet kommer via content, og en figur som sto og ventet på
   // det skal enten tegnes eller si at treet mangler. Tegner bare om ved endring.
@@ -135,9 +120,9 @@ function injectModals() {
 }
 
 function wireModals() {
-  ["modal-teknologi", "modal-instrumenter", "modal-decade-view",
+  ["modal-teknologi", "modal-instrumenter",
    "modal-subgenre-list", "modal-undersjangre", "modal-subgenre-info",
-   "modal-varmekart", "modal-vk-edit", "modal-sjangerperioder", "modal-tidslinje", "modal-referanser", "modal-sjangerhimmel",
+   "modal-sjangerperioder", "modal-tidslinje", "modal-referanser", "modal-sjangerhimmel",
    "modal-artistliste", "modal-spilleliste", "modal-sjanger", "modal-tech-detail",
    "modal-store-bildet", "modal-app-guide", "modal-om-historie", "modal-rotter", "modal-historier",
    "modal-meta-oversikt", "modal-visningssider", "modal-galleri",
@@ -186,17 +171,16 @@ function wireModals() {
     else rotterTre.style.display = "none";
   }
 
-  // Sjangre-fanene (v6.12, brukervalg 2026-10-03): de fem kortene om sjangrene
+  // Sjangre-fanene (v6.12, brukervalg 2026-10-03): de fire kortene om sjangrene
   // står som faner i samme vindu, med Sjangre først. Hvert kort beholder sin
-  // egen adresse og åpner, så huben, tiårene og kjøreplanene åpner dem som
-  // før, nå med fanene over. Slektstreet (egen side) og Sjangerhistorier
-  // (flagget) er knapper til høyre, ikke faner. Skjules «Sjangerhistorier»
+  // egen adresse og åpner, så huben og kjøreplanene åpner dem som før, nå med
+  // fanene over. (Varmekartet var den femte, til fase 2.) Slektstreet (egen
+  // side) og Sjangerhistorier (flagget) er knapper til høyre, ikke faner. Skjules «Sjangerhistorier»
   // her, må hubkortet skjules samtidig, ellers er historiene fortsatt åpne.
   // Lærersiden gir onStoryEdit og beholder den.
   const SJ_FANER = [
     { id: "sjangre", navn: "Sjangre", modal: "modal-subgenre-list", apne: () => openSubgenreList() },
     { id: "sjangerperioder", navn: "Sjangerperioder", modal: "modal-sjangerperioder", apne: () => openSjangerperioder() },
-    { id: "varmekart", navn: "Varmekart", modal: "modal-varmekart", apne: () => openVarmekart() },
     { id: "tidslinje", navn: "Artisttidslinje", modal: "modal-tidslinje", apne: () => openTidslinje() },
     { id: "undersjangre", navn: "Undersjangre", modal: "modal-undersjangre", apne: () => openUndersjangre() },
   ];
@@ -255,7 +239,6 @@ function wireModals() {
     // i griden og gitt et hull.
     if (sbTre && opts.onSlektstre) sbTre.addEventListener("click", () => opts.onSlektstre());
     else sbTre?.remove();
-    paaKort("sb-varmekart", () => openVarmekart());
     paaKort("sb-sjangerperioder", openSjangerperioder);
     paaKort("sb-himmel", openSjangerhimmel);
     paaKort("sb-referanser", openReferanser);
@@ -313,17 +296,8 @@ function wireModals() {
 
   document.addEventListener("click", (e) => {
     // Metasjangerens oversikt (v6.05, S2): fra familiekortene i Sjangre,
-    // gruppene i tidslinja/varmekartet/periodene og merket øverst på
-    // artist- og sjangerkortet (K5).
-    // Et tiår på tidsstripene (artistkortet, sjangerkortet): tiårsvinduet på
-    // Musikk-fanen (v6.07, K1). data-tiar-fane velger en annen fane
-    // (metasjanger-oversiktens tiår åpner Samfunn, v6.47).
-    const tiarBtn = e.target.closest("[data-tiar]");
-    if (tiarBtn) {
-      e.preventDefault();
-      openDecade(Number(tiarBtn.dataset.tiar), tiarBtn.dataset.tiarFane || "musikk");
-      return;
-    }
+    // gruppene i tidslinja og periodene og merket øverst på artist- og
+    // sjangerkortet (K5).
     const metaBtn = e.target.closest("[data-meta-oversikt]");
     if (metaBtn) {
       e.preventDefault();
@@ -363,14 +337,10 @@ export function initExplore(options) {
   setOpts(options);
   injectModals();
   wireModals();
-  // Kun medlemmer sidene faktisk kaller. openVarmekart og showPlaylist-
-  // ForMainGenre lå her uten en eneste konsument (de nås via knappene i
-  // utforsk-laget selv). renderInstrumenter er no-op når seksjonen er lukket,
-  // så sidene kan kalle den trygt fra ethvert snapshot.
+  // Kun medlemmer sidene faktisk kaller. renderInstrumenter er no-op når
+  // seksjonen er lukket, så sidene kan kalle den trygt fra ethvert snapshot.
   return {
     openSok,
-    openDecadeList,
-    refreshDecadeView,
     openLytt,
     openTime,
     openSubgenreList,

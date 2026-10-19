@@ -16,7 +16,6 @@ import { renderRichText } from "../felles/rich-text.js";
 import { guideDeler, guideForStudent } from "../felles/guide-deler.js";
 import { guideDelSynlig } from "../felles/feature-flags.js";
 import { genreFamilyNodes } from "../ui/ui-timeline.js";
-import { heatBlockHtml, heatAxisRowHtml, heatRowsHtml, wireHeatRows } from "./heat-rows.js";
 import { wireLinks } from "../ui/ui-helpers.js";
 import { renderSjangerhimmel } from "../sjangre/constellation.js";
 import { buildLinkCtx, injectTeacherRow, onMainGenreClick } from "./explore-context.js";
@@ -125,12 +124,12 @@ export function renderRotterChips() {
 // lenkes og åpner kortene OPPÅ historien.
 let currentStoryGenre = null;
 
-// Snapshot-omtegning av en ÅPEN historie (v5.34, audit-funn 8): varmestriper
-// og tekst skal følge lærerens celleklikk og lagring — og en historie åpnet
-// før treet landet, skal fylles når det kommer. Kalles fra contentChanged/
+// Snapshot-omtegning av en ÅPEN historie (v5.34, audit-funn 8): familien og
+// teksten skal følge lærerens lagring — og en historie åpnet før treet
+// landet, skal fylles når det kommer. Kalles fra contentChanged/
 // genreDescsChanged (explore-context) bak isOpen-sjekken der. Tegner bare om
 // når det historien viser faktisk er endret, og aldri til toppen (audit v5.42
-// funn 14): hver lagring i content-samlingen (kjøreplaner, sider, varmekart)
+// funn 14): hver lagring i content-samlingen (kjøreplaner, sider)
 // kastet før alle med en historie åpen tilbake til toppen.
 export function refreshHistorie() {
   if (currentStoryGenre != null) renderHistorie(currentStoryGenre, { fraSnapshot: true });
@@ -138,14 +137,12 @@ export function refreshHistorie() {
 
 let historieSignatur = null;
 
-// Alt historien tegnes fra: sjangeren, familiens varmerader, teksten og om
-// innholdet har landet.
+// Alt historien tegnes fra: sjangeren, familien, teksten og om innholdet
+// har landet.
 function historieSig(genre) {
   const s = getState();
   const familie = genreFamilyNodes(genre, s.genreDescs).map(({ n }) => n.l);
-  const heat = s.content?.varmekart?.heat || null;
   return JSON.stringify([genre, !!s.contentLoaded, familie,
-    familie.map((f) => heat?.[f] ?? null), !!heat && Object.keys(heat).length > 0,
     storyFor(genre, s.genreDescs)?.body ?? null]);
 }
 
@@ -173,34 +170,20 @@ function renderHistorie(genre, { fraSnapshot = false } = {}) {
   const oversiktKnapp = document.getElementById("hist-oversikt");
   if (oversiktKnapp) oversiktKnapp.textContent = `Vis oversikt over ${genre}`;
 
-  // Sjangerfamilien som varmestriper, én rad per sjanger under metasjangeren
-  // (v5.16). Her lå tidligere en proporsjonal tidslinje over startårene, men
-  // en historie handler om hvor toneangivende sjangrene VAR gjennom tiårene,
-  // ikke bare når de oppsto — og det er nettopp det stripene viser. Radene er
-  // de samme som i varmekartet, så de to flatene leses likt.
-  //
-  // Rekkefølgen er kronologisk etter startår (brukervalg): genreFamilyNodes
-  // sorterer familien slik, i motsetning til varmekartet, som sorterer etter
-  // første tiår med varme. Tegnes uavhengig av om historieteksten finnes —
-  // treet er alltid der.
+  // Familien som bobler i tidsrekkefølge (fase 2, pedagogikkappen): epokene
+  // i retningen, eldst først. Her sto varmestripene (v5.16) til varmekartet
+  // ble tatt ut. Rekkefølgen er genreFamilyNodes sin (startår, og aldri foran
+  // en forelder), og boblene åpner epokekortet gjennom den delegerte
+  // data-sjanger-lytteren i explore.js, samme dør som navn i teksten.
   const tre = document.getElementById("hist-tre");
   if (tre) {
-    const familie = genreFamilyNodes(genre, getState().genreDescs).map(({ n }) => n.l);
-    const heat = getState().content?.varmekart?.heat || null;
-    // Uten varmedata ville hele blokka stått som tretten grå felter per rad.
-    // Da sier vi det heller med ord, som varmekartet og sjangerkortet gjør.
-    // Samme predikat som varmekartet (audit-funn 31): et TOMT kart ({} er
-    // truthy, mulig etter migrering eller import) skal også gi ordene.
-    const hasData = !!heat && Object.keys(heat).length > 0;
-    tre.innerHTML = !familie.length ? ""
-      : hasData ? heatBlockHtml(heatAxisRowHtml() + heatRowsHtml(familie, {
-          heat, meta: genre,
-          colorFor: (sj) => MAIN_GENRE_INFO[sj]?.color || META_GENRE_COLOR[genre] || FAMILIES.gray?.stroke,
-        }), "hist-heat")
-      : `<p class="gx-missing">${getState().contentLoaded
-          ? "Varmekart-nivåene er ikke lagt inn ennå."
-          : "Laster innhold …"}</p>`;
-    wireHeatRows(tre);
+    const familie = genreFamilyNodes(genre, getState().genreDescs).map(({ n }) => n);
+    tre.innerHTML = familie.length
+      ? `<div class="hist-familie">${familie.map((n) => {
+          const farge = MAIN_GENRE_INFO[n.l]?.color || META_GENRE_COLOR[genre] || FAMILIES.gray?.stroke || "#9bada1";
+          return `<button type="button" class="tag hist-epoke" data-sjanger="${escapeHtml(n.l)}" title="${escapeHtml(n.f || n.l)}" style="--hist-color:${escapeHtml(farge)}">${escapeHtml(n.l)}</button>`;
+        }).join("")}</div>`
+      : "";
   }
 
   const story = storyFor(genre, getState().genreDescs);
@@ -237,9 +220,9 @@ export function openHistorier(genre) {
   // Inngangene er skjult da (explore.js), men en lenke kan fortsatt peke hit.
   if (!rekkefolge.length) return;
   const regel = sjekketRegelAktiv();
-  // Faner (v6.34, brukervalg 2026-10-04), som Tiår, Sjangre og Instrumenter.
+  // Faner (v6.34, brukervalg 2026-10-04), som Sjangre og Instrumenter.
   // Hver metasjanger bærer sin egen farge fra slektstreet (META_GENRE_COLOR),
-  // så fanene, treet, varmekartet og himmelen snakker samme fargespråk:
+  // så fanene, treet og himmelen snakker samme fargespråk:
   // --hist-color gir prikken foran navnet og understreken på den valgte.
   faner.innerHTML = rekkefolge.map((g) => {
     const color = META_GENRE_COLOR[g] || FAMILIES.gray?.stroke || "#9bada1";

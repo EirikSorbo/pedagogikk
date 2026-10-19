@@ -69,7 +69,7 @@ export const SKJUL_I_STUDENTVISNING = {
 
 // Kortene INNE i «Det store bildet» (js/utforsk/explore.js). Huben ble åpnet for
 // studentene 2026-09-10, men brukeren ville bare slippe til de tre
-// visualiseringene: tidslinje, slektstre og varmekart. Sjangerperioder kom til som
+// visualiseringene: tidslinje, slektstre og varmekart (tatt ut i fase 2). Sjangerperioder kom til som
 // fjerde synlige kort i v5.20 (brukervalg). Resten står skjult til
 // innholdet er kvalitetssikret, og slippes inn ett og ett ved å sette flagget
 // til false. Læreren ser alltid alle.
@@ -91,7 +91,6 @@ export const SKJUL_I_HUBEN = {
   "sb-historier":   true,
   "sb-tidslinje":   false,
   "sb-slektstre":   false,
-  "sb-varmekart":   false,
   "sb-sjangerperioder": false,
   "sb-himmel":      true,
   "sb-referanser":  true,

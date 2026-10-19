@@ -9,7 +9,7 @@ import { lesJs } from "../helpers/js-filer.js";
 // pedagogiske valg, ikke implementasjonsdetaljer: et uskyldig «rydd opp i
 // nivålistene» skal ikke kunne dra kildene inn på lerretet igjen.
 test("kilder vises ALDRI i visning, uansett nivå eller unntak", () => {
-  for (const flate of ["artist", "sjanger", "tech", "tiår", "historie"]) {
+  for (const flate of ["artist", "sjanger", "tech", "historie"]) {
     for (const n of [1, 2, 3]) {
       assert.equal(erSynlig(flate, "kilder", n), false, `${flate} nivå ${n}`);
     }
@@ -50,9 +50,11 @@ test("artistnivåene: bilde + levetid + innflytelseslinje + lytteeksempler, så 
   for (const { id } of FLATER.artist) assert.equal(synlig(id, 3), id !== "punkter", id);
 });
 
-test("tiårstekstene står fra nivå 1, tech skjuler kategori og instrument", () => {
-  assert.equal(erSynlig("tiår", "tekst", 1), true);
-  assert.equal(erSynlig("tiår", "tidslinje", 1), true);
+test("tech skjuler kategori og instrument; tiårsflaten finnes ikke lenger (fase 2)", () => {
+  assert.equal("tiår" in FLATER, false);
+  // Epokene i retningen står over historien fra nivå 1, der varmestripene sto.
+  assert.equal(erSynlig("historie", "familie", 1), true);
+  assert.equal(erSynlig("historie", "tekst", 1), false);
   for (const n of [1, 2, 3]) {
     assert.equal(faktaSynlig("tech", "kategori", n), false, `nivå ${n}`);
     assert.equal(faktaSynlig("tech", "instrument", n), false, `nivå ${n}`);
@@ -225,7 +227,7 @@ test("oppsummeringspunktene (v5.50): bare nivå 2, der de erstatter beskrivelsen
   assert.equal(erSynlig("sjanger", "beskrivelse", 2, { "sjanger.beskrivelse": true }, { harPunkter: true }), true);
   assert.equal(erSynlig("tech", "punkter", 2, { "tech.punkter": false }, { harPunkter: true }), false);
   // Andre flater bryr seg ikke.
-  assert.equal(erSynlig("tiår", "tekst", 2, {}, { harPunkter: true }), true);
+  assert.equal(erSynlig("historie", "tekst", 2, {}, { harPunkter: true }), true);
 });
 
 test("erSynlig: unntak overstyrer nivået begge veier", () => {
@@ -236,7 +238,7 @@ test("erSynlig: unntak overstyrer nivået begge veier", () => {
 });
 
 test("erSynlig: ukjent flate viser alt, ukjent seksjon bare på Alt", () => {
-  assert.equal(erSynlig("varmekart", "hvasomhelst", 1), true);
+  assert.equal(erSynlig("tidslinje", "hvasomhelst", 1), true);
   assert.equal(erSynlig("artist", "ny-seksjon", 2), false);
   assert.equal(erSynlig("artist", "ny-seksjon", 3), true);
 });
@@ -244,9 +246,9 @@ test("erSynlig: ukjent flate viser alt, ukjent seksjon bare på Alt", () => {
 // Kontrakten mot renderne: hver seksjons-ID modellen lover, må finnes som
 // data-sekt i koden som tegner flaten — ellers er tannhjul-panelet en løgn.
 test("data-sekt-merkingen dekker modellens seksjoner", () => {
-  // Tiår og historie leses fra SIN modal i markupen, ikke hele fila: begge
-  // har data-sekt="tekst", så et fjernet merke på historien slapp gjennom
-  // (audit v5.42 funn 9).
+  // Historien leses fra SIN modal i markupen, ikke hele fila: tiårsvinduet
+  // hadde også data-sekt="tekst", så et fjernet merke på historien slapp
+  // gjennom (audit v5.42 funn 9).
   const modaler = kilde("explore-modals.js");
   const modal = (id) => {
     const start = modaler.indexOf(`id="${id}"`);
@@ -257,7 +259,6 @@ test("data-sekt-merkingen dekker modellens seksjoner", () => {
     artist: kilde("ui.js"),
     sjanger: kilde("genealogy.js"),
     tech: kilde("ui-tech.js"),
-    tiår: modal("modal-decade-view"),
     historie: modal("modal-historier"),
   };
   for (const [flate, seksjoner] of Object.entries(FLATER)) {
@@ -348,27 +349,28 @@ test("lytteeksempelNavn: tittel og artist, eller null når videoen er ukjent", (
 });
 
 test("planOversikt: grupperer etter kategori i fast rekkefølge, ikke etter planen", () => {
-  const g = planOversikt(vis("tiår:1960:tech", "artist:a2", "tech:t1", "yt:abcdefghijk", "sjanger:Rock", "instrument:Gitar", "varmekart"), { artister, tech });
-  assert.deepEqual(g.map((k) => k.id), ["artister", "lytteeksempler", "sjangre", "tiaar", "teknologi", "instrumenter", "oversikter"]);
+  const g = planOversikt(vis("tidslinje", "artist:a2", "tech:t1", "yt:abcdefghijk", "sjanger:Rock", "instrument:Gitar"), { artister, tech });
+  assert.deepEqual(g.map((k) => k.id), ["artister", "lytteeksempler", "sjangre", "teknologi", "instrumenter", "oversikter"]);
   assert.deepEqual(OVERSIKT_KATEGORIER.map((k) => k.id), g.map((k) => k.id), "alle kategoriene er i bruk her");
   assert.equal(g.find((k) => k.id === "teknologi").punkter[0].tekst, "Elektrisk gitar");
-  assert.equal(g.find((k) => k.id === "oversikter").punkter[0].tekst, "Varmekartet");
+  assert.equal(g.find((k) => k.id === "oversikter").punkter[0].tekst, "Tidslinjen");
 });
 
-test("planOversikt: alfabetisk innenfor kategorien, tiårene i tidsrekkefølge", () => {
-  const g = planOversikt(vis("artist:a2", "artist:a1", "artist:a3", "tiår:1970", "tiår:1950:musikk", "tiår:1950:tech", "tiår:1950"), { artister });
+test("planOversikt: alfabetisk innenfor kategorien", () => {
+  const g = planOversikt(vis("artist:a2", "artist:a1", "artist:a3"), { artister });
   assert.deepEqual(g[0].punkter.map((p) => p.tekst), ["Aretha Franklin", "Chuck Berry", "Elvis Presley"]);
-  const tiaar = g.find((k) => k.id === "tiaar").punkter;
-  assert.deepEqual(tiaar.map((p) => `${p.tekst} ${p.detalj}`),
-    // Fanerekkefølgen innenfor tiåret (v6.07): teknologi, samfunn, musikk.
-    ["1950-tallet teknologi", "1950-tallet samfunn", "1950-tallet musikk", "1970-tallet samfunn"]);
-  assert.ok(tiaar.every((p) => !("sort" in p)), "sorteringsnøkkelen lekker ikke ut");
+  assert.ok(g[0].punkter.every((p) => !("sort" in p)), "sorteringsnøkkelen lekker ikke ut");
+});
+
+test("planOversikt: et stopp til tiår eller varmekart (tatt ut i fase 2) er ukjent og faller bort", () => {
+  const g = planOversikt(vis("tiår:1950:society", "varmekart", "artist:a1"), { artister });
+  assert.deepEqual(g.map((k) => k.id), ["artister"]);
 });
 
 test("planOversikt: hvert mål én gang, og punktet peker på FØRSTE forekomst", () => {
-  const g = planOversikt(vis("artist:a1", "tiår:1950", "artist:a1", "tiår:1950:society", "yt:abcdefghijk::45", "yt:abcdefghijk::130"), { artister });
+  const g = planOversikt(vis("artist:a1", "tidslinje", "artist:a1", "tidslinje", "yt:abcdefghijk::45", "yt:abcdefghijk::130"), { artister });
   assert.deepEqual(g[0].punkter, [{ tekst: "Elvis Presley", detalj: "", stopp: 0, stoppene: [0, 2] }]);
-  assert.equal(g.find((k) => k.id === "tiaar").punkter.length, 1, "uten modus og «society» er samme visning");
+  assert.equal(g.find((k) => k.id === "oversikter").punkter.length, 1, "samme visning to ganger er ett punkt");
   // Samme video fra to ulike tidspunkt er to lyttemomenter.
   assert.deepEqual(g.find((k) => k.id === "lytteeksempler").punkter.map((p) => p.detalj), ["fra 0:45", "fra 2:10"]);
 });
@@ -709,11 +711,12 @@ test("sjangernivåene: navnelista med artister fra nivå 2, også på nivå 3", 
   assert.ok(FLATER.sjanger.some((f) => f.id === "artister"), "valgbar i tannhjulpanelet");
 });
 
-test("sjangerPlassering: varmestripa og epoken øverst, navnelista til høyre, resten til venstre", () => {
-  assert.equal(sjangerPlassering("stripe"), "topp");
-  // v5.91: epokelinja er bildetekst under stripa, så punktene og «Artister»
-  // begynner på samme linje (brukerønske 2026-09-29).
+test("sjangerPlassering: epoken øverst, navnelista til høyre, resten til venstre", () => {
+  // v5.91: epokelinja står øverst, så punktene og «Artister» begynner på
+  // samme linje (brukerønske 2026-09-29). Varmestripa over den er tatt ut
+  // (fase 2) og havner nå i tekstspalta som en ukjent seksjon.
   assert.equal(sjangerPlassering("era"), "topp");
+  assert.equal(sjangerPlassering("stripe"), "venstre");
   assert.equal(sjangerPlassering("artister"), "hoyre");
   for (const id of ["punkter", "beskrivelse", "lytt", "relasjoner", "kilder"]) {
     assert.equal(sjangerPlassering(id), "venstre", id);
@@ -992,14 +995,12 @@ test("pilene faller tilbake på stoppene, og komma og X er koblet", () => {
 
 // --- Lerret på annen skjerm og private notater (v6.50, brukerbestilling 2026-10-07) ---
 
-test("notatNokkel: artist, sjanger, innovasjon og tiår; tiåret har ett notat for begge fanene", () => {
+test("notatNokkel: artist, sjanger og innovasjon (tiårskortet er tatt ut i fase 2)", () => {
   assert.equal(notatNokkel("artist:abc123"), "artist:abc123");
   assert.equal(notatNokkel("sjanger:Electric blues"), "sjanger:Electric%20blues");
   assert.equal(notatNokkel("sjanger:R&B"), "sjanger:R%26B");
   assert.equal(notatNokkel("tech:t1"), "tech:t1");
-  assert.equal(notatNokkel("tiår:1950:society"), "tiår:1950");
-  assert.equal(notatNokkel("tiår:1950:tech"), "tiår:1950");
-  for (const v of ["yt:dQw4w9WgXcQ", "historie:Blues", "varmekart", "artist", "", null, undefined]) {
+  for (const v of ["tiår:1950:society", "yt:dQw4w9WgXcQ", "historie:Blues", "varmekart", "artist", "", null, undefined]) {
     assert.equal(notatNokkel(v), null, String(v));
   }
 });

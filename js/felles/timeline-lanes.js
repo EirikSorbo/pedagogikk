@@ -7,13 +7,14 @@
 // ============================================================================
 
 // Aktiv-perioden til en artist:
-//   start = influenceStart (påkrevd — uten den kan artisten ikke plasseres)
+//   start = influenceStart (påkrevd — uten den kan artisten ikke plasseres).
+//           År før Kristus er negative tall (fase 2); 0 er «ikke satt».
 //   end   = influenceEnd, ellers deathYear som tak, ellers ÅPEN (pågår/ukjent)
 // Returnerer { start, end, open } eller null. `end` er alltid et tall
 // (nowYear for åpne), `open` sier om høyre ende er kjent eller ikke.
 export function resolveSpan(artist, nowYear) {
   const start = Number(artist?.influenceStart);
-  if (!Number.isFinite(start) || start <= 0) return null;
+  if (!Number.isFinite(start) || start === 0) return null;
   const infEnd = Number(artist?.influenceEnd);
   const death = Number(artist?.deathYear);
   let end = null;
@@ -24,9 +25,11 @@ export function resolveSpan(artist, nowYear) {
 }
 
 // Grådig banepakking: sorter på start, legg hvert element i første bane der
-// forrige element sluttet minst `gap` år tidligere. `visualEnd` (span-slutt,
+// forrige element sluttet minst `gap` tidligere. `visualEnd` (span-slutt,
 // men minst start+minSpan) brukes både til pakking og bredde, så korte
-// perioder får plass til navnet uten å overlappe naboen.
+// perioder får plass til navnet uten å overlappe naboen. Enheten er den
+// kalleren gir: år, eller plass på tidsromsaksen i prosent (fase 2), der
+// et år i antikken er mye smalere enn et år i dag.
 export function packLanes(items, { gap = 3, minSpan = 6 } = {}) {
   const sorted = [...items].sort((a, b) => a.span.start - b.span.start || String(a.name).localeCompare(String(b.name), "no"));
   const lanes = [];

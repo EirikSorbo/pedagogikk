@@ -5,20 +5,20 @@ Kartet lages av `tools/modulkart.js` og skal ikke redigeres for hånd: endre inn
 i fila og kjør `./bump.sh` (eller `node tools/modulkart.js`). Pre-push-kroken og GitHub
 stopper et kart som ikke stemmer med filene.
 
-113 filer i 11 mapper.
+111 filer i 11 mapper.
 
 | Mappe | Innhold | Filer |
 |---|---|---|
 | `js/` | Sidene og oppsettet | 11 |
-| `js/utforsk/` | Utforsk | 21 |
-| `js/sjangre/` | Sjangrene og slektstreet | 13 |
+| `js/utforsk/` | Utforsk | 18 |
+| `js/sjangre/` | Sjangrene og slektstreet | 12 |
 | `js/visning/` | Visning | 15 |
 | `js/laerer/` | Lærersiden | 8 |
 | `js/forslag/` | Endringsforslag | 3 |
 | `js/utskrift/` | Utskrift | 2 |
 | `js/ui/` | Byggeklosser for skjermen | 15 |
 | `js/data/` | Data | 9 |
-| `js/felles/` | Felles hjelpere | 15 |
+| `js/felles/` | Felles hjelpere | 17 |
 | `js/vendor/` | Tredjepart | 1 |
 
 ## Reglene koden holder seg til
@@ -51,13 +51,12 @@ stopper et kart som ikke stemmer med filene.
 
 ## `js/utforsk/` Utforsk
 
-Det store bildet, tiårene, sjangrene, varmekartet, tidslinja, Lytt, Instrumenter, referansene, søket og ?vis=-ruteren. explore.js kobler dem sammen, og explore-context.js er limet de deler.
+Det store bildet, sjangrene, sjangerperiodene, tidslinja, Lytt, Instrumenter, referansene, søket og ?vis=-ruteren. explore.js kobler dem sammen, og explore-context.js er limet de deler.
 
 | Fil | Hva den gjør |
 |---|---|
 | `explore-apne.js` | DELT ÅPNER + ?vis=-RUTER (v5.22) |
 | `explore-context.js` | DELT KJERNE FOR UTFORSK-MODULENE |
-| `explore-decade.js` | TIÅR: Teknologi / Samfunn / Musikk |
 | `explore-innhold.js` | INNHOLDSSIDER, SJANGERHISTORIER, HUB & SJANGERHIMMEL |
 | `explore-instrument.js` | INSTRUMENTER — utvikling per instrumentgruppe |
 | `explore-lytt.js` | LYTT — spillelistene samlet (v6.07, strukturgjennomgangen U7) |
@@ -71,10 +70,8 @@ Det store bildet, tiårene, sjangrene, varmekartet, tidslinja, Lytt, Instrumente
 | `explore-tech.js` | TEKNOLOGI — innovasjonskortene (liste og detalj) |
 | `explore-tidslinje.js` | TIDSLINJE: når var artistene aktive? |
 | `explore-timer.js` | FRA TIMENE (v6.10, strukturgjennomgangen U1) |
-| `explore-varmekart.js` | VARMEKART: mainGenre (rad) × tiår (kolonne) |
 | `explore-visningssider.js` | VISNING — SPESIALSIDENE FOR VISNINGSMODUS (v5.96) |
 | `explore.js` | UTFORSK — ORKESTRATOR |
-| `heat-rows.js` | VARMEKART-RADER — aksen, radblokka og lærerens nivåvelger |
 | `metaoversikt-modell.js` | METASJANGER-OVERSIKTEN — ren modell (v5.94) |
 
 ## `js/sjangre/` Sjangrene og slektstreet
@@ -95,7 +92,6 @@ Sjangermodellen (treet bor i Firestore, og alt annet avledes av det), beskrivels
 | `genre-picker.js` | SJANGERVELGER — nedtrekk + brikker (flervalg fra slektstreet) |
 | `genre-validate.js` | VALIDERING AV SJANGERTREET |
 | `gx-camera.js` | KARTKAMERA — panorering, zoom og pinch for slektstre-flatene |
-| `heat-strip.js` | VARMESTRIPE — den glidende linja, delt mellom varmekartet og sjangerkortet |
 
 ## `js/visning/` Visning
 
@@ -193,10 +189,11 @@ Firestore (store.js er den eneste fila som snakker med databasen), den delte dat
 
 ## `js/felles/` Felles hjelpere
 
-Små hjelpere og vokabular som flere deler av appen bruker: tekst og lenker, kilder, søkeindeksen, tiår og instrumenter, dype lenker og bryterne.
+Små hjelpere og vokabular som flere deler av appen bruker: tekst og lenker, kilder, søkeindeksen, årstall og tidsakse, instrumenter, dype lenker og bryterne.
 
 | Fil | Hva den gjør |
 |---|---|
+| `aarstall.js` | ÅRSTALL — år og spenn i tekst, også før Kristus (fase 2) |
 | `feature-flags.js` | MIDLERTIDIGE BRYTERE — skjuler funksjoner i STUDENTVISNINGEN |
 | `guide-deler.js` | «SLIK BRUKER DU APPEN» I DELER (v6.95, brukervalg 2026-10-13) |
 | `kilder.js` | KILDER — vokabular, publikasjoner og aggregering |
@@ -209,6 +206,7 @@ Små hjelpere og vokabular som flere deler av appen bruker: tekst og lenker, kil
 | `search.js` | SØK — én indeks over alt innholdet i appen |
 | `sjekket.js` | BARE SJEKKET INNHOLD FOR STUDENTENE (v6.89, brukervalg 2026-10-13) |
 | `story-format.js` | SJANGERHISTORIER OG INNHOLDSSIDER — oppslag |
+| `tidsakse.js` | TIDSAKSEN — tidsrommene som akse for tidslinjer, striper og filtre (fase 2) |
 | `timeline-lanes.js` | TIDSLINJE-BANER — ren logikk for artist-aktivitets-tidslinjen |
 | `util.js` | SMÅ DELTE HJELPERE |
 | `vis-lenke.js` | VIS-LENKER — dype lenker til alt søket kan åpne (v5.22) |

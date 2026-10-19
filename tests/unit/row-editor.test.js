@@ -14,7 +14,8 @@ test("rowInnerHtml bygger riktige felter og fjern-knapp per spec", () => {
   const work = rowInnerHtml(WORK_SPEC, { title: "Cross Road Blues", year: 1936 });
   assert.match(work, /class="work-title"[^>]*value="Cross Road Blues"/);
   assert.match(work, /class="work-year"[^>]*value="1936"/);
-  assert.match(work, /min="1800" max="2030"/);
+  // Årstallene går fra 3000 f.Kr. (fase 2; før 1800–2030).
+  assert.match(work, /min="-3000" max="2100"/);
   assert.match(work, /class="btn ghost small remove-work"/);
 
   const me = rowInnerHtml(MUSIC_SPEC, {});

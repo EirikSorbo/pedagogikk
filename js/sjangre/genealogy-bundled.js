@@ -4,7 +4,7 @@
 //  Slektstreets renderer (tre.html) siden v4.58 — en låst designbeslutning.
 //  Startet som prototype ved siden av det pakkede kartet; kartet er slettet.
 //  Formen er
-//  «tangled tree»: nodene er piller på tiårslinjer, og alle foreldrene til én
+//  «tangled tree»: nodene er piller på tidsromslinjer, og alle foreldrene til én
 //  sjanger samles i ETT bånd i BARNETS familiefarge før de går inn i pilla.
 //
 //  Poenget med fargevalget: en sammensmeltning som R&B (blues + gospel) eller
@@ -21,13 +21,13 @@
 import { showSjangerInfo, showEdgeInfo } from "./genealogy.js";
 import { SKJUL_I_STUDENTVISNING } from "../felles/feature-flags.js";
 import { koblingSjekketOk } from "../felles/sjekket.js";
-import { GENEALOGY, DECADE_ROWS, nodeColor, layoutX, edgeKey } from "./genre-model.js";
+import { GENEALOGY, TIDSROM, RAD_ANTALL, nodeColor, layoutX, edgeKey } from "./genre-model.js";
 import { attachCamera } from "./gx-camera.js";
 import { LAYOUT_WIDTH } from "./genre-layout.js";
 
 const SVGNS = "http://www.w3.org/2000/svg";
 const W = LAYOUT_WIDTH;    // logisk kartbredde = layoutens (kameraet skalerer til scenen)
-const ROW_H = 100;         // avstand mellom tiårslinjene
+const ROW_H = 100;         // avstand mellom tidsromslinjene
 const TOP = 96;            // y for rad 0
 const NH = 44;             // pillehøyde
 const PILL_PAD = 13;       // vannrett luft inni pilla, i tillegg til teksten
@@ -43,11 +43,11 @@ const BUNDLE_LIFT = 26;    // hvor høyt over pilla båndet samles
 //  må fortsatt få plass innenfor W uten at klemmen på linje ~146 slår inn.
 const CORNER = 9;          // hjørneradius i båndene
 
-// Nederste rad i aksen NÅ. DECADE_ROWS er en live binding fra genre-model og
-// utvides av seg selv når en node settes på en ny rad (2020-t) — en hardkodet
-// liste her stoppet på 2010-t og ville tegnet en ny rad uten linje og etikett,
-// delvis utenfor kameraet. Leses ved KALL (aldri modulnivå-konstant).
-const maxRow = () => Math.max(DECADE_ROWS.length - 1, 12);
+// Nederste rad i aksen NÅ. RAD_ANTALL er en live binding fra genre-model:
+// tidsrommene, eller den dypeste noden om den står lenger ned (en hardkodet
+// liste ville tegnet en ny rad uten linje og etikett, delvis utenfor
+// kameraet). Leses ved KALL (aldri modulnivå-konstant).
+const maxRow = () => Math.max(RAD_ANTALL - 1, 1);
 
 const el = (tag, attrs) => {
   const e = document.createElementNS(SVGNS, tag);
@@ -122,14 +122,22 @@ export function renderGenealogyBundled({ root = document, getOpts }) {
   cam.appendChild(gBands);
   cam.appendChild(gNodes);
 
-  // Tiårsrutenett — så langt aksen faktisk rekker (DECADE_ROWS utvider seg
-  // selv når treet får en node på en ny rad).
+  // Rutenettet for tidsrommene, så langt aksen faktisk rekker. Etiketten er
+  // årstallene («1790–1850»), og et tidsrom med navn får navnet på linja
+  // under («Renessansen»). Tidsrommene er ulikt lange, men like høye: treet
+  // viser rekkefølgen og slektskapet, ikke en målestokk.
   for (let r = 0; r <= maxRow(); r++) {
     const y = TOP + r * ROW_H - 48;
     gGrid.appendChild(el("line", { x1: 0, y1: y, x2: W, y2: y, class: "gx-grid" }));
+    const rom = TIDSROM[r];
     const t = el("text", { x: 14, y: y + 20, class: "gx-decade" });
-    t.textContent = DECADE_ROWS[r] || "";
+    t.textContent = rom?.etikett || "";
     gGrid.appendChild(t);
+    if (rom?.navn) {
+      const navn = el("text", { x: 14, y: y + 40, class: "gx-decade gx-tidsrom-navn" });
+      navn.textContent = rom.navn;
+      gGrid.appendChild(navn);
+    }
   }
 
   // --- Pass 1: bygg pillene og MÅL etikettene. Bredden må være kjent før
@@ -189,7 +197,7 @@ export function renderGenealogyBundled({ root = document, getOpts }) {
   });
 
   // --- Pass 3: båndene. Én ledig korridor per lang loddrett strek, så en
-  //     kobling som spenner flere tiår ikke skjærer gjennom mellomliggende
+  //     kobling som spenner flere rader ikke skjærer gjennom mellomliggende
   //     piller (det gjør den i praksis ofte: Gospel → Cont. gospel spenner
   //     fire tiår, Nashville → Cont. country tre).
   const boxes = nodes.map((n) => ({ id: n.id, x: n._x, y: n._y, w: n._w }));
@@ -410,7 +418,7 @@ export function renderGenealogyBundled({ root = document, getOpts }) {
 
   const camera = attachCamera({
     root, stage, cam, width: W,
-    height: TOP + maxRow() * ROW_H + NH,   // nederste tiårsrad + pillehøyde
+    height: TOP + maxRow() * ROW_H + NH,   // nederste rad + pillehøyde
     onBackgroundClick: reset,
   });
 

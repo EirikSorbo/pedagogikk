@@ -43,7 +43,8 @@ test("funn 8: editoren sjekker hvert mål mot det åpneren slår opp i, og vente
   const v = kilde("stopp-etikett.js");
   assert.match(v, /case "sjanger":\n\s*return ut\(m\.id, GENEALOGY\.some\(\(n\) => n\.l === m\.id \|\| n\.f === m\.id\) \? \{\} : \{ feil: DOD \}\);/,
     "røttene og Reggae er sjanger-noder uten metasjanger");
-  for (const hva of ["varmekart", "undersjanger", "kobling", "instrument"]) {
+  // (Varmekartet hadde også egen sjekk, til det ble tatt ut i fase 2.)
+  for (const hva of ["undersjanger", "kobling", "instrument"]) {
     assert.match(v, new RegExp(`case "${hva}":`), `${hva} har egen sjekk`);
   }
   assert.match(v, /edgeExists\(m\.id\) \? \{\} : \{ feil: DOD \}/);

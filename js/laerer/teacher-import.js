@@ -14,7 +14,6 @@ import {
   saveDocsBulk,
   saveGenealogyTree,
   updateArtistFields,
-  mergeVarmekartRows,
   saveReferanser,
   addPodcast,
   updatePodcast,
@@ -30,7 +29,7 @@ import { validateTree } from "../sjangre/genre-validate.js";
 import { ARTIST_LABELS, ARTIST_COMPARE_FIELDS, ARTIST_EXPORT_FIELDS } from "../data/artist-schema.js";
 import { INSTRUMENTS } from "../felles/limits.js";
 import { rensFakta } from "../felles/plateselskaper.js";
-import { validateArtistsForImport, normalizeImportFile, CONTENT_KEYS, decadeDoc, erDelpost } from "../data/import-format.js";
+import { validateArtistsForImport, normalizeImportFile, CONTENT_KEYS, erDelpost } from "../data/import-format.js";
 import { melding, bekreft, sporTekst } from "../ui/ui-modal.js";
 import { sjekkerEndretAvImport, sjekkerUten } from "../data/sjekket-filter.js";
 
@@ -59,8 +58,8 @@ async function fjernSjekker(fjern) {
 const sjekkMerknad = (n) => (n ? ` Sjekk er fjernet på ${n} av dem, siden teksten er endret.` : "");
 
 // Konfliktdialogen løses av læreren LENGE etter at handleMergeFile returnerer.
-// Uten dette løftet fortsatte importen med beskrivelser, teknologi, sider,
-// varmekart og sjangertre mens dialogen fortsatt sto åpen — og avbrøt læreren,
+// Uten dette løftet fortsatte importen med beskrivelser, teknologi, sider
+// og sjangertre mens dialogen fortsatt sto åpen — og avbrøt læreren,
 // sa appen «ingen endringer er lagret» mens alt det andre alt lå i databasen.
 // meldMergeFerdig(false) = avbrutt, (true) = fullført.
 function ventPaMerge() {
@@ -124,12 +123,6 @@ function genreSectionOf(name) {
   return GENEALOGY_META_GENRES.includes(name) ? "meta" : (isMainGenre(name) ? "main" : "sub");
 }
 
-// Har tiåret noe innhold verdt å eksportere/importere? (samfunn, teknologi
-// eller kilder — det er alt et tiårsdokument består av.)
-function hasDecadeContent(d) {
-  return !!(d && (d.society || d.tech || (Array.isArray(d.kilder) && d.kilder.length)));
-}
-
 // Bygger hele eksport-objektet fra gjeldende state. Delt av den manuelle
 // «Eksporter»-knappen og av auto-sikkerhetskopien før «Erstatt alle».
 // Tar med ALLE artister uansett status (også ventende forslag), alle
@@ -140,13 +133,6 @@ function hasDecadeContent(d) {
 function buildExportData() {
   const artists = state.artists
     .map((a) => Object.fromEntries(EXPORT_FIELDS.map((f) => [f, a[f] ?? null])));
-
-  const decades = {};
-  for (const [id, d] of Object.entries(state.decadeDescs)) {
-    if (hasDecadeContent(d)) {
-      decades[id] = decadeDoc(d);
-    }
-  }
 
   // Sjangerbeskrivelser eksporteres NESTET i tre bolker (meta → main → sub), så
   // fila blir oversiktlig i stedet for én lang flat liste. Bolken bestemmes av
@@ -183,8 +169,8 @@ function buildExportData() {
     return rest;
   });
 
-  // Innholdssidene (Om historie, Røtter) og varmekartet — fra content-
-  // samlingen, så backupen inneholder ALT pensuminnhold (koden har ingen
+  // Innholdssidene (Om historie, Røtter) — fra content-samlingen, så
+  // backupen inneholder ALT pensuminnhold (koden har ingen
   // fallback-tekster). Podkast-metadata tas også med. (Config er borte, v3.68:
   // instrument-vokabularet bor i koden — INSTRUMENTS i limits.js.)
   const pages = {};
@@ -192,11 +178,8 @@ function buildExportData() {
     // Samme predikat som pageFor: en side med kilder men uten tekst er ekte
     // innhold og skal med i sikkerhetskopien.
     const harInnhold = docData && (docData.body || (Array.isArray(docData.kilder) && docData.kilder.length));
-    if (id !== "varmekart" && harInnhold) pages[id] = docData;
+    if (harInnhold) pages[id] = docData;
   }
-  const varmekart = state.content?.varmekart?.heat
-    ? { heat: state.content.varmekart.heat, updatedAt: state.content.varmekart.updatedAt || null }
-    : null;
 
   // Frittstående referanser (content/referanser): egen toppnøkkel, ikke en
   // «side» — dokumentet har ingen body, og ville falt ut av pages-filteret.
@@ -211,10 +194,9 @@ function buildExportData() {
 
   const out = {
     formatVersion: 1,
-    artists, decades, genreDescriptions, edgeDescriptions, tech, pages, podcasts,
+    artists, genreDescriptions, edgeDescriptions, tech, pages, podcasts,
     teacherChecks: state.teacherChecks || null,
   };
-  if (varmekart) out.varmekart = varmekart;
   if (referanser) out.referanser = referanser;
   // Kjøreplanene (content/presentasjoner, v5.25): egen toppnøkkel, som
   // referansene. Dokumentet har verken body eller kilder og falt ut av
@@ -225,9 +207,10 @@ function buildExportData() {
   if (Object.keys(planer).length) {
     out.presentasjoner = { planer, updatedAt: state.content.presentasjoner.updatedAt || null };
   }
-  // Sjangertreet (content/genealogy). Uten det er en backup ikke lenger
-  // komplett: fra v4.49 er treets STRUKTUR data, ikke kode, og en gjenoppretting
-  // uten det ville gitt en app helt uten sjangervokabular.
+  // Sjangertreet (content/genealogy), med tidsrommene (fase 2). Uten det er
+  // en backup ikke lenger komplett: fra v4.49 er treets STRUKTUR data, ikke
+  // kode, og en gjenoppretting uten det ville gitt en app helt uten
+  // sjangervokabular.
   if (state.content?.genealogy?.nodes?.length) out.genealogy = state.content.genealogy;
   // Lærerens private notater til kortene (v6.50, egen samling bare læreren
   // leser). Uten dem ville en gjenoppretting mistet alt som er skrevet til
@@ -279,7 +262,6 @@ async function kanEksportere() {
     ["sjangerbeskrivelsene", state.genreDescsLoaded],
     ["koblingsbeskrivelsene", state.edgeDescsLoaded],
     ["innovasjonskortene", state.techLoaded],
-    ["tiårene", state.decadesLoaded],
     ["podkastene", state.podcastsLoaded],
     ["avkryssingene", state.teacherChecksLoaded],
   ].filter(([, lastet]) => !lastet).map(([navn]) => navn);
@@ -349,8 +331,6 @@ function importParts(data) {
   const parts = [];
   const artistCount = (data.artists || []).filter(a => a.name).length;
   if (artistCount) parts.push(`${artistCount} artister`);
-  const decadeCount = Object.keys(data.decades || {}).length;
-  if (decadeCount) parts.push(`${decadeCount} tiårsbeskrivelser`);
   const subCount = Object.keys(data.genreDescriptions || {}).length;
   if (subCount) parts.push(`${subCount} sjangerbeskrivelser`);
   const edgeCount = Object.keys(data.edgeDescriptions || {}).length;
@@ -358,7 +338,6 @@ function importParts(data) {
   if ((data.tech || []).length) parts.push(`${data.tech.length} teknologier`);
   const pageCount = Object.keys(data.pages || {}).length;
   if (pageCount) parts.push(`${pageCount} innholdsside(r)`);
-  if (data.varmekart?.heat) parts.push(`varmekart (${Object.keys(data.varmekart.heat).length} sjangre)`);
   if (Array.isArray(data.referanser?.kilder) && data.referanser.kilder.length) parts.push(`${data.referanser.kilder.length} frittstående referanser`);
   const planAntall = Object.keys(normaliserPlaner(data.presentasjoner?.planer)).length;
   if (planAntall) parts.push(`${planAntall} kjøreplan(er) (legges til eller erstatter planen med samme id, du får se lista først)`);
@@ -366,7 +345,8 @@ function importParts(data) {
   const notatAntall = Object.keys(data.notater || {}).length;
   if (notatAntall) parts.push(`${notatAntall} private notater (erstatter notatet til samme kort)`);
   if (Array.isArray(data.genealogy?.nodes) && data.genealogy.nodes.length) {
-    parts.push(`sjangertreet (${data.genealogy.nodes.length} sjangre)`);
+    const rom = Array.isArray(data.genealogy.tidsrom) ? data.genealogy.tidsrom.length : 0;
+    parts.push(`sjangertreet (${data.genealogy.nodes.length} sjangre${rom ? `, ${rom} tidsrom` : ""})`);
   }
   // Sjekk-fremdriften ble skrevet uten å stå i «Filen inneholder …».
   if (data.teacherChecks && typeof data.teacherChecks === "object") {
@@ -382,7 +362,7 @@ async function handleImportFile(file) {
 
   const data = normalizeImportFile(raw);
   if (!data) {
-    melding("Ugyldig format. Filen må være en artist-liste eller et objekt med innhold (artists, pages, varmekart …)."); return;
+    melding("Ugyldig format. Filen må være en artist-liste eller et objekt med innhold (artists, pages, genealogy …)."); return;
   }
 
   // Valider HELE artistlista før noe kan skrives/slettes. Slår feil her ⇒
@@ -470,19 +450,7 @@ export function setupImportChoice() {
   }
 }
 
-async function importDescriptions({ decades, genreDescriptions, edgeDescriptions }) {
-  // decadeDoc plukker feltene ETT FOR ETT (samme hjelper som eksporten bruker):
-  // en rå skriving av objektet fra fila ville dratt inn igjen felter appen ikke
-  // har lenger, fra en eldre sikkerhetskopi.
-  //
-  // partial: skrivingen går med merge, og et felt fila ikke nevner skal stå
-  // urørt. Uten dette nullstilte en fil med bare { society } både tiårets
-  // teknologitekst og kildene dets.
-  const decadeEntries = Object.entries(decades || {})
-    .filter(([, data]) => hasDecadeContent(data))
-    .map(([id, data]) => ({ id, data: decadeDoc(data, { partial: true }) }))
-    .filter(({ data }) => Object.keys(data).length);
-
+async function importDescriptions({ genreDescriptions, edgeDescriptions }) {
   // Appen leser KUN nivåfeltene (main/sub) og story. Alt annet i et
   // sjangerdokument ignoreres — og en fil uten dem har ingenting å skrive.
   const genreEntries = [];
@@ -499,26 +467,24 @@ async function importDescriptions({ decades, genreDescriptions, edgeDescriptions
     .filter(([, data]) => data && (data.description || (data.kilder || []).length))
     .map(([id, data]) => ({ id, data }));
 
-  const fjern = sjekkerEndretAvImport({ decades, genreDescriptions, edgeDescriptions }, state);
+  const fjern = sjekkerEndretAvImport({ genreDescriptions, edgeDescriptions }, state);
 
   // Batchet skriving (saveDocsBulk) i stedet for dokument-for-dokument.
   // En batch er alt-eller-ingenting, så feiltelling skjer per samling.
   let ok = 0, fail = 0;
-  try { ok += await saveDocsBulk("decades", decadeEntries); }
-  catch (e) { fail += decadeEntries.length; console.error("Tiår-import feilet:", e); }
   try { ok += await saveDocsBulk("genreDescriptions", genreEntries); }
   catch (e) { fail += genreEntries.length; console.error("Sjanger-import feilet:", e); }
   try { ok += await saveDocsBulk("edgeDescriptions", edgeEntries); }
   catch (e) { fail += edgeEntries.length; console.error("Koblings-import feilet:", e); }
 
   if (fail > 0) {
-    melding(`${fail} beskrivelse(r) kunne ikke lagres.\n\nSannsynlig årsak: Firestore-reglene tillater ikke skriving til 'genreDescriptions', 'edgeDescriptions' eller 'decades'.\n\nGå til Firebase Console → Firestore → Rules og publiser oppdaterte regler.`);
+    melding(`${fail} beskrivelse(r) kunne ikke lagres.\n\nSannsynlig årsak: Firestore-reglene tillater ikke skriving til 'genreDescriptions' eller 'edgeDescriptions'.\n\nGå til Firebase Console → Firestore → Rules og publiser oppdaterte regler.`);
   } else if (ok > 0) {
     melding(`${ok} beskrivelse(r) importert.${sjekkMerknad(await fjernSjekker(fjern))}`);
   }
 }
 
-// Innholdssider, varmekart og podkaster fra importfila. Podkaster
+// Innholdssider, sjangertre og podkaster fra importfila. Podkaster
 // oppdateres på tittel-match (så en re-import ikke dupliserer episoder);
 // (Config i gamle backuper ignoreres — vokabularet bor i koden, v3.68.)
 // Union av to sjekk-kart: { kategori: [id, ...] }. Verdier som ikke er lister
@@ -533,12 +499,12 @@ export function flettSjekker(gjeldende, fraFil) {
   return ut;
 }
 
-async function importExtras({ pages, varmekart, referanser, podcasts, teacherChecks, genealogy, presentasjoner, notater }) {
+async function importExtras({ pages, referanser, podcasts, teacherChecks, genealogy, presentasjoner, notater }) {
   const done = [];
   const failed = [];
 
   const pageEntries = Object.entries(pages || {})
-    .filter(([id, d]) => id !== "varmekart" && d
+    .filter(([, d]) => d
       && ((typeof d.body === "string" && d.body.trim())
         || (Array.isArray(d.kilder) && d.kilder.length)))
     // kilder tas MED (instrumentsammendragene har dem): uten dette ville en
@@ -563,18 +529,6 @@ async function importExtras({ pages, varmekart, referanser, podcasts, teacherChe
       done.push(`${pageEntries.length} innholdsside(r)${n ? ` (sjekk fjernet på ${n}, siden teksten er endret)` : ""}`);
     }
     catch (e) { console.error("Side-import feilet:", e); failed.push("innholdssidene"); }
-  }
-
-  // Varmekartet FLETTES rad for rad (mergeVarmekartRows): sjangre fila ikke
-  // nevner, beholder tallene sine. En delvis fil (f.eks. bare den nye sjangeren)
-  // er derfor trygg — den skrev tidligere over hele kartet og slettet resten.
-  if (varmekart && varmekart.heat && typeof varmekart.heat === "object") {
-    try {
-      const { written, kept, skipped } = await mergeVarmekartRows(varmekart.heat);
-      done.push(`varmekartet (${written.length} sjanger-rad(er) oppdatert, ${kept.length} beholdt)`);
-      if (skipped.length) console.warn("Varmekart-import: hoppet over rader som ikke er lister:", skipped);
-    }
-    catch (e) { console.error("Varmekart-import feilet:", e); failed.push("varmekartet"); }
   }
 
   // Sjangertreet ERSTATTES i sin helhet, men bare når det VALIDERER. En fil med

@@ -3,7 +3,8 @@
 // ----------------------------------------------------------------------------
 //  Etiketten er en IDENTITET seks andre steder peker på. Glemmer planleggeren
 //  én av dem, blir data foreldreløse i stillhet — artisten står med en sjanger
-//  som ikke finnes, varmekartraden blir en død nøkkel, beskrivelsen usynlig.
+//  som ikke finnes, beskrivelsen usynlig. (Varmekartraden var også en død
+//  nøkkel, til varmekartet ble tatt ut i fase 2.)
 //
 //  Testene her er derfor uttømmende per identitet, og de dekker i tillegg de to
 //  fellene som er lette å gå på:
@@ -11,15 +12,14 @@
 //      (shadowing) — et navnebytte skal flytte kun main
 //    · node-ID-er skal ALDRI endres, fordi edgeDescriptions er nøklet «fra__til»
 //
-//  Fire av flatene ble oppdaget først av en kartlegging, ikke av meg: sjangeren
-//  på lytteeksemplene, sjangerhistorien (story-feltet), metaOrderHint, og at
-//  varmekartet må skrives med replace fordi merge ikke kan fjerne en nøkkel.
+//  Tre av flatene ble oppdaget først av en kartlegging, ikke av meg: sjangeren
+//  på lytteeksemplene, sjangerhistorien (story-feltet) og metaOrderHint.
 // ============================================================================
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
   findReferences, planGenreRename, planMetaRename, planGenreDelete, planMetaDelete,
-  planPasserIBatch, byggMetaTre, planHeatCleanup,
+  planPasserIBatch, byggMetaTre,
 } from "../../js/sjangre/genre-migrate.js";
 import { BATCH_MAX } from "../../js/felles/limits.js";
 
@@ -80,7 +80,6 @@ test("findReferences finner alt som peker på en sjanger", () => {
   assert.equal(r.artister.length, 2, "både «R&B» og «r&b» skal telle");
   assert.deepEqual(r.barn.map((n) => n.id).sort(), ["rock", "soul"], "rx teller som referanse");
   assert.equal(r.harMain, true);
-  assert.equal(r.harVarmekart, true);
   assert.equal(r.sjekket, true);
   assert.equal(r.forslag.length, 1, "kun sjangerforslaget, ikke artistforslaget");
   assert.deepEqual(r.koblinger.sort(), ["blues__rnb", "rnb__soul"]);
@@ -97,7 +96,7 @@ test("navnebytte dekker ALLE identitetene som peker på etiketten", () => {
   // a1 + a3 (mainGenre-tagg) + a5 (kun lytteeksempel). a4 har «R&B» som FRI
   // undersjanger og skal med vilje IKKE røres.
   assert.deepEqual(ops(plan, "artists").map((o) => o.id).sort(), ["a1", "a3", "a5"]);
-  assert.ok(ops(plan, "content").some((o) => o.id === "varmekart"), "varmekartet");
+  assert.equal(ops(plan, "content").some((o) => o.id === "varmekart"), false, "varmekartet er tatt ut (fase 2)");
   assert.ok(ops(plan, "config").some((o) => o.id === "teacherChecks"), "avkryssingen");
   assert.equal(ops(plan, "pendingEdits").length, 1, "det åpne forslaget");
 });
@@ -108,14 +107,6 @@ test("navnebytte tagger artistene om, også de med annen case", () => {
   const a3 = ops(plan, "artists").find((o) => o.id === "a3");
   assert.deepEqual(a1.data.mainGenre, ["Rhythm and blues", "Soul"], "de andre taggene røres ikke");
   assert.deepEqual(a3.data.mainGenre, ["Rhythm and blues"], "«r&b» skal også byttes");
-});
-
-test("varmekartraden flyttes til den nye nøkkelen og den gamle fjernes", () => {
-  const plan = planGenreRename(lagState(), "R&B", "Rhythm and blues");
-  const heat = ops(plan, "content").find((o) => o.id === "varmekart").data.heat;
-  assert.deepEqual(heat["Rhythm and blues"], [1, 2]);
-  assert.equal("R&B" in heat, false, "den gamle nøkkelen skal være borte");
-  assert.deepEqual(heat.Blues, [3], "andre rader røres ikke");
 });
 
 test("node-ID-en endres ALDRI — koblingsbeskrivelsene ville blitt foreldreløse", () => {
@@ -182,10 +173,7 @@ test("en ren case-retting er et gyldig navnebytte", () => {
   // identitetsflytting maskineriet kan utføre — den skal ikke avvises.
   const plan = planGenreRename(lagState(), "R&B", "R&b");
   assert.deepEqual(plan.feil, []);
-  // Varmekartraden må flytte, ikke forsvinne, når nøklene er ulike strenger.
-  const heat = ops(plan, "content").find((o) => o.id === "varmekart").data.heat;
-  assert.deepEqual(heat["R&b"], [1, 2]);
-  assert.ok(!("R&B" in heat));
+  assert.equal(treet(plan).nodes.find((n) => n.id === "rnb").l, "R&b");
 });
 
 // --- Metasjanger -------------------------------------------------------------
@@ -231,8 +219,6 @@ test("en løvnode uten artister kan slettes, og tar med seg sitt eget innhold", 
   assert.ok(ops(plan, "genreDescriptions").some((o) => o.id === "R&B"));
   assert.equal(ops(plan, "edgeDescriptions").length, 2, "begge koblingsbeskrivelsene");
   assert.ok(ops(plan, "pendingEdits").length, "det åpne forslaget ryddes");
-  const heat = ops(plan, "content").find((o) => o.id === "varmekart").data.heat;
-  assert.equal("R&B" in heat, false);
 });
 
 test("sletting av ukjent sjanger gir feil, ikke en tom plan som ser vellykket ut", () => {
@@ -277,13 +263,6 @@ test("fri undersjanger med samme navn røres IKKE, men varsles", () => {
   const a4 = ops(plan, "artists").find((o) => o.id === "a4");
   assert.equal(a4, undefined, "artisten som bare har «R&B» som fri undersjanger skal ikke skrives");
   assert.ok(plan.advarsler.some((a) => a.includes("FRI undersjanger")), plan.advarsler.join(" | "));
-});
-
-test("varmekartet skrives med replace, ikke merge — ellers overlever den gamle nøkkelen", () => {
-  const plan = planGenreRename(lagState(), "R&B", "Rhythm and blues");
-  const vk = ops(plan, "content").find((o) => o.id === "varmekart");
-  assert.equal(vk.type, "doc.replace",
-    "merge dyp-fletter map-felter, så «R&B»-nøkkelen ville blitt liggende ved siden av den nye");
 });
 
 test("metasjanger-bytte tar med sjangerhistorien (story-feltet)", () => {
@@ -447,73 +426,6 @@ test("byggMetaTre: en metasjanger utenfor hintet legges inn der læreren velger"
   const gammel = t.metaGenres.find((m) => m.name === "R&B");
   const ut = byggMetaTre(t, { gammel, navn: "R&B", fam: "red", kartPlass: 1, hintPlass: 1 });
   assert.deepEqual(ut.metaOrderHint, ["Blues", "R&B", "Rock"]);
-});
-
-// --- Foreldreløse varmekart-rader --------------------------------------------
-//  Nøkler i content/varmekart som ikke lenger peker på en sjanger i treet.
-//  De er usynlige i appen (varmekartet tegner én rad per TRE-sjanger), så
-//  dette er eneste vei til dem.
-
-test("rene varmekart gir ingen plan, men sier fra", () => {
-  const plan = planHeatCleanup(lagState());
-  assert.equal(plan.ops.length, 0);
-  assert.ok(plan.feil.some((f) => f.includes("rent")));
-});
-
-test("foreldreløse rader fjernes, de gyldige står igjen", () => {
-  const s = lagState();
-  s.content.varmekart.heat["Gullalder-hip-hop"] = [1, 2, 3];
-  s.content.varmekart.heat["Country"] = [4];
-  const plan = planHeatCleanup(s);
-  assert.deepEqual(plan.feil, []);
-  assert.equal(plan.ops.length, 1);
-  const o = plan.ops[0];
-  // doc.replace, ikke merge: Firestore-merge kan ikke fjerne en nøkkel.
-  assert.equal(o.type, "doc.replace");
-  assert.equal(o.coll, "content");
-  assert.equal(o.id, "varmekart");
-  assert.deepEqual(Object.keys(o.data.heat).sort(), ["Blues", "R&B"]);
-  assert.equal(o.data.updatedAt, "i går", "resten av dokumentet skal bæres med");
-  assert.ok(plan.advarsler.some((a) => a.includes("navnebytte")));
-});
-
-test("case-forskjell alene gjør ikke en rad foreldreløs", () => {
-  const s = lagState();
-  delete s.content.varmekart.heat["R&B"];
-  s.content.varmekart.heat["r&b"] = [1, 2];
-  const plan = planHeatCleanup(s);
-  assert.ok(plan.feil.some((f) => f.includes("rent")), "«r&b» er samme sjanger som «R&B»");
-});
-
-test("uten tre eller varmekart planlegges ingenting", () => {
-  assert.ok(planHeatCleanup({ tree: { nodes: [] } }).feil.length);
-  assert.ok(planHeatCleanup({ ...lagState(), content: {} }).feil.length);
-});
-
-// Predikatet bak «Rydd foreldreløse varmekart-rader». Det var «node MED
-// metasjanger», og rot-noder (g === null) FINNES i treet — knappen sto derfor
-// og tilbød seg å slette ekte, kuratert varmedata. Slettingen er uopprettelig.
-test("heatOrphanKeys: rot-noder uten metasjanger er IKKE foreldreløse", async () => {
-  const { heatOrphanKeys } = await import("../../js/sjangre/genre-migrate.js");
-  const noder = [
-    { id: "reggae", l: "Reggae", f: "Reggae", g: null },   // rot-node, ekte
-    { id: "bebop", l: "Bebop", f: "Bebop", g: "Jazz" },
-  ];
-  const heat = { Reggae: [1, 2], Bebop: [3], "Gullalder-hip-hop": [4] };
-  const ut = heatOrphanKeys(noder, heat);
-  assert.deepEqual(ut, ["Gullalder-hip-hop"], "kun ekte rester skal fanges");
-  assert.equal(ut.includes("Reggae"), false, "Reggae har g:null, men finnes i treet");
-});
-
-test("heatOrphanKeys: matcher både etikett og fullnavn, og tåler tomt", () => {
-  return import("../../js/sjangre/genre-migrate.js").then(({ heatOrphanKeys }) => {
-    const noder = [{ id: "x", l: "Kort", f: "Langt fullnavn", g: "Jazz" }];
-    assert.deepEqual(heatOrphanKeys(noder, { Kort: [1] }), []);
-    assert.deepEqual(heatOrphanKeys(noder, { "Langt fullnavn": [1] }), []);
-    assert.deepEqual(heatOrphanKeys(noder, { Ukjent: [1] }), ["Ukjent"]);
-    assert.deepEqual(heatOrphanKeys(null, null), []);
-    assert.deepEqual(heatOrphanKeys([], {}), []);
-  });
 });
 
 // Artistforslag bærer sjangeretiketter (mainGenre/subGenre/metaGenre og

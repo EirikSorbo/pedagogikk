@@ -2,38 +2,31 @@
 //  ARTIST-STRIPE — artistens aktive periode som en liten tidslinje på kortet
 // ----------------------------------------------------------------------------
 //  Samme spenn som artistenes tidslinje (resolveSpan i timeline-lanes.js) og
-//  samme tiårsrekke som varmestripa (DECADES). Det er hele poenget: kortet,
-//  tidslinjen, tiårsfiltrene og varmekartet kan ikke svare ulikt på «når var
-//  denne artisten aktiv», fordi de leser samme funksjon og samme akse.
+//  samme akse som treet: tidsrommene (fase 2, js/felles/tidsakse.js), hvert
+//  like bredt, med året lineært innenfor sitt tidsrom. Det er hele poenget:
+//  kortet, tidslinjen, tidsromsfiltrene og treet kan ikke svare ulikt på «når
+//  var denne artisten aktiv», fordi de leser samme funksjon og samme akse.
+//  (I musikkappen var aksen tiårene 1900–2030.)
 //
-//  Aksen er KONTINUERLIG, ikke tiårsbolker: blokka plasseres på årstallet sitt,
-//  og etiketten står midt på sitt eget år. Varmestripas akse (heatAxisHtml)
-//  kunne derfor ikke gjenbrukes — der er hvert tiår en bolk, og etiketten står
-//  midt i bolken, altså et halvt tiår til høyre for året den nevner. På en
-//  varmestripe er det riktig (tiåret ER enheten), her ville det flyttet 1955 en
-//  halv tiårsbredde bort fra streken sin.
+//  Aksen er KONTINUERLIG: blokka plasseres på årstallet sitt, og etiketten
+//  står midt på sitt eget år (startåret til tidsrommet).
 //
-//  Bare ANNETHVERT tiår skrives (brukervalg): stripa står ofte i en smal
-//  kortspalte ved siden av det høyrestilte bildet, og tretten årstall ble for
-//  trangt. Strekene i sporet står under nøyaktig de årstallene som skrives.
+//  Bare noen av tidsrommene får årstall: stripa står ofte i en smal
+//  kortspalte ved siden av det høyrestilte bildet, og seksten årstall ble for
+//  trangt. Strekene i sporet står ved hver tidsromsgrense.
 //
-//  Avhengighetsfattig med vilje (limits + timeline-lanes + genre-model + util),
-//  så ui-helpers.js kan importere den uten import-sykel.
+//  Avhengighetsfattig med vilje (tidsakse + aarstall + timeline-lanes +
+//  genre-model + util), så ui-helpers.js kan importere den uten import-sykel.
 // ============================================================================
 
-import { DECADES } from "../felles/limits.js";
 import { resolveSpan } from "../felles/timeline-lanes.js";
-import { META_GENRE_COLOR, FAMILIES } from "../sjangre/genre-model.js";
+import { aksePos, forAksen, etterAksen, tidsromGrenser } from "../felles/tidsakse.js";
+import { visAar, visSpenn } from "../felles/aarstall.js";
+import { META_GENRE_COLOR, FAMILIES, TIDSROM } from "../sjangre/genre-model.js";
 import { escapeHtml } from "../felles/util.js";
 
-const Y0 = DECADES[0];                          // aksens første år (1900)
-const Y1 = DECADES[DECADES.length - 1] + 10;    // aksens siste år (2030)
-
-// Hvert n-te tiår får årstall. Endres dette, følger strekene i sporet med:
-// de tegnes av samme tall i CSS-gradienten (--ai-tick).
-const LABEL_STEP = 2;
-
-const pctOf = (y) => ((y - Y0) / (Y1 - Y0)) * 100;
+// Høyst så mange årstall på aksen. Med seksten tidsrom blir det hvert fjerde.
+const MAKS_ETIKETTER = 5;
 
 // Fargene kommer fra sjangertreet i Firestore, altså fra DATA. De limes inn i
 // et style-attributt, og «${farge}24»-trikset (alfa som to hex-siffer) krever
@@ -51,48 +44,49 @@ function artistColor(a) {
 // leses likt. «ca.» fordi innflytelsesårene er skjønnsmessige anslag (samme
 // grunn som på faktalinja rett over stripa).
 export function spanText(span) {
-  if (span.open) return `ca. ${span.start} → pågår / sluttår ikke satt`;
-  return span.start === span.end ? `ca. ${span.start}` : `ca. ${span.start}–${span.end}`;
+  if (span.open) return `ca. ${visAar(span.start)} → pågår / sluttår ikke satt`;
+  return `ca. ${visSpenn(span.start, span.end)}`;
 }
 
-// Årstallene over sporet. Absolutt plassert og sentrert PÅ året sitt — derfor
-// har .ai-strip vannrett luft: den ytterste etiketten stikker ut et halvt
-// årstall til hver side og skal ha plass, ikke bli klippet.
-function axisHtml() {
-  return `<div class="ai-axis">` + DECADES
-    .map((d, i) => (i % LABEL_STEP === 0
-      // Tiåret er en lenke til tiårsvinduets Musikk-fane (v6.07, K1); den
-      // delegerte lytteren i explore.js fanger data-tiar.
-      ? `<span style="left:${pctOf(d).toFixed(2)}%"><button type="button" class="tiar-lenke" data-tiar="${d}" aria-label="${d}-tallet">${d}</button></span>` : ""))
+// Årstallene over sporet: startåret til hvert k-te tidsrom. Absolutt plassert
+// og sentrert PÅ året sitt — derfor har .ai-strip vannrett luft: den ytterste
+// etiketten stikker ut et halvt årstall og skal ha plass, ikke bli klippet.
+// (Årstallene var lenker til tiårsvinduet til fase 2.)
+function axisHtml(grenser) {
+  const n = grenser.length;
+  const steg = Math.max(1, Math.ceil(n / MAKS_ETIKETTER));
+  return `<div class="ai-axis">` + grenser
+    .map((g, i) => (i % steg === 0
+      ? `<span style="left:${((i / n) * 100).toFixed(2)}%">${escapeHtml(visAar(g.start))}</span>` : ""))
     .join("") + `</div>`;
 }
 
 // Stripa for ÉN artist. Tom streng når artisten ikke kan plasseres (mangler
-// influenceStart) — kortet skal da se ut som før, ikke vise en tom akse.
-export function artistStripHtml(artist, { nowYear = new Date().getFullYear() } = {}) {
+// influenceStart), eller når treet ikke har tidsrom å plassere på — kortet
+// skal da se ut som før, ikke vise en tom akse.
+export function artistStripHtml(artist, { nowYear = new Date().getFullYear(), tidsrom = TIDSROM } = {}) {
   const span = resolveSpan(artist, nowYear);
-  if (!span) return "";
+  const grenser = tidsromGrenser(tidsrom, nowYear);
+  if (!span || !grenser.length) return "";
 
   const color = artistColor(artist);
   // Utenfor aksen klippes blokka, og enden tegnes flat (uten kant og hjørne),
   // nøyaktig som tidslinjen markerer en åpen slutt: flat ende betyr
   // «fortsetter utenfor bildet», avrundet hjørne betyr «her slutter det».
-  // Buddy Bolden (1895) og Scott Joplin (1899) begynner før 1900.
-  const cutStart = span.start < Y0;
-  const cutEnd = span.open || span.end > Y1;
-  const left = Math.max(0, pctOf(span.start));
+  const cutStart = forAksen(tidsrom, span.start, nowYear);
+  const cutEnd = span.open || etterAksen(tidsrom, span.end, nowYear);
+  const left = aksePos(tidsrom, span.start, nowYear) * 100;
   // Minstebredde så et enkeltår ikke blir usynlig; sporet klipper overskuddet.
-  const width = Math.max(1.5, Math.min(100, pctOf(span.end)) - left);
+  const width = Math.max(1.5, aksePos(tidsrom, span.end, nowYear) * 100 - left);
 
   const cls = ["ai-bar", cutStart ? "is-cut-start" : "", cutEnd ? "is-cut-end" : ""]
     .filter(Boolean).join(" ");
   const txt = spanText(span);
 
-  // role="group", ikke "img": tiårene på aksen er knapper (v6.07), og en
-  // img-rolle gjør innholdet presentasjonelt for skjermlesere.
-  return `<div class="ai-strip" role="group" aria-label="Aktiv ${escapeHtml(txt)}">` +
-    axisHtml() +
-    `<div class="ai-track" title="Aktiv ${escapeHtml(txt)}">` +
+  // --ai-n: antall tidsrom, så strekene i sporet (CSS) står ved hver grense.
+  return `<div class="ai-strip" role="img" aria-label="Aktiv ${escapeHtml(txt)}">` +
+    axisHtml(grenser) +
+    `<div class="ai-track" style="--ai-n:${grenser.length}" title="Aktiv ${escapeHtml(txt)}">` +
     `<div class="${cls}" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%;` +
     `background:${color}2e;border-color:${color}b3"></div>` +
     `</div></div>`;

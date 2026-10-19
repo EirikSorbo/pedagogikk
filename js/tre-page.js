@@ -193,9 +193,8 @@ export function initTrePage({ render }) {
     if (!CONFIGURED) return;
     wireFirestoreErrorBanner();
     subscribeSharedData(state, {
-      // contentChanged legger varmenivåene i heat-strip.js og tegner et åpent
-      // sjangerkort på nytt, så varmestripa dukker opp av seg selv når
-      // snapshotet lander etter at kortet ble åpnet.
+      // contentChanged tegner et åpent sjangerkort på nytt når snapshotet
+      // lander etter at kortet ble åpnet.
       // Sjangertreet ligger i samme snapshot; er det ikke der, sier vi fra.
       onContent: () => {
         explore.contentChanged();
@@ -212,9 +211,8 @@ export function initTrePage({ render }) {
       onGenreDescs: () => { explore.genreDescsChanged?.(); provVisMaal(); visningTikk(); },
       // Artistene teller på «Alle artister (n)» i Instrumenter-kortet.
       // presPlanTikk: kjøreplanens oversiktskort viser artist- og kortnavn.
-      onArtists: () => { explore.renderInstrumenter?.(); explore.renderPlateselskaper?.(); explore.refreshDecadeView?.(); provVisMaal(); presPlanTikk(); visningTikk(); },
-      onDecades: () => { explore.refreshDecadeView?.(); provVisMaal(); },
-      onTech: () => { explore.renderInstrumenter?.(); explore.refreshTeknologi?.(); explore.refreshDecadeView?.(); provVisMaal(); presPlanTikk(); visningTikk(); },
+      onArtists: () => { explore.renderInstrumenter?.(); explore.renderPlateselskaper?.(); provVisMaal(); presPlanTikk(); visningTikk(); },
+      onTech: () => { explore.renderInstrumenter?.(); explore.refreshTeknologi?.(); provVisMaal(); presPlanTikk(); visningTikk(); },
       onEdgeDescs: () => provVisMaal(),
       onPodcasts: () => explore.renderInstrumenter?.(),
     });

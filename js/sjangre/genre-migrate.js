@@ -7,13 +7,13 @@
 //    · content/genealogy      nodens l (og g, for metasjangre)
 //    · genreDescriptions      DOKUMENT-ID-en er etiketten
 //    · artists                mainGenre-taggene (og metaGenre)
-//    · content/varmekart      heat-radene er nøklet på etiketten
 //    · config/teacherChecks   genres/metaGenres er navnelister
 //    · pendingEdits           entityId for et sjangerforslag ER etiketten
 //
 //  Endrer man bare treet, blir alt det andre foreldreløst i stillhet: artisten
-//  står igjen med en sjanger som ikke finnes, varmekartraden blir en foreldreløs
-//  nøkkel, og beskrivelsen blir usynlig fordi ingen slår opp det gamle navnet.
+//  står igjen med en sjanger som ikke finnes, og beskrivelsen blir usynlig
+//  fordi ingen slår opp det gamle navnet. (Varmekartet var også nøklet på
+//  etiketten, til det ble tatt ut i fase 2.)
 //
 //  Derfor: modulen PLANLEGGER. Hver funksjon returnerer hva som må skje, uten å
 //  skrive noe. Da kan læreren se konsekvensen før hun bekrefter, og planen kan
@@ -70,9 +70,6 @@ export function findReferences(state, label) {
   const harMeta = !!beskrivelse?.meta;
   const harStory = !!beskrivelse?.story;
 
-  const heat = state?.content?.varmekart?.heat || {};
-  const harVarmekart = Object.keys(heat).some((k) => lik(k, label));
-
   // BEGGE navnelistene: en tre-sjanger kan være avhaket som «genres», og et
   // navn som deler etikett med en fri undersjanger kan stå i «subgenres».
   // Bare den første ble flyttet ved navnebytte, så avhukingen falt av.
@@ -111,7 +108,7 @@ export function findReferences(state, label) {
     })
     : [];
 
-  return { node, artister, eksempler, friUndersjanger, barn, beskrivelse, harMain, harSub, harMeta, harStory, harVarmekart, sjekket, sjekketSub, forslag, artistForslag, koblinger };
+  return { node, artister, eksempler, friUndersjanger, barn, beskrivelse, harMain, harSub, harMeta, harStory, sjekket, sjekketSub, forslag, artistForslag, koblinger };
 }
 
 // Bygger de feltene som må skrives om i et artistforslag når etiketten `fra`
@@ -238,21 +235,6 @@ export function planGenreRename(state, fra, til) {
   //     og et automatisk bytte ville endret noe læreren ikke ba om.
   if (ref.friUndersjanger.length) {
     advarsler.push(`${ref.friUndersjanger.length} artist(er) har «${fra}» som FRI undersjanger. Den taggen står igjen med vilje: den er et eget vokabular, ikke tre-sjangeren. Rett den manuelt om den skulle følge med.`);
-  }
-
-  // 4) Varmekartet
-  if (ref.harVarmekart) {
-    const heat = state.content.varmekart.heat;
-    const gammelNokkel = Object.keys(heat).find((k) => lik(k, fra));
-    const nyHeat = { ...heat, [nyttNavn]: heat[gammelNokkel] };
-    // Ved en ren case-retting kan nøkkelen allerede stå i målformen — da ville
-    // delete fjernet raden vi nettopp satte.
-    if (gammelNokkel !== nyttNavn) delete nyHeat[gammelNokkel];
-    // doc.replace, IKKE merge: Firestore dyp-fletter map-felter, så med merge
-    // ville den GAMLE heat-nøkkelen blitt liggende igjen ved siden av den nye.
-    ops.push(op("doc.replace", "content", "varmekart",
-      { ...state.content.varmekart, heat: nyHeat },
-      "Varmekartraden følger med (gammel nøkkel fjernes)"));
   }
 
   // 5) Lærerens avkryssing
@@ -466,7 +448,7 @@ export function planMetaRename(state, fra, til) {
 
   const berorteNoder = noder.filter((n) => lik(n.g, fra));
   // metaOrderHint er en NAVNELISTE som rangerer metasjangrene pedagogisk
-  // (varmekartet og tidslinjen leser den). Glemmes den, faller metasjangeren
+  // (tidslinjen og listene leser den). Glemmes den, faller metasjangeren
   // stille bakerst i rekkefølgen uten at noe ser galt ut.
   const hint = Array.isArray(tre.metaOrderHint) ? tre.metaOrderHint : [];
   ops.push(op("doc.replace", "content", "genealogy", {
@@ -600,13 +582,6 @@ export function planGenreDelete(state, label) {
   if (ref.koblinger.length) {
     advarsler.push(`${ref.koblinger.length} koblingsbeskrivelse(r) slettes. De gjaldt streker til eller fra denne sjangeren.`);
   }
-  if (ref.harVarmekart) {
-    const heat = { ...state.content.varmekart.heat };
-    const nokkel = Object.keys(heat).find((k) => lik(k, label));
-    delete heat[nokkel];
-    ops.push(op("doc.replace", "content", "varmekart", { ...state.content.varmekart, heat },
-      "Varmekartraden fjernes"));
-  }
   if (ref.sjekket) {
     ops.push(op("doc.merge", "config", "teacherChecks",
       { genres: (state.teacherChecks.genres || []).filter((g) => !lik(g, label)) },
@@ -725,7 +700,8 @@ export function planMetaDelete(state, navn) {
 }
 
 // ----------------------------------------------------------------------------
-//  FORELDRELØSE VARMEKART-RADER
+//  FORELDRELØSE KOBLINGSBESKRIVELSER
+// ----------------------------------------------------------------------------
 // Koblingsbeskrivelser hvis kant ikke finnes i treet. Doc-ID-en er
 // «forelderid__barnid», så å fjerne en forelder (re-parenting) etterlater
 // dokumentet uten at noe rydder det. De er nå usynlige i appen (edgeExists i
@@ -741,8 +717,8 @@ export function edgeOrphanKeys(nodes, edgeDescs) {
   return Object.keys(edgeDescs || {}).filter((k) => !kanter.has(k));
 }
 
-// Sletteplan for dem. Samme form som planHeatCleanup: ingenting skjer før
-// læreren har sett hva som forsvinner.
+// Sletteplan for dem: ingenting skjer før læreren har sett hva som
+// forsvinner.
 export function planEdgeCleanup(state) {
   const advarsler = [], ops = [];
   const noder = Array.isArray(state?.tree?.nodes) ? state.tree.nodes : [];
@@ -766,65 +742,6 @@ export function planEdgeCleanup(state) {
   }
   advarsler.push(`Koblingene finnes ikke i treet lenger, så tekstene vises ikke noe sted i appen. De bærer likevel ekte tekst du har skrevet. SLETTINGEN KAN IKKE ANGRES. Ta en eksport først hvis du vil beholde dem. Vil du heller ha tekstene tilbake, legg koblingen inn i treet igjen i stedet for å slette her.`);
   return { ops, feil: [], advarsler, blokkeringer: [] };
-}
-
-// Varmekart-nøkler INGEN node i treet bærer navnet til. Eksportert fordi BÅDE
-// planen under og etiketten på knappen (teacher-genres.js) må bruke nøyaktig
-// samme predikat — de hadde hver sin kopi, og begge var feil på samme måte.
-//
-// Predikatet var «node MED metasjanger» (n.g). Det er noe helt annet: rot- og
-// uplasserte noder har g === null, men de FINNES i treet. Reggae er en av dem,
-// og knappen sto derfor og tilbød seg å slette sju tiår med kuratert varmedata
-// under påskudd av at raden var foreldreløs.
-//
-// Matcher både etiketten (som varmekartet er nøklet på) og fullnavnet: denne
-// slettingen er uopprettelig, så tvil skal falle ut i «behold».
-export function heatOrphanKeys(nodes, heat) {
-  const noder = Array.isArray(nodes) ? nodes : [];
-  return Object.keys(heat || {}).filter(
-    (k) => !noder.some((n) => lik(n.l, k) || lik(n.f, k))
-  );
-}
-
-// ----------------------------------------------------------------------------
-//  `content/varmekart` er nøklet på sjangerETIKETTEN. Et navnebytte utført før
-//  migreringsmaskineriet fantes (v4.38: Gullalder-hip-hop → Hip-hop, Country →
-//  Hillbilly) etterlot de gamle nøklene liggende, og de er usynlige: varmekartet
-//  tegner én rad per sjanger i TREET, så en nøkkel uten sjanger vises ingen
-//  steder og kan ikke slettes fra noen editor.
-//
-//  De er ufarlige, men de er skitt: de følger med i hver eksport, og en
-//  framtidig sjanger med samme navn ville arvet gamle tall. Ryddes her.
-//
-//  doc.replace, IKKE merge: Firestore dyp-fletter map-felter, så merge kan
-//  ikke fjerne en nøkkel — samme grunn som ved navnebytte.
-export function planHeatCleanup(state) {
-  const feil = [], advarsler = [], ops = [];
-  const noder = Array.isArray(state?.tree?.nodes) ? state.tree.nodes : [];
-  const varmekart = state?.content?.varmekart;
-  const heat = varmekart?.heat;
-
-  if (!noder.length) {
-    return { ops: [], feil: ["Sjangertreet er ikke lastet inn."], advarsler, blokkeringer: [] };
-  }
-  if (!heat || typeof heat !== "object") {
-    return { ops: [], feil: ["Varmekartet er ikke lastet inn."], advarsler, blokkeringer: [] };
-  }
-
-  const foreldrelose = heatOrphanKeys(noder, heat);
-  if (!foreldrelose.length) {
-    return {
-      ops: [], advarsler, blokkeringer: [],
-      feil: ["Varmekartet er rent: alle radene peker på en sjanger i treet."],
-    };
-  }
-
-  const nyHeat = { ...heat };
-  for (const k of foreldrelose) delete nyHeat[k];
-  ops.push(op("doc.replace", "content", "varmekart", { ...varmekart, heat: nyHeat },
-    `Varmekartet: ${foreldrelose.length} foreldreløs(e) rad(er) fjernes (${foreldrelose.join(", ")})`));
-  advarsler.push(`Ingen node i treet heter dette, så radene vises ikke noe sted i appen i dag. De er typisk rester etter et navnebytte gjort før migreringen fantes. SLETTINGEN KAN IKKE ANGRES: oppretter du senere en sjanger med samme navn, starter den uten tall. Dette fjernes: ${foreldrelose.map((k) => `${k} (${(heat[k] || []).filter((v) => v != null).length} tiår med nivå)`).join(", ")}.`);
-  return { ops, feil, advarsler, blokkeringer: [] };
 }
 
 // ----------------------------------------------------------------------------

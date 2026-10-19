@@ -2,7 +2,7 @@
 //  REFERANSER: alle kildene appen bygger på, samlet
 // ----------------------------------------------------------------------------
 //  Kortet er en AVLEDNING av dataene: kildene hentes fra det som allerede
-//  ligger i minnet (artister, tiår, sjangre, koblinger, innovasjonskort) og
+//  ligger i minnet (artister, sjangre, koblinger, innovasjonskort) og
 //  regnes om ved hver åpning, så listen aldri kan bli utdatert. I tillegg kan
 //  læreren legge inn frittstående referanser som ikke hører til noe kort
 //  (content/referanser, «Ny referanse» på lærersiden) — de blandes inn i samme
@@ -22,7 +22,6 @@ import { onMainGenreClick, sjangerOpts } from "./explore-context.js";
 import { opts, getState } from "../data/app-state.js";
 import { metaGroupHeadHtml, wireMetaAccordion } from "../ui/ui-metagruppe.js";
 import { openTechDetail } from "./explore-tech.js";
-import { openDecade } from "./explore-decade.js";
 import { openHistorier } from "./explore-innhold.js";
 
 export function openReferanser() {
@@ -42,7 +41,6 @@ function alleKilder() {
   const legg = (arr, opphav) => { if (Array.isArray(arr)) for (const k of arr) if (k) ut.push({ ...k, opphav }); };
 
   for (const a of (s.artists || []).filter(isVisible)) legg(a.kilder, { type: "artist", id: a.id, navn: a.name });
-  for (const [id, d] of Object.entries(s.decadeDescs || {})) legg(d && d.kilder, { type: "decade", id, navn: `${id}-tallet` });
   for (const [navn, g] of Object.entries(s.genreDescs || {})) {
     if (!g) continue;
     for (const niva of ["meta", "main", "sub"]) legg(g[niva] && g[niva].kilder, { type: "genre", id: navn, navn, niva });
@@ -81,8 +79,6 @@ function apneOpphav(o) {
   } else if (o.type === "tech") {
     const t = (s.techItems || []).find((x) => x.id === o.id);
     if (t) openTechDetail(t);
-  } else if (o.type === "decade") {
-    openDecade(o.id, "society");
   } else if (o.type === "edge") {
     const [fra, til] = String(o.id).split("__");
     showEdgeInfo(fra, til, sjangerOpts());
@@ -119,7 +115,7 @@ function radHtml(rad, i, visSted) {
   if (rad.opphav.length === 1) {
     // Artikkelen og kortet heter som regel det samme («Bessie Smith» på SNL,
     // brukt på Bessie Smiths kort) — da er navnet en gjentakelse, og knappen
-    // sier heller hva den gjør. Er navnene ulike (et tiår, en sjanger), er
+    // sier heller hva den gjør. Er navnene ulike (en sjanger, en kobling), er
     // navnet det mest opplysende.
     const navn = rad.opphav[0].navn || "";
     const likt = navn.toLowerCase() === String(rad.tittel || "").toLowerCase();
@@ -173,7 +169,7 @@ export function renderReferanser() {
 
   radListe = [];
   let html = `<p class="muted" style="margin:0 0 6px;font-size:0.86rem">`;
-  html += `${antallOrd(data.unike, "kilde", "kilder")} samlet fra artistkortene, tiårene, sjangrene, koblingene i slektstreet og innovasjonskortene.</p>`;
+  html += `${antallOrd(data.unike, "kilde", "kilder")} samlet fra artistkortene, sjangrene, koblingene i slektstreet og innovasjonskortene.</p>`;
 
   // Seksjonene er overskrifter, ikke knapper: de står alltid åpne. Bare
   // nettstedene under «Nettsteder» har trekant, siden de kan romme hundrevis

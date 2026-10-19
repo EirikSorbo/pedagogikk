@@ -16,7 +16,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { normalizeImportFile, decadeDoc } from "../../js/data/import-format.js";
+import { normalizeImportFile } from "../../js/data/import-format.js";
 import { validateTree } from "../../js/sjangre/genre-validate.js";
 import { GENEALOGY, FAMILIES, META_ORDER_HINT } from "../../js/sjangre/genealogy-data.js";
 
@@ -43,11 +43,9 @@ test("en fil med BARE sjangertreet godtas — det er en gyldig innholdsfil", () 
 test("hver innholdsdel overlever normaliseringen", () => {
   const raw = {
     artists: [{ name: "A" }],
-    decades: { 1950: { body: "x" } },
     edgeDescriptions: { blues__rnb: { description: "x" } },
     tech: [{ name: "T" }],
     pages: { omHistorie: { body: "x" } },
-    varmekart: { heat: { Blues: [1] } },
     referanser: { kilder: [{ tittel: "K" }] },
     podcasts: [{ title: "P" }],
     teacherChecks: { genres: ["Blues"] },
@@ -66,7 +64,24 @@ test("manglende deler blir tomme, ikke undefined", () => {
   assert.deepEqual(d.pages, {});
   assert.deepEqual(d.podcasts, []);
   assert.equal(d.genealogy, null);
-  assert.equal(d.varmekart, null);
+});
+
+// Tiårsbeskrivelsene og varmekartet ble tatt ut i fase 2. En eldre fil med
+// dem godtas for resten av innholdet, men de to delene slipper ikke gjennom
+// (teacher-import melder dem som ukjente felter).
+test("tiår og varmekart i en eldre fil slipper ikke gjennom", () => {
+  const d = normalizeImportFile({ artists: [{ name: "A" }], decades: { 1950: { society: "x" } }, varmekart: { heat: { Blues: [1] } } });
+  assert.ok(d);
+  assert.equal("decades" in d, false);
+  assert.equal("varmekart" in d, false);
+  assert.equal(normalizeImportFile({ decades: { 1950: { society: "x" } } }), null, "en fil med BARE tiår er ikke en innholdsfil lenger");
+});
+
+// Tidsrommene (fase 2) ligger i genealogy og følger med treet.
+test("tidsrommene følger sjangertreet gjennom normaliseringen", () => {
+  const tidsrom = [{ fra: -800, til: -150, navn: "Antikken" }, { fra: -150, til: null }];
+  const d = normalizeImportFile({ genealogy: { ...tre(), tidsrom } });
+  assert.deepEqual(d.genealogy.tidsrom, tidsrom);
 });
 
 // { skip }-opsjonen, ikke en stille return: en return rapporteres som PASS
@@ -82,46 +97,6 @@ test("seed-fila har den formen importen faktisk godtar", { skip: seedSkip }, () 
   assert.ok(d, "seed-fila må godtas av formsjekken");
   assert.equal(d.genealogy.nodes.length, GENEALOGY.length);
   assert.deepEqual(validateTree(d.genealogy).filter((p) => p.nivå === "feil"), []);
-});
-
-// «Les mer»-tekstene ble forkastet i v4.78 og slettet i v4.93. Et tiårsdokument
-// bygges derfor felt for felt, både ut i eksporten og inn fra en fil — ellers
-// ville en eldre sikkerhetskopi dratt dem inn igjen.
-test("tiårsdokumentet har KUN samfunn, teknologi og kilder", () => {
-  const d = decadeDoc({
-    society: "Samfunn", tech: "Teknologi", kilder: [{ text: "SNL" }],
-    societyMore: "gammel les mer-tekst", techMore: "gammel les mer-tekst", noeAnnet: 1,
-  });
-  assert.deepEqual(Object.keys(d).sort(), ["kilder", "society", "tech"]);
-  assert.equal(d.society, "Samfunn");
-  assert.equal(d.kilder.length, 1);
-});
-
-test("et tomt tiår gir tomme felter, ikke undefined", () => {
-  assert.deepEqual(decadeDoc(), { society: "", tech: "", kilder: [] });
-  assert.deepEqual(decadeDoc({ kilder: "ikke en liste" }), { society: "", tech: "", kilder: [] });
-});
-
-// Importen skriver tiår med { merge: true }, og Firestore SKRIVER en tom verdi
-// framfor å hoppe over den. Full form betydde at en fil med bare { society }
-// nullstilte tiårets teknologitekst og kilder, stille.
-test("decadeDoc partial: felter fila ikke nevner, skrives ikke", () => {
-  assert.deepEqual(decadeDoc({ society: "ny tekst" }, { partial: true }), { society: "ny tekst" });
-  assert.deepEqual(decadeDoc({ tech: "T" }, { partial: true }), { tech: "T" });
-  assert.deepEqual(
-    decadeDoc({ society: "S", kilder: [{ text: "SNL" }] }, { partial: true }),
-    { society: "S", kilder: [{ text: "SNL" }] }
-  );
-  // Eksplisitt tomme verdier teller heller ikke: fletting kan aldri tømme.
-  assert.deepEqual(decadeDoc({ society: "S", tech: "", kilder: [] }, { partial: true }), { society: "S" });
-  assert.deepEqual(decadeDoc({}, { partial: true }), {});
-  // Gamle «les mer»-felter siles bort også i partial-form.
-  assert.deepEqual(decadeDoc({ society: "S", societyMore: "x" }, { partial: true }), { society: "S" });
-});
-
-test("decadeDoc uten partial er UENDRET — eksporten skal ha full form", () => {
-  assert.deepEqual(decadeDoc({ society: "S" }), { society: "S", tech: "", kilder: [] });
-  assert.deepEqual(decadeDoc(), { society: "", tech: "", kilder: [] });
 });
 
 // Konfliktdialogen løses av læreren lenge etter at handleMergeFile returnerer.

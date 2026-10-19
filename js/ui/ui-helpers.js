@@ -10,8 +10,9 @@
 // ============================================================================
 
 import { escapeHtml, buildKilderList, safeUrl, wikimediaThumb, dropboxDirectUrl } from "../felles/util.js";
+import { visAar, visSpenn } from "../felles/aarstall.js";
 import { wireAllLinks, nevnteArtister } from "../felles/linkify.js";
-import { renderRichText, renderInline } from "../felles/rich-text.js";
+import { renderRichText } from "../felles/rich-text.js";
 import { GENDERS, UKJENT_KJONN, instrumenterFor, erSkjult } from "../felles/limits.js";
 import { artistSjekketOk } from "../felles/sjekket.js";
 import { askChoice, modalClose } from "./ui-modal.js";
@@ -404,9 +405,11 @@ if (typeof document !== "undefined") {
   }, true);
 }
 
+// Årstallene her og under går gjennom visAar (fase 2): et verk eller en
+// framføring før Kristus står som «(375 f.Kr.)».
 function yearLabel(w) {
   const y = w.year || null;
-  if (y) return `(${y})`;
+  if (y) return `(${visAar(y)})`;
   return "";
 }
 
@@ -419,9 +422,9 @@ export const sentralMerke = (m) => (m && m.sentral === true ? SENTRAL_MERKE : ""
 export function musicExampleLabel(m) {
   const y = m.year || null;
   const p = m.performanceYear || null;
-  if (y && p && p !== y) return ` (${y}, framføring ${p})`;
-  if (y) return ` (${y})`;
-  if (p) return ` (framføring ${p})`;
+  if (y && p && p !== y) return ` (${visAar(y)}, framføring ${visAar(p)})`;
+  if (y) return ` (${visAar(y)})`;
+  if (p) return ` (framføring ${visAar(p)})`;
   return "";
 }
 
@@ -584,28 +587,8 @@ export function artistImage(a, big = false) {
   </figure>`;
 }
 
-// Tiårstekstene ble skrevet FØR appen kunne formatere: ett punkt per linje,
-// uten noen markering, og formatInfoText gjorde hver linje til et kulepunkt.
-// Elleve slike felter ligger fortsatt i Firestore (alle «teknologi»-feltene fra
-// 1900 til 2000), og de skal fortsatt se ut som lister. Regelen er smal med
-// vilje: flere linjer, ingen blank linje mellom dem, og ingen blokkmarkering i
-// noen av dem. Setter læreren inn et «- », en tom linje eller en mellomtittel,
-// tar den vanlige parseren over. Returnerer linjene, eller null.
-function gammelLinjeliste(text) {
-  if (/\n\s*\n/.test(text)) return null;
-  const linjer = text.split("\n").map((l) => l.trim()).filter(Boolean);
-  if (linjer.length < 2) return null;
-  if (linjer.some((l) => /^(#{1,6}|[-•–]|\d+[.)])\s/.test(l))) return null;
-  return linjer;
-}
-
-// Tiårenes samfunns- og teknologitekst (og «les mer»-modalen deres).
-export function formatInfoText(text, lc) {
-  if (!text) return "";
-  const gammel = gammelLinjeliste(String(text));
-  if (gammel) return `<ul>${gammel.map((l) => `<li>${renderInline(l, lc)}</li>`).join("")}</ul>`;
-  return renderRichText(text, lc);
-}
+// (formatInfoText, som tegnet tiårstekstene og deres gamle linjelister, ble
+// tatt ut sammen med tiårskortene i fase 2.)
 
 export function pct(n, max) {
   if (!max) return 0;
@@ -621,16 +604,15 @@ export function pct(n, max) {
 // samme tre som kaller denne.
 export function factsLines(a, { showGender = false } = {}) {
   const rows = [];
-  if (a.birthYear && a.deathYear) rows.push(["Levetid", `${a.birthYear}–${a.deathYear}`]);
-  else if (a.birthYear) rows.push(["Levetid", `${a.birthYear}–`]);
-  else if (a.deathYear) rows.push(["Levetid", `?–${a.deathYear}`]);
+  // visSpenn (fase 2): «427–347 f.Kr.», «1712–», «?–1778».
+  if (a.birthYear || a.deathYear) rows.push(["Levetid", visSpenn(a.birthYear || null, a.deathYear || null)]);
   // «ca.» gjelder HELE perioden, ikke bare enkeltåret: innflytelsesårene er
   // skjønnsmessige anslag, ikke datofestede fakta, og et bart «1955–1970» leses
   // som en presisjon feltet ikke har.
   if (a.influenceStart) {
     const p = (!a.influenceEnd || a.influenceEnd === a.influenceStart)
-      ? `${a.influenceStart}`
-      : `${a.influenceStart}–${a.influenceEnd}`;
+      ? visAar(a.influenceStart)
+      : visSpenn(a.influenceStart, a.influenceEnd);
     rows.push(["Innflytelse", `ca. ${p}`]);
   }
   if (a.recordLabel) rows.push(["Plateselskap", a.recordLabel, { html: plateselskapHtml(a.recordLabel) }]);
@@ -692,7 +674,7 @@ export function techFactsLines(t) {
     // funksjonalitet, ikke gjenoppretting.)
     ["Kategori", t.category, { attr: "data-tech-cat" }],
     ["Instrument", t.instrument, { attr: "data-tech-instr" }],
-    ["Oppfunnet", t.inventedYear],
+    ["Oppfunnet", visAar(t.inventedYear)],
     ["Tatt i bruk", t.adoptedLabel],
   ]);
 }

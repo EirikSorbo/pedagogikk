@@ -16,10 +16,8 @@ import { opts, getState } from "../data/app-state.js";
 import { showSubsjangerInfo } from "../ui/ui.js";
 import { showEdgeInfo } from "../sjangre/genealogy.js";
 import { openTechDetail, openTeknologi } from "./explore-tech.js";
-import { openDecade } from "./explore-decade.js";
 import { openRotter, openOmHistorie, openHistorier, openAppGuide, openStoreBildet, openSjangerhimmel } from "./explore-innhold.js";
 import { openInstrumenter, openPodkaster } from "./explore-instrument.js";
-import { openVarmekart } from "./explore-varmekart.js";
 import { openSjangerperioder } from "./explore-sjangerperioder.js";
 import { openTidslinje } from "./explore-tidslinje.js";
 import { openReferanser } from "./explore-referanser.js";
@@ -70,7 +68,6 @@ export function apneMaal(apne) {
       if (t) openTechDetail(t);
       return;
     }
-    case "tiår": return openDecade(apne.id, apne.modus);
     // Et lytteeksempel (v5.28): spill i den innebygde spilleren. Tittelen
     // slås opp i artistenes egne eksempler når de har landet — best effort.
     // Fjerde ledd er starttidspunktet i sekunder (v5.29).
@@ -84,7 +81,6 @@ export function apneMaal(apne) {
       if (apne.id === "omHistorie") return openOmHistorie();
       return openAppGuide();
     case "instrument": return openInstrumenter(apne.id);
-    case "varmekart": return openVarmekart(apne.id);
     case "kobling": {
       const [fra, til] = String(apne.id).split("__");
       showEdgeInfo(fra, til, sjangerOpts());
@@ -164,16 +160,10 @@ function klarFor(apne, s) {
       // Teksten bor i genreDescriptions og familien i treet: vent på begge,
       // så kortet ikke åpnes med «mangler»-tekst som straks byttes ut.
       return s.genreDescsLoaded && isGenreModelReady() ? "klar" : "vent";
-    case "tiår":
-      // Teknologifanen tegner innovasjonskortene i tiåret: vent på dem også.
-      return Object.keys(s.decadeDescs || {}).length && (apne.modus !== "tech" || s.techLoaded) ? "klar" : "vent";
     case "teknologi":
       return s.techLoaded ? "klar" : "vent";
     case "side": case "sjangerperioder": case "referanser": case "store-bildet":
       return s.contentLoaded ? "klar" : "vent";
-    case "varmekart":
-      // Med metasjanger som id trengs også treet (gruppene bygges av det).
-      return s.contentLoaded && (!apne.id || isGenreModelReady()) ? "klar" : "vent";
     case "instrument":
       return s.contentLoaded && s.artistsLoaded ? "klar" : "vent";
     // Plateselskapene (v6.37): teksten i content, artistene fra artistlista.

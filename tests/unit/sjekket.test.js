@@ -10,7 +10,7 @@ import { SKJUL_I_STUDENTVISNING } from "../../js/felles/feature-flags.js";
 import { sjekketRegelAktiv, artistSjekketOk, settSjekketLaerer, brukSjekker, sjekketOk, koblingSjekketOk } from "../../js/felles/sjekket.js";
 import { isVisible } from "../../js/felles/limits.js";
 import {
-  filtrerGenreDescs, filtrerEdgeDescs, filtrerTech, filtrerDecades, filtrerContent,
+  filtrerGenreDescs, filtrerEdgeDescs, filtrerTech, filtrerContent,
   sideSjekk, sjekkerEndretAvImport, sjekkerUten,
 } from "../../js/data/sjekket-filter.js";
 import { storyOrderSynlig, storyOrder } from "../../js/felles/story-format.js";
@@ -75,17 +75,10 @@ test("sjangerbeskrivelsene: teksten tas bort, årstallene blir stående", () => 
   assert.equal(noen["Doo-wop"].sub.description, "s", "store og små bokstaver spiller ingen rolle");
 });
 
-test("koblinger, innovasjonskort og tiår følger hver sin sjekk", () => {
+test("koblinger og innovasjonskort følger hver sin sjekk", () => {
   assert.deepEqual(Object.keys(filtrerEdgeDescs({ a__b: { description: "x" }, b__c: { description: "y" } }, { edges: ["b__c"] })), ["b__c"]);
   assert.deepEqual(filtrerTech([{ id: "t1" }, { id: "t2" }], { tech: ["t2"] }).map((t) => t.id), ["t2"]);
-  const tiaar = filtrerDecades({
-    1950: { id: "1950", society: "s", tech: "t", kilder: [{ text: "k" }] },
-    1960: { id: "1960", society: "s", tech: "t", kilder: [{ text: "k" }] },
-  }, { decades: ["1950"] });
-  assert.equal(tiaar[1950].society, "s");
-  assert.equal(tiaar[1950].tech, undefined);
-  assert.equal(tiaar[1950].kilder.length, 1, "kildene følger den sjekkede teksten");
-  assert.deepEqual(tiaar[1960], { id: "1960" });
+  // (Tiårene hadde to sjekker, samfunn og teknologi, til de ble tatt ut i fase 2.)
 });
 
 test("innholdssidene: pensumsidene følger sjekken, resten av content står", () => {
@@ -136,8 +129,7 @@ test("import: sjekken faller når teksten endres, ikke når den er lik eller tom
     pages: { rotter: { body: "ny" }, skriveveiledning: { body: "s" } },
     tech: [{ name: "Mikrofon", description: "ny" }, { name: "Ny ting", description: "z" }],
   }, naa);
-  assert.deepEqual([...fjern.decades], ["1950"]);
-  assert.equal(fjern.decadesTech, undefined, "tom tekst i fila skriver ingenting");
+  assert.equal(fjern.decades, undefined, "tiårene i en eldre fil importeres ikke lenger (fase 2)");
   assert.deepEqual([...fjern.genres].sort(), ["Europeisk", "Europeisk folkemusikk"]);
   assert.equal(fjern.metaGenres, undefined, "lik historie beholder sjekken");
   assert.equal(fjern.edges, undefined);
@@ -146,8 +138,8 @@ test("import: sjekken faller når teksten endres, ikke når den er lik eller tom
 
   const { data, antall } = sjekkerUten(
     { decades: ["1950", "1960"], genres: ["europeisk"], pages: [], tech: ["t1"] }, fjern);
-  assert.equal(antall, 3);
-  assert.deepEqual(data, { decades: ["1960"], genres: [], tech: [] });
+  assert.equal(antall, 2);
+  assert.deepEqual(data, { genres: [], tech: [] });
 });
 
 test("godkjent studentforslag fjerner sjekken (store.js)", () => {

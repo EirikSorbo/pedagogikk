@@ -1,7 +1,7 @@
 // ============================================================================
 //  PRIVATE NOTATER I VISNINGEN (v6.50, brukerbestilling 2026-10-07)
 // ----------------------------------------------------------------------------
-//  Lærerens egne notater til kortene (artist, sjanger, innovasjon, tiår).
+//  Lærerens egne notater til kortene (artist, sjanger, innovasjon).
 //  Tasten P viser og skjuler dem i et lite kort oppå lerretet, bare i
 //  lærerens eget vindu: lerretet på prosjektoren (js/visning/lerret.js)
 //  viser dem aldri. Hver visning starter med notatene skjult; valget huskes
@@ -15,7 +15,7 @@
 //  lytteeksempel oppå artistkortet ikke tar notatene bort.
 //
 //  Lærersiden (v6.58, brukerønske 2026-10-08): en «Notater»-knapp på
-//  artist-, teknologi-, tiårs- og sjangerkortene i lærerviewet kaller
+//  artist-, teknologi- og sjangerkortene i lærerviewet kaller
 //  redigerNotatForKort(hva, id, navn) direkte — der står jo ALDRI et kort
 //  åpent på lerretet (teacher.html presenterer ingenting). Boksen er den
 //  SAMME som i visningen; bare målet kommer fra en knapp i stedet for det
@@ -61,12 +61,12 @@ export function vekslNotater() {
   tegn();
 }
 
-// Lærerviewets «Notater»-knapp (v6.58) på artist-, teknologi-, tiårs- og
+// Lærerviewets «Notater»-knapp (v6.58) på artist-, teknologi- og
 // sjangerkortene: samme boks og redigeringsflyt som tasten Å, men med et
 // eksplisitt mål i stedet for det øverste åpne kortet — teacher.html har
 // ingen lerret å lete etter et åpent kort på. `hva` er samme nøkkel som
-// NOTAT_TYPER («artist», «tech», «tiår», «sjanger»), `id` er kortets egen id
-// (artistens/innovasjonens dok-ID, tiårstallet, eller sjangerens etikett).
+// NOTAT_TYPER («artist», «tech», «sjanger»), `id` er kortets egen id
+// (artistens/innovasjonens dok-ID eller sjangerens etikett).
 export function redigerNotatForKort(hva, id, navn) {
   const nokkel = notatNokkel(`${hva}:${id}`);
   if (!nokkel) return;
@@ -135,7 +135,6 @@ function kortNavn(vis) {
   const s = getState();
   if (m.hva === "artist") return (s.artists || []).find((a) => a.id === m.id)?.name || "Artist";
   if (m.hva === "tech") return (s.techItems || []).find((t) => t.id === m.id)?.name || "Innovasjon";
-  if (m.hva === "tiår") return `${m.id}-tallet`;
   const n = GENEALOGY.find((x) => x.l === m.id);
   return n?.f || n?.l || m.id;
 }
@@ -196,7 +195,7 @@ function tegn() {
   if (feil) { el.innerHTML = `${hode("", "")}<p class="pn-tom">${escapeHtml(feil)}</p>`; return; }
   const kort = aktivtKort();
   if (!kort) {
-    el.innerHTML = `${hode("", "")}<p class="pn-tom">Åpne et artist-, sjanger-, innovasjons- eller tiårskort, så står notatet til kortet her.</p>`;
+    el.innerHTML = `${hode("", "")}<p class="pn-tom">Åpne et artist-, sjanger- eller innovasjonskort, så står notatet til kortet her.</p>`;
     return;
   }
   if (!lastet) { el.innerHTML = `${hode(kort.navn, "")}<p class="pn-tom">Laster notatene …</p>`; return; }

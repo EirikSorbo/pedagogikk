@@ -4,8 +4,13 @@
 //  Her legger læreren inn, endrer og fjerner sjangre og metasjangre. Treet bor i
 //  content/genealogy (fase 1), og layouten regnes ut (fase 2), så det finnes
 //  ingen koordinater å pusle med: man sier hvilken metasjanger sjangeren hører
-//  til, hvilket tiår den preget og hvem den vokste ut av, så plasserer kartet
-//  den selv.
+//  til, hvilket tidsrom den preget og hvem den vokste ut av, så plasserer
+//  kartet den selv.
+//
+//  Tidsrommene (radene, pedagogikkappens fase 2) redigeres i et eget skjema.
+//  De er en TRYGG endring: et tidsrom er ingen identitet, og nodene peker på
+//  raden med et tall. Settes et tidsrom inn eller fjernes, flyttes nodene
+//  under med i samme lagring, så ingen epoke havner i feil tidsrom.
 //
 //  DET VIKTIGE SKILLET, og grunnen til at fila er bygget som den er:
 //
@@ -15,8 +20,7 @@
 //
 //    IDENTITETSbytter  — å endre ETIKETTEN, eller å slette. Etiketten er
 //                        dokument-ID i genreDescriptions og står som tagg på
-//                        artister, i varmekartet, i avkryssinger og i åpne
-//                        forslag. Slike endringer går ALLTID gjennom
+//                        artister, i avkryssinger og i åpne forslag. Slike endringer går ALLTID gjennom
 //                        js/sjangre/genre-migrate.js: den planlegger, læreren ser hva
 //                        som skjer, og alt skrives i ÉN atomisk batch.
 //
@@ -29,11 +33,12 @@ import { $ } from "../data/shared.js";
 import { escapeHtml, kanoniskJson } from "../felles/util.js";
 
 import { state } from "./teacher-state.js";
-import { DECADE_ROWS, FAMILIES } from "../sjangre/genre-model.js";
-import { validateTree } from "../sjangre/genre-validate.js";
+import { TIDSROM, RAD_ANTALL, FAMILIES, tidsromEtikett } from "../sjangre/genre-model.js";
+import { validateTree, sjekkTidsrom } from "../sjangre/genre-validate.js";
+import { tolkAar, visSpenn, AAR_HJELP } from "../felles/aarstall.js";
 import {
   planGenreRename, planMetaRename, planGenreDelete, planMetaDelete,
-  planPasserIBatch, byggMetaTre, planHeatCleanup, heatOrphanKeys,
+  planPasserIBatch, byggMetaTre,
   planEdgeCleanup, edgeOrphanKeys,
 } from "../sjangre/genre-migrate.js";
 import { runMigrationPlan, saveGenealogyTree } from "../data/store.js";
@@ -66,17 +71,14 @@ export const GENRE_ADMIN_HTML = `
     </div>
     <p class="muted" style="margin:0 0 12px">
       Legg inn, endre eller fjern sjangre. Plasseringen i kartet regnes ut av metasjanger,
-      tiår og slektskap, så du trenger ikke tenke på koordinater.
+      tidsrom og slektskap, så du trenger ikke tenke på koordinater.
     </p>
     <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
       <button class="btn primary small" id="gen-ny-sjanger">Ny sjanger</button>
       <button class="btn ghost small" id="gen-ny-meta">Ny metasjanger</button>
-      <!-- Foreldreløse varmekart-rader: nøkler som ikke lenger peker på en
-           sjanger i treet (rester etter navnebytter gjort før migreringen
-           fantes). Usynlige i varmekartet, så dette er eneste vei til dem.
-           Knappen står alltid — se renderListe for hvorfor. -->
-      <button class="btn ghost small" id="gen-rydd-heat">Sjekk varmekartet for foreldreløse rader</button>
-      <!-- Samme sak for koblingsbeskrivelsene: doc-ID er «forelderid__barnid»,
+      <!-- Radene i treet (fase 2): tidsrom av fri lengde. -->
+      <button class="btn ghost small" id="gen-tidsrom">Tidsrom</button>
+      <!-- Foreldreløse koblingsbeskrivelser: doc-ID er «forelderid__barnid»,
            så det å fjerne en forelder etterlater dokumentet. De er usynlige i
            appen (edgeExists), og dette er eneste vei til dem. -->
       <button class="btn ghost small" id="gen-rydd-kobling">Sjekk koblingsbeskrivelsene for foreldreløse</button>
@@ -115,6 +117,27 @@ export const GENRE_ADMIN_HTML = `
   </div>
 </div>
 
+<div class="modal-backdrop" id="modal-genre-tidsrom">
+  <div class="modal modal-wide">
+    <div class="modal-head">
+      <h2>Tidsrom</h2>
+      <button class="modal-close btn ghost small">✕</button>
+    </div>
+    <p class="muted" style="margin:0 0 12px">
+      Radene i treet, ovenfra og ned. Et tidsrom varer fra startåret til neste
+      tidsrom begynner; la «Til» stå tom i det siste, så varer det til i dag.
+      Tidsrommene kan være ulikt lange, men tegnes like høye.
+      ${AAR_HJELP} Etiketten er valgfri: tom etikett gir årstallene.
+    </p>
+    <div id="gen-tidsrom-body"></div>
+    <p id="gen-tidsrom-msg" class="form-msg"></p>
+    <div class="modal-foot-right" style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn ghost small" id="gen-tidsrom-ny">Legg til nederst</button>
+      <button class="btn primary small" id="gen-tidsrom-lagre">Lagre</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="modal-genre-plan">
   <div class="modal">
     <div class="modal-head">
@@ -148,23 +171,10 @@ function renderListe() {
   const metaer = [...(t.metaGenres || [])].sort((a, b) => (a.column ?? 0) - (b.column ?? 0));
   const uten = t.nodes.filter((n) => !n.g);
 
-  // Varmekart-rader uten sjanger i treet. Knappen står ALLTID: den var
-  // selvskjulende først, og da var funksjonen uoppdagelig i det øyeblikket
-  // tellingen (eller en cachet side) tok feil — nettopp fordi radene ikke
-  // vises noe annet sted i appen. Nå sier etiketten hva den fant, og et klikk
-  // på et rent varmekart svarer «rent» i planen i stedet for å gjøre noe.
-  const ryddHeat = $("#gen-rydd-heat");
-  if (ryddHeat) {
-    const heat = state.content?.varmekart?.heat || {};
-    // Samme predikat som planen (heatOrphanKeys) — tidligere hadde de hver sin
-    // kopi, og knappen kunne love å slette noe planen ikke skulle rørt.
-    const foreldrelose = heatOrphanKeys(t.nodes, heat);
-    ryddHeat.textContent = foreldrelose.length
-      ? `Rydd foreldreløse varmekart-rader (${foreldrelose.length})`
-      : "Sjekk varmekartet for foreldreløse rader";
-    ryddHeat.classList.toggle("primary", foreldrelose.length > 0);
-  }
-
+  // Knappen står ALLTID: en selvskjulende knapp var uoppdagelig i det
+  // øyeblikket tellingen (eller en cachet side) tok feil, nettopp fordi
+  // tekstene ikke vises noe annet sted i appen. Nå sier etiketten hva den
+  // fant, og et klikk når alt er rent svarer «rent» i planen.
   const ryddKobling = $("#gen-rydd-kobling");
   if (ryddKobling) {
     const n = edgeOrphanKeys(t.nodes, state.edgeDescs).length;
@@ -198,7 +208,7 @@ function renderListe() {
 }
 
 function radHtml(n) {
-  const tiar = DECADE_ROWS[Math.floor(n.r)] || `rad ${n.r}`;
+  const tiar = tidsromEtikett(n.r) || `rad ${Math.floor(n.r) + 1}`;
   const antall = (state.artists || []).filter((a) =>
     (a.mainGenre || []).some((g) => String(g).toLowerCase() === String(n.l).toLowerCase())).length;
   return `<button class="gen-rad" data-node="${escapeHtml(n.id)}">
@@ -225,14 +235,16 @@ function openNodeEditor(nodeId) {
   const andre = t.nodes.filter((x) => x.id !== nodeId).sort((a, b) => a.r - b.r || a.l.localeCompare(b.l, "no"));
   const metaValg = (t.metaGenres || []).map((m) =>
     `<option value="${escapeHtml(m.name)}"${n?.g === m.name ? " selected" : ""}>${escapeHtml(m.name)}</option>`).join("");
-  // Én rad EKSTRA nederst: DECADE_ROWS går bare til dagens dypeste rad, og
-  // uten denne kunne aksen aldri utvides via editoren (høna-og-egget: 2020-t
-  // kommer først i DECADE_ROWS når en node står der).
-  const nesteRad = DECADE_ROWS.length;
-  const nesteEtikett = `${1900 + (nesteRad - 1) * 10}-t`;
-  const radValg = DECADE_ROWS.map((etikett, i) =>
-    `<option value="${i}"${Math.floor(n?.r ?? 6) === i ? " selected" : ""}>${escapeHtml(etikett)}</option>`).join("") +
-    `<option value="${nesteRad}">${escapeHtml(nesteEtikett)} (nytt tiår)</option>`;
+  // Radene er tidsrommene (fase 2). En ny rad lages i Tidsrom-skjemaet, ikke
+  // her: et tidsrom trenger årstall. En node som står på en rad uten tidsrom,
+  // får raden sin i lista likevel, så skjemaet ikke flytter den i stillhet.
+  // En ny sjanger foreslås i det siste tidsrommet.
+  const valgtRad = Math.floor(n?.r ?? Math.max(0, RAD_ANTALL - 1));
+  const radValg = Array.from({ length: Math.max(RAD_ANTALL, 1) }, (_, i) => {
+    const rom = TIDSROM[i];
+    const tekst = rom ? `${rom.etikett}${rom.navn ? ` (${rom.navn})` : ""}` : `Rad ${i + 1} (uten tidsrom)`;
+    return `<option value="${i}"${valgtRad === i ? " selected" : ""}>${escapeHtml(tekst)}</option>`;
+  }).join("");
   const famValg = Object.entries(FAMILIES).map(([k, v]) =>
     `<option value="${escapeHtml(k)}"${n?.fam === k ? " selected" : ""}>${escapeHtml(v.label || k)}</option>`).join("");
 
@@ -251,7 +263,7 @@ function openNodeEditor(nodeId) {
       <label>Metasjanger
         <select id="gen-g"><option value="">(rot, ingen metasjanger)</option>${metaValg}</select>
       </label>
-      <label>Tiår
+      <label>Tidsrom
         <select id="gen-r">${radValg}</select>
       </label>
       <label>Egen farge (unntak)
@@ -280,6 +292,7 @@ function lesSkjema() {
     l,
     f: $("#gen-f").value.trim() || l,
     g: $("#gen-g").value || null,
+    // Desimalen (yOffset er en egen nøkkel) beholdes ikke: raden er et heltall.
     r: Number($("#gen-r").value),
     fam: $("#gen-fam").value || undefined,
     p: valgte("p"),
@@ -358,7 +371,7 @@ async function lagre() {
 
   // guardTeacherAction FANGER feilen og returnerer normalt. Sto tre-lagringen,
   // kjørte navnebytte-planen likevel — og den flytter identiteter (beskrivelser,
-  // varmekart, tagger) til et navn treet aldri fikk. Her må vi vite om det gikk.
+  // tagger) til et navn treet aldri fikk. Her må vi vite om det gikk.
   let stempel;
   try {
     stempel = await saveGenealogyTree(nyttTre);
@@ -376,7 +389,7 @@ async function lagre() {
       // over (audit-funn 22): med død content-lytter (typisk tømt lesekvote)
       // sto state.content på versjonen FØR lagringen, ferskhetssjekken i
       // utforPlan bygde planen fra det foreldede treet, og «Utfør» skrev de
-      // trygge endringene (tiår, farge …) stille tilbake. ISO-strenger
+      // trygge endringene (tidsrom, farge …) stille tilbake. ISO-strenger
       // sammenlignes leksikografisk, som her er kronologisk.
       const snap = state.content?.genealogy;
       s.tree = (snap?.updatedAt || "") >= stempel ? snap : nyttTre;
@@ -497,6 +510,106 @@ async function utforPlan() {
 }
 
 // ----------------------------------------------------------------------------
+//  Tidsrommene (radene)
+// ----------------------------------------------------------------------------
+//  Skjemaet arbeider på en kopi. Hver rad husker hvilken rad den var da
+//  skjemaet ble åpnet (`fra`), så lagringen kan flytte nodene når et tidsrom
+//  settes inn over dem eller et tomt tidsrom fjernes. Et tidsrom som har
+//  epoker, kan ikke fjernes: flytt epokene først.
+let tidsromKopi = null;       // [{ fra, til, navn, etikett, opprinnelig }]
+
+const nodeTall = (t, rad) => (t?.nodes || []).filter((n) => Math.floor(Number(n.r) || 0) === rad).length;
+
+function openTidsromEditor() {
+  const t = tre();
+  if (!t) return;
+  const raa = Array.isArray(t.tidsrom) ? t.tidsrom : [];
+  tidsromKopi = raa.map((x, i) => ({
+    fra: Number.isInteger(x?.fra) ? x.fra : null,
+    til: Number.isInteger(x?.til) ? x.til : null,
+    navn: String(x?.navn || ""), etikett: String(x?.etikett || ""), opprinnelig: i,
+  }));
+  if (!tidsromKopi.length) tidsromKopi.push({ fra: null, til: null, navn: "", etikett: "", opprinnelig: null });
+  $("#gen-tidsrom-msg").textContent = "";
+  tegnTidsrom();
+  modalOpen($("#modal-genre-tidsrom"));
+}
+
+// Feltene står som tekst (ikke type=number), så «427 f.Kr.» kan skrives som
+// det sies; tolkAar leser begge formene.
+function tegnTidsrom() {
+  const t = tre();
+  const felt = (i, navn, v, plass) =>
+    `<input type="text" data-tr="${i}" data-felt="${navn}" value="${escapeHtml(v ?? "")}" placeholder="${escapeHtml(plass)}"${navn === "fra" || navn === "til" ? ' inputmode="numeric" class="gen-tr-aar"' : ""}>`;
+  const rader = tidsromKopi.map((x, i) => {
+    const antall = x.opprinnelig == null ? 0 : nodeTall(t, x.opprinnelig);
+    const sist = i === tidsromKopi.length - 1;
+    return `<tr>
+      <td class="muted">${i + 1}</td>
+      <td>${felt(i, "fra", x.fra, i === 0 ? "-800" : String(tidsromKopi[i - 1]?.til ?? ""))}</td>
+      <td>${felt(i, "til", x.til, sist ? "i dag" : String(tidsromKopi[i + 1]?.fra ?? ""))}</td>
+      <td>${felt(i, "navn", x.navn, "Renessansen")}</td>
+      <td>${felt(i, "etikett", x.etikett, visSpenn(x.fra, x.til, { apen: "i dag" }) || "")}</td>
+      <td class="muted">${antall ? `${antall} epoke${antall === 1 ? "" : "r"}` : "tomt"}</td>
+      <td class="gen-tr-knapper">
+        <button type="button" class="btn ghost small" data-tr-inn="${i}" title="Sett inn et nytt tidsrom over dette">Sett inn over</button>
+        <button type="button" class="btn ghost small" data-tr-ut="${i}"${antall ? ' disabled title="Flytt epokene til et annet tidsrom først"' : ""}>Fjern</button>
+      </td>
+    </tr>`;
+  }).join("");
+  $("#gen-tidsrom-body").innerHTML = `<div class="gen-tr-tabell"><table>
+    <thead><tr><th></th><th>Fra</th><th>Til</th><th>Navn</th><th>Etikett</th><th></th><th></th></tr></thead>
+    <tbody>${rader}</tbody></table></div>`;
+}
+
+// Skjemaets verdier inn i kopien, før en rad settes inn, fjernes eller lagres.
+function lesTidsrom() {
+  document.querySelectorAll("#gen-tidsrom-body [data-tr]").forEach((inp) => {
+    const x = tidsromKopi[Number(inp.dataset.tr)];
+    if (!x) return;
+    const v = inp.value.trim();
+    if (inp.dataset.felt === "fra" || inp.dataset.felt === "til") x[inp.dataset.felt] = v === "" ? null : (tolkAar(v) ?? v);
+    else x[inp.dataset.felt] = v;
+  });
+}
+
+async function lagreTidsrom() {
+  const t = tre();
+  const msg = $("#gen-tidsrom-msg");
+  lesTidsrom();
+  const ugyldig = tidsromKopi.findIndex((x) => typeof x.fra === "string" || typeof x.til === "string");
+  if (ugyldig >= 0) { msg.textContent = `Tidsrom ${ugyldig + 1}: årstallet kan ikke leses. ${AAR_HJELP}`; return; }
+  const tidsrom = tidsromKopi.map((x) => {
+    const ut = { fra: x.fra, til: x.til };
+    if (x.navn) ut.navn = x.navn;
+    if (x.etikett) ut.etikett = x.etikett;
+    return ut;
+  });
+  // Nodene følger tidsrommet sitt: opprinnelig rad → ny rad. Desimalen
+  // (mellomrader) beholdes.
+  const nyRad = new Map(tidsromKopi.filter((x) => x.opprinnelig != null).map((x, _, __) => [x.opprinnelig, tidsromKopi.indexOf(x)]));
+  const nodes = t.nodes.map((n) => {
+    const r = Number(n.r) || 0;
+    const gammel = Math.floor(r);
+    if (!nyRad.has(gammel) || nyRad.get(gammel) === gammel) return n;
+    return { ...n, r: nyRad.get(gammel) + (r - gammel) };
+  });
+  const nyttTre = { ...t, nodes, tidsrom };
+  const feil = [...sjekkTidsrom(tidsrom, nodes), ...validateTree(nyttTre)].filter((p) => p.nivå === "feil");
+  if (feil.length) { msg.textContent = feil[0].melding; return; }
+  try {
+    await saveGenealogyTree(nyttTre);
+  } catch (err) {
+    console.error("Kunne ikke lagre tidsrommene:", err);
+    msg.textContent = "Tidsrommene ble ikke lagret (" + (err?.message || err) + "). Ingenting er endret. Prøv igjen.";
+    return;
+  }
+  tidsromKopi = null;
+  modalClose($("#modal-genre-tidsrom"));
+  renderListe();
+}
+
+// ----------------------------------------------------------------------------
 //  Metasjanger
 // ----------------------------------------------------------------------------
 //  Samme skille som for nodene: farge og plassering er TRYGT og skrives rett,
@@ -563,7 +676,7 @@ function openMetaEditor(navn) {
     <p class="muted" style="margin:10px 0 0">
       Sjangrene i metasjangeren arver fargen, med mindre de har fått sin egen.
       Plasseringen i kartet og den pedagogiske rekkefølgen er to ulike akser:
-      varmekartet og tidslinjen leser den siste.
+      tidslinjen og listene leser den siste.
     </p>`;
   modalOpen($("#modal-genre-meta"));
 }
@@ -644,9 +757,30 @@ function slettMeta() {
 export function setupGenreAdmin() {
   $("#gen-ny-sjanger")?.addEventListener("click", () => openNodeEditor(null));
   $("#gen-ny-meta")?.addEventListener("click", () => openMetaEditor(null));
-  $("#gen-rydd-heat")?.addEventListener("click", () =>
-    visPlan("Rydd foreldreløse varmekart-rader", planHeatCleanup(migrasjonsState()),
-      () => planHeatCleanup(migrasjonsState())));
+  $("#gen-tidsrom")?.addEventListener("click", () => openTidsromEditor());
+  $("#gen-tidsrom-lagre")?.addEventListener("click", () => lagreTidsrom());
+  $("#gen-tidsrom-ny")?.addEventListener("click", () => {
+    lesTidsrom();
+    const forrige = tidsromKopi[tidsromKopi.length - 1];
+    // Det forrige siste tidsrommet varte til i dag; nå slutter det der det nye begynner.
+    tidsromKopi.push({ fra: Number.isInteger(forrige?.til) ? forrige.til : null, til: null, navn: "", etikett: "", opprinnelig: null });
+    tegnTidsrom();
+  });
+  // Delegert: tabellen bygges på nytt ved hver innsetting og fjerning.
+  $("#gen-tidsrom-body")?.addEventListener("click", (e) => {
+    const inn = e.target.closest("[data-tr-inn]");
+    const ut = e.target.closest("[data-tr-ut]");
+    if (!inn && !ut) return;
+    lesTidsrom();
+    if (inn) {
+      const i = Number(inn.dataset.trInn);
+      const neste = tidsromKopi[i];
+      tidsromKopi.splice(i, 0, { fra: null, til: Number.isInteger(neste?.fra) ? neste.fra : null, navn: "", etikett: "", opprinnelig: null });
+    } else {
+      tidsromKopi.splice(Number(ut.dataset.trUt), 1);
+    }
+    tegnTidsrom();
+  });
   $("#gen-rydd-kobling")?.addEventListener("click", () =>
     visPlan("Rydd foreldreløse koblingsbeskrivelser", planEdgeCleanup(migrasjonsState()),
       () => planEdgeCleanup(migrasjonsState())));

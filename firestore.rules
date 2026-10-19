@@ -194,11 +194,8 @@ service cloud.firestore {
       allow write: if isTeacher();
     }
 
-    // ---- Tiårsbeskrivelser ----
-    match /decades/{doc} {
-      allow read: if true;
-      allow write: if isTeacher();
-    }
+    // (Tiårsbeskrivelsene, samlingen decades, ble tatt ut i fase 2 av
+    // pedagogikkappen. Uten egen match er samlingen stengt for alle.)
 
     // ---- Sjangerbeskrivelser (main/sub + story-feltet) ----
     match /genreDescriptions/{doc} {
@@ -212,7 +209,7 @@ service cloud.firestore {
       allow write: if isTeacher();
     }
 
-    // ---- Innhold: sidene «Om historie»/«Røtter» og varmekartet ----
+    // ---- Innhold: sidene «Om historie»/«Røtter», sjangertreet og kjøreplanene ----
     match /content/{doc} {
       allow read: if true;
       allow write: if isTeacher();
@@ -328,7 +325,7 @@ service cloud.firestore {
       // misbruk utenfor appen er App Check (audit v5.42 funn 25). Takene:
       // korte strenger med rause
       // tak, URL som artist-create (2000), beskrivelse 5000, langtekstene
-      // (instrumentsammendrag/tiårstekst) 20 000. Lister begrenses i ANTALL —
+      // (instrumentsammendrag) 20 000. Lister begrenses i ANTALL —
       // regler kan ikke validere hvert element, så innholdet i kilder-rader
       // dekkes av moderasjonskøen (lærer ser og avviser).
       function forslagOk() {
@@ -342,9 +339,9 @@ service cloud.firestore {
           "name", "birthYear", "deathYear", "gender", "metaGenre", "instrument",
           "mainGenre", "subGenre", "influenceStart", "influenceEnd", "recordLabel",
           "geography", "description", "imageUrl", "imageCredit",
-          "type", "category", "decade", "inventedYear", "adoptedYear", "adoptedLabel", "kilder",
+          "type", "category", "inventedYear", "adoptedYear", "adoptedLabel", "kilder",
           "keyWorks", "musicExamples",
-          "activeFrom", "activeTo", "era", "body", "society", "tech"
+          "activeFrom", "activeTo", "era", "body"
         ]) &&
         capOk("name", 120) &&
         capOk("gender", 40) &&
@@ -354,15 +351,12 @@ service cloud.firestore {
         capOk("geography", 200) &&
         capOk("type", 40) &&
         capOk("category", 100) &&
-        capOk("decade", 20) &&
         capOk("adoptedLabel", 300) &&
         capOk("era", 100) &&
         capOk("imageCredit", 300) &&
         capOk("imageUrl", 2000) &&
         capOk("description", 5000) &&
         capOk("body", 20000) &&
-        capOk("society", 20000) &&
-        capOk("tech", 20000) &&
         capListOk("mainGenre", 50) &&
         capListOk("subGenre", 50) &&
         capListOk("kilder", 50) &&
@@ -398,7 +392,7 @@ service cloud.firestore {
           "proposedBy", "level", "createdAt", "ownerUid"
         ]) &&
         request.resource.data.get("ownerUid", "") in ["", request.auth.uid] &&
-        request.resource.data.entityType in ["artist", "tech", "subgenre", "instrument", "decade-society", "decade-tech"] &&
+        request.resource.data.entityType in ["artist", "tech", "subgenre", "instrument"] &&
         request.resource.data.entityId is string &&
         request.resource.data.entityId.size() <= 200 &&
         forslagOk() &&

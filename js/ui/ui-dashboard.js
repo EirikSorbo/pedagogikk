@@ -1,7 +1,7 @@
 // ============================================================================
 //  UI — OVERSIKT (lærer)
 // ----------------------------------------------------------------------------
-//  Pensum-oversikten: FORM (hva pensumet inneholder — tiår, sjangre, kjønn,
+//  Pensum-oversikten: FORM (hva pensumet inneholder — tidsrom, sjangre, kjønn,
 //  instrument). MANGLER (innhold som ikke er skrevet ennå, med PLATESELSKAPENE
 //  som ett av punktene: ett kort per selskap med Sjekk og Rediger) står fra
 //  v6.66 i et eget vindu (manglerEl), og HULL (hvor det er tynt) nederst der
@@ -16,15 +16,15 @@ import {
   computeCounts,
   genderDistribution,
   activeArtists,
-  decadesForArtist,
-  DECADES,
+  tidsromForArtist,
   INSTRUMENTS,
   instrumenterFor,
   erSkjult,
 } from "../felles/limits.js";
 import { GENDER_LABEL, pct, teacherActionRow, toggleCheckBtn, PRIO_ICONS, PRIO_LABELS } from "./ui-helpers.js";
 import { escapeHtml } from "../felles/util.js";
-import { GENEALOGY, GENEALOGY_MAIN_GENRES, GENEALOGY_META_GENRES, GENEALOGY_EDGES, edgeKey, isMainGenre } from "../sjangre/genre-model.js";
+import { visAar } from "../felles/aarstall.js";
+import { GENEALOGY, GENEALOGY_MAIN_GENRES, GENEALOGY_META_GENRES, GENEALOGY_EDGES, TIDSROM, edgeKey, isMainGenre } from "../sjangre/genre-model.js";
 import { resolveDesc, resolveDescAny } from "../sjangre/genre-descriptions.js";
 import { storyOrder, storyFor, pageFor } from "../felles/story-format.js";
 import { selskaperSortert, plateselskapSideId } from "../felles/plateselskaper.js";
@@ -231,10 +231,14 @@ export function renderDashboard(el, {
   const maxMetaEx = Math.max(1, ...metaCounts.map((m) => m.e));
   const metaByName = Object.fromEntries(metaCounts.map((m) => [m.g, m]));
 
-  // --- Tiår ------------------------------------------------------------------
-  const decades = DECADES;
-  const maxDecade = Math.max(1, ...decades.map((d) => counts.perDecade[d] || 0));
-  const thinDecades = decades.filter((d) => (counts.perDecade[d] || 0) <= 1);
+  // --- Tidsrom (fase 2; før tiår) ---------------------------------------------
+  // Én søyle per tidsrom i treet, i treets rekkefølge. Nøkkelen i perTidsrom er
+  // indeksen. Søylene er like brede selv om tidsrommene er ulikt lange, som
+  // radene i treet: de sammenligner tidsrom, ikke år.
+  const tidsrom = TIDSROM.map((t, i) => ({ i, t, n: counts.perTidsrom[i] || 0 }));
+  const maxTidsrom = Math.max(1, ...tidsrom.map((x) => x.n));
+  const tynneTidsrom = tidsrom.filter((x) => x.n <= 1);
+  const romNavn = (t) => (t.navn ? `${t.etikett} (${t.navn})` : t.etikett);
 
   // --- Instrument -------------------------------------------------------------
   // Kun instrumenter som faktisk er i bruk: en boble med 0 forteller ingenting
@@ -309,12 +313,13 @@ export function renderDashboard(el, {
     </button>
   </div>`;
 
-  const histCols = decades.map((d) => {
-    const n = counts.perDecade[d] || 0;
-    return `<button type="button" class="ov-hist-col" data-ov-decade="${d}" title="${d}-tallet: ${n} artister. Klikk for liste">
+  // Under søyla står startåret («1790», «800 f.Kr.»); hele etiketten og
+  // navnet står i title.
+  const histCols = tidsrom.map(({ i, t, n }) => {
+    return `<button type="button" class="ov-hist-col" data-ov-tidsrom="${i}" title="${escapeHtml(romNavn(t))}: ${n} artister. Klikk for liste">
       <span class="ov-hist-val">${n}</span>
-      <span class="ov-hist-bar${n <= 1 ? " ov-thin" : ""}" style="height:${Math.max(2, (n / maxDecade) * 100)}%"></span>
-      <span class="ov-hist-year">${d}</span>
+      <span class="ov-hist-bar${n <= 1 ? " ov-thin" : ""}" style="height:${Math.max(2, (n / maxTidsrom) * 100)}%"></span>
+      <span class="ov-hist-year">${escapeHtml(visAar(t.fra))}</span>
     </button>`;
   }).join("");
 
@@ -412,8 +417,8 @@ export function renderDashboard(el, {
     </div>
 
     <div class="stat-card ov-block">
-      <div class="stat-label">Antall artister per tiår</div>
-      <div class="ov-hist">${histCols}</div>
+      <div class="stat-label">Antall artister per tidsrom</div>
+      <div class="ov-hist">${histCols || `<p class="muted">Treet har ingen tidsrom ennå.</p>`}</div>
     </div>
 
     <div class="stat-card ov-block">
@@ -495,11 +500,11 @@ export function renderDashboard(el, {
     <div class="ov-kick">Hull og skjevheter</div>
     <div class="ov-gaps">
       <div class="ov-gap">
-        <div class="ov-gap-t">Tynne tiår <span>${thinDecades.length}</span></div>
-        ${thinDecades.length
-          ? `<div class="ov-chips">${thinDecades.map((d) =>
-              `<button type="button" class="ov-chip ov-zero" data-ov-decade="${d}">${d} <strong>${counts.perDecade[d] || 0}</strong></button>`).join("")}</div>`
-          : `<p class="muted">Ingen. Alle tiår har minst to artister.</p>`}
+        <div class="ov-gap-t">Tynne tidsrom <span>${tynneTidsrom.length}</span></div>
+        ${tynneTidsrom.length
+          ? `<div class="ov-chips">${tynneTidsrom.map(({ i, t, n }) =>
+              `<button type="button" class="ov-chip ov-zero" data-ov-tidsrom="${i}">${escapeHtml(t.navn || t.etikett)} <strong>${n}</strong></button>`).join("")}</div>`
+          : `<p class="muted">Ingen. Alle tidsrom har minst to artister.</p>`}
       </div>
       <div class="ov-gap">
         <div class="ov-gap-t">Artister uten sjanger <span>${artistsNoSjanger.length}</span></div>
@@ -556,11 +561,11 @@ export function renderDashboard(el, {
       const g = meta.dataset.ovMeta;
       return onShowArtistList?.(g, metaByName[g]?.list || []);
     }
-    const dec = hit("[data-ov-decade]");
-    if (dec) {
-      const d = Number(dec.dataset.ovDecade);
-      return onShowArtistList?.(`${d}-tallet`,
-        active.filter((a) => decadesForArtist(a).includes(d)).sort(byInfluenceThenName));
+    const rom = hit("[data-ov-tidsrom]");
+    if (rom) {
+      const i = Number(rom.dataset.ovTidsrom);
+      return onShowArtistList?.(TIDSROM[i] ? romNavn(TIDSROM[i]) : "Tidsrom",
+        active.filter((a) => tidsromForArtist(a).includes(i)).sort(byInfluenceThenName));
     }
     const instr = hit("[data-ov-instr]");
     if (instr) {

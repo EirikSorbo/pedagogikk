@@ -33,6 +33,7 @@ import { setupFormatBars } from "./format-bar.js";
 import { fyllPunktfelt, lesPunktfelt } from "./ui-helpers.js";
 import { bekreft, modalOpen, modalClose, setupModal } from "./ui-modal.js";
 import { escapeHtml, TREG_SENDING_MELDING } from "../felles/util.js";
+import { AAR_MIN, AAR_MAKS, AAR_HJELP, visAar } from "../felles/aarstall.js";
 import { renderRichText } from "../felles/rich-text.js";
 
 const STUDENTMODUS = ["ny", "retur", "forslag"];
@@ -82,11 +83,12 @@ function markup(modus) {
           <select data-felt="gender"></select>
         </label>
         <label>Fødselsår
-          <input type="number" data-felt="birthYear" min="1800" max="2030" placeholder="1911" />
+          <input type="number" data-felt="birthYear" min="${AAR_MIN}" max="${AAR_MAKS}" placeholder="1746 eller -427" />
         </label>
         <label>Dødsår
-          <input type="number" data-felt="deathYear" min="1800" max="2030" placeholder="1938" />
+          <input type="number" data-felt="deathYear" min="${AAR_MIN}" max="${AAR_MAKS}" placeholder="1827 eller -347" />
         </label>
+        <p class="hint full">${AAR_HJELP}</p>
         <label class="full">Geografisk tilhørighet
           <input type="text" data-felt="geography" placeholder="f.eks. Mississippi Delta" />
         </label>
@@ -110,10 +112,10 @@ function markup(modus) {
           <input type="text" data-felt="recordLabel" placeholder="f.eks. Motown" />
         </label>` : ""}
         <label>Innflytelse fra (år)${stj("influenceStart")}
-          <input type="number" data-felt="influenceStart" min="1800" max="2030" placeholder="f.eks. 1955" />
+          <input type="number" data-felt="influenceStart" min="${AAR_MIN}" max="${AAR_MAKS}" placeholder="f.eks. 1780" />
         </label>
         <label>Innflytelse til (år)
-          <input type="number" data-felt="influenceEnd" min="1800" max="2030" placeholder="f.eks. 1972" />
+          <input type="number" data-felt="influenceEnd" min="${AAR_MIN}" max="${AAR_MAKS}" placeholder="f.eks. 1827" />
         </label>
         <div class="full genre-picker" data-felt="mainGenre">
           <span class="field-label">Sjangre (fra slektstreet)</span>
@@ -524,7 +526,7 @@ export function lagArtistSkjema(beholder, cfg) {
       return s?.value ? (s.selectedOptions[0]?.textContent || s.value) : "";
     };
     const spenn = (fra, til, bareFra, bareTil) =>
-      fra && til ? `${fra}–${til}` : fra ? `${bareFra} ${fra}` : til ? `${bareTil} ${til}` : "";
+      fra && til ? `${visAar(fra)}–${visAar(til)}` : fra ? `${bareFra} ${visAar(fra)}` : til ? `${bareTil} ${visAar(til)}` : "";
     const ledd = (...xs) => xs.filter(Boolean).join(" · ");
     const ord = v.description.split(/\s+/).filter(Boolean).length;
     const innflytelse = spenn(v.influenceStart, v.influenceEnd, "fra", "til");

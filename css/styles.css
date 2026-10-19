@@ -136,7 +136,6 @@
   --paper-line: #d5dfd8;                /* skillelinjer i heftet */
   --tree-bg: var(--surface);            /* slektstreets lerret */
   --map-bg: var(--stone-50);                    /* sjangerhimmelen, også glorien bak etikettene */
-  --heat-nodata: var(--stone-150);               /* varmestriper uten data */
   --backdrop: rgba(var(--shadow-rgb), 0.4);
   --highlight: var(--yellow-200);       /* treff i søket */
 
@@ -256,7 +255,6 @@
      var(--text)) for å gjøre alle ikonene ensfargede på én gang. */
   --icon-artister: var(--icon-mono, var(--blue-700));
   --icon-sjangre: var(--icon-mono, var(--pine-700));
-  --icon-tiar: var(--icon-mono, var(--iris-600));
   --icon-lytt: var(--icon-mono, var(--pink-700));
   --icon-instrumenter: var(--icon-mono, var(--teal-700));
   --icon-store-bildet: var(--icon-mono, var(--violet-600));
@@ -266,7 +264,6 @@
   --icon-historier: var(--icon-mono, var(--iris-600));
   --icon-tidslinje: var(--icon-mono, var(--blue-700));
   --icon-slektstre: var(--icon-mono, var(--pine-700));
-  --icon-varmekart: var(--icon-mono, var(--red-600));
   --icon-sjangerperioder: var(--icon-mono, var(--orange-600));
   --icon-himmel: var(--icon-mono, var(--violet-600));
   --icon-plateselskaper: var(--icon-mono, var(--amber-700));
@@ -1414,6 +1411,11 @@ button.tag.tag-instrument:hover { border-color: var(--tag-instr-line-hover); col
 /* Den usynlige halvfete kopien (som holder bredden) må også ha plass til
    prikken, ellers flytter fanene seg når en blir valgt. */
 .hist-faner .dv-fane[data-tekst]::after { padding-left: 14px; }
+/* Epokene i retningen over historien (fase 2; her sto varmestripene):
+   bobler i tidsrekkefølge, med kant i epokens farge. */
+.hist-familie { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; }
+.hist-epoke { cursor: pointer; font: inherit; font-size: 0.78rem; color: var(--text); border-color: var(--hist-color, var(--line)); }
+.hist-epoke:hover, .hist-epoke:focus-visible { background: var(--surface); text-decoration: underline; }
 /* Formatert tekst (markdown-light fra js/rich-text.js). `.story-body` er
    historiene og innholdssidene; `.rt` er de vanlige beskrivelsene (artist,
    sjanger, kobling, innovasjon). Begge får samme typografi, for det er samme
@@ -2532,70 +2534,6 @@ body:not(.presentasjon) :is(#modal-artistliste, #modal-spilleliste) > .modal > *
 .dash-title { font-weight: 600; font-size: 0.95rem; color: var(--text); }
 .dash-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.35; }
 
-/* Tiårsvelger: klikkbar tidslinje-stripe øverst i Samfunn/Teknologi-
-   visningen (student og lærer). Linja tegnes som ::before fra første til
-   siste punktsenter (én kolonnehalvdel inn fra hver side). */
-.decade-ribbon { margin: 6px 0 2px; }
-.dr-track {
-  position: relative;
-  display: grid;
-  /* --dr-cols settes av renderDecadeRibbon (ett spor per tiår i DECADES). */
-  grid-template-columns: repeat(var(--dr-cols, 13), 1fr);
-}
-/* Selve tidsaksen. Den starter i midten av den FØRSTE tiårsprikken og slutter i
-   midten av den siste. */
-.dr-track::before {
-  content: "";
-  position: absolute;
-  top: 10px;
-  left: calc(100% / var(--dr-cols, 13) * 0.5);
-  right: calc(100% / var(--dr-cols, 13) * 0.5);
-  height: 2px;
-  background: var(--line-strong);
-  border-radius: 1px;
-}
-.dr-node {
-  position: relative;
-  background: none;
-  border: 0;
-  padding: 5px 0 2px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  cursor: pointer;
-  font: inherit;
-}
-.dr-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--surface);
-  border: 2px solid var(--accent);
-  transition: transform 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
-}
-.dr-node:hover .dr-dot { transform: scale(1.25); }
-.dr-node.active .dr-dot {
-  background: var(--accent);
-  box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.16);
-}
-.dr-year {
-  font-size: 0.66rem;
-  color: var(--muted-2);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
-}
-.dr-node.active .dr-year { color: var(--accent-2); font-weight: 700; }
-.dr-node:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius-s); }
-
-@media (max-width: 480px) {
-  .dr-year { font-size: 0.56rem; letter-spacing: -0.03em; }
-  .dr-dot { width: 10px; height: 10px; }
-  .dr-track::before { top: 9px; }
-}
-.dv-decade { font-size: 1.15rem; margin: 12px 0 2px; }
-.dv-nav { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
-
 /* ----- Podkast ----- */
 /* Episodekortene: lave og slanke, hvit flate med tynn ramme i stedet for det
    grønne fyllet — de skal lese som en liste, ikke som åtte tunge blokker. */
@@ -2810,6 +2748,9 @@ body.is-teacher #gate { display: none; }
    selve tidsreferansen kartet leses mot. Fortsatt tydelig underordnet
    navnene, som den skal være. */
 .gx-decade { font-size: 17px; fill: var(--muted-2); font-family: var(--font-body); }
+/* Navnet på tidsrommet (fase 2) under årstallene: mindre og i kursiv, så
+   årstallene fortsatt er det øyet finner først. */
+.gx-tidsrom-navn { font-size: 14px; font-style: italic; }
 
 /* Usynlig, bred trykkbane oppå hver strek — fanger klikk/hover for koblingen
    (en tynn linje er umulig å treffe med finger). pointer-events: stroke gjør
@@ -2978,26 +2919,8 @@ body.is-teacher #gate { display: none; }
    ruta aldri stjeler hover fra prikken under og «blinker» av og på. */
 #sh-svg .sh-thumb { pointer-events: none; filter: drop-shadow(0 3px 8px rgba(var(--text-rgb), 0.28)); }
 
-/* ----- Varmekart: én glidende stripe per sjanger -----
-   Raden var 13 avrundede bolker med luft imellom; nå er den ÉN stripe der
-   gradienten (bygd i explore-varmekart.js) bærer hele tidsforløpet. Høyden er
-   bevisst lav — stripa skal lese som en linje, ikke som en rad klosser — og
-   pille-radiusen gjør endene runde uten å dele opp innmaten.
-   .vk-cell er de usynlige tiårsfeltene oppå: treffområder for hjelpetekst og
-   lærerens klikk. De har ALDRI egen bakgrunn i hvile — får de det, er vi tilbake
-   til firkantene. Hover/fokus er derfor et lyst slør, ikke en ramme. */
-/* Tiårsaksen over en varmestripe. Like kolonner og INGEN luft, så
-   etikettmidtene treffer segmentmidtene i stripa under på prosenten. Delt av
-   varmekartet og sjangerkortet, så de to aldri kan drive fra hverandre. */
-.hs-axis {
-  display: grid;
-  font-size: 0.72rem;
-  color: var(--muted);
-  text-align: center;
-}
-
-/* Artistkortets egen tidslinje: innflytelsesperioden på samme tiårsrekke som
-   artistenes tidslinje. På listekortene og dagens artist ligger den under
+/* Artistkortets egen tidslinje: innflytelsesperioden på samme tidsromsakse
+   som artistenes tidslinje og treet (fase 2; før tiårene). På listekortene og dagens artist ligger den under
    faktalinjene. I detaljkortet står den øverst (v6.04, renderArtistDetail).
 
    clear:right, ikke bare en egen blokkontekst: artistbildet er float:right, og
@@ -3014,8 +2937,8 @@ body.is-teacher #gate { display: none; }
    Den vannrette luften er nettopp til de ytterste årstallene: de er sentrert på
    sitt eget år, altså på sporets ytterkanter, og stikker ut et halvt årstall.
 
-   Strekene i sporet står under de årstallene aksen faktisk skriver, altså hvert
-   ANNET tiår: 2 x 100/13 = 15,3846 % per gjentakelse. */
+   Strekene i sporet står ved hver tidsromsgrense: --ai-n (antall tidsrom)
+   settes på sporet av artist-strip.js. Årstallene står bare ved noen av dem. */
 .ai-strip {
   display: flow-root;
   clear: right;
@@ -3052,11 +2975,11 @@ body:not(.presentasjon) :is(#detail-body, #ad-body) .related { clear: right; }
 .ai-track {
   position: relative;
   height: 0.75rem;
-  /* Samme hjørner som sjangerstripene (.vk-strip), ikke pilleform (v6.61). */
+  /* Samme hjørner som sjangerstripene hadde, ikke pilleform (v6.61). */
   border-radius: var(--radius-s);
   background-color: var(--surface-2);
   background-image: repeating-linear-gradient(to right,
-    var(--line) 0 1px, transparent 1px 15.3846%);
+    var(--line) 0 1px, transparent 1px calc(100% / var(--ai-n, 16)));
   overflow: hidden;
 }
 .ai-bar {
@@ -3067,148 +2990,17 @@ body:not(.presentasjon) :is(#detail-body, #ad-body) .related { clear: right; }
   border-radius: var(--radius-s);
 }
 /* Flat ende = «fortsetter utenfor bildet»: åpent sluttår, eller en periode som
-   begynner før 1900. Samme signal som de åpne blokkene i tidslinjen. */
+   begynner før det første tidsrommet. Samme signal som de åpne blokkene i
+   tidslinjen. */
 .ai-bar.is-cut-end { border-right: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; }
 .ai-bar.is-cut-start { border-left: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; }
 
 /* Smal spalte (todelt kortgrid ved siden av bildet, ~200 px spor): der står
-   sju årstall 6 px fra hverandre og leses som én tallrekke. Da vises HVERT
-   FJERDE tiår i stedet, og strekene i sporet følger med — ellers pekte de på
-   årstall som ikke lenger står der. Container query, ikke media query: det er
-   stripas EGEN bredde som avgjør, og den varierer med kortets spalte, ikke med
-   skjermen. Uten støtte for @container beholdes alle sju, som før. */
+   årstallene så tett at de leses som én tallrekke. Da vises annethvert.
+   Container query, ikke media query: det er stripas EGEN bredde som avgjør,
+   og den varierer med kortets spalte, ikke med skjermen. */
 @container (max-width: 260px) {
   .ai-axis span:nth-of-type(2n) { display: none; }
-  .ai-track {
-    background-image: repeating-linear-gradient(to right,
-      var(--line) 0 1px, transparent 1px 30.7692%);
-  }
-}
-
-/* Varmelinja øverst på sjangerkortet: tyngdepunktet gjennom historien, over
-   selve teksten. Litt luft under, så den ikke klistrer seg til era-linja. */
-.gx-heat { margin: 0 0 14px; }
-.gx-heat .hs-axis { margin-bottom: 3px; }
-/* Mobil: sjangerkortets akse får ~25 px per tiår på en 375 px-skjerm, mens
-   «1900» er 26 px bredt. Etikettene klistret seg sammen til «190019101920…».
-   Under 480 px vises derfor annethvert årstall (1900, 1920 … 2020), som gir
-   dem det dobbelte av plassen, og begge ender er fortsatt merket.
-   Grensen er MÅLT på tekstboksene (ikke på grid-cellene, som alltid fyller
-   kolonnen sin): med alle tretten synlige er avstanden mellom årstallene
-   -1,3 px ved 375 px skjerm, 1,6 px ved 431 px og 5,5 px ved 481 px. Det er
-   altså først rett over 480 px det er luft nok til å vise hele rekka.
-   visibility, IKKE display: kolonnene må stå igjen, ellers flytter de synlige
-   etikettene seg vekk fra segmentene i stripa under. Stripa selv beholder alle
-   tretten segmentene og hjelpeteksten på hvert av dem.
-   Gjelder kun sjangerkortet: varmekartets akse ligger i en vannrett scroller og
-   har 35 px per tiår, altså god plass. */
-@media (max-width: 480px) {
-  .gx-heat .hs-axis > :nth-child(even) { visibility: hidden; }
-}
-/* Varmestripene over hver sjangerhistorie (v5.16). Blokka ligger i en SMAL
-   lesespalte (modalen er 640 px, altså 584 px innhold), mens varmekartets
-   scroller krever 600 px. Differansen er bare 16 px, men den ville tvunget
-   leseren sidelengs midt i en fortelling. Minstebredden slippes derfor her.
-   Den var aldri et krav fra innholdet: etikettkolonnen beholder varmekartets
-   128 px, og de resterende 446 px gir ~34 px per tiår, mens de fire-sifrede
-   årstallene bare trenger ~28. Radene er altså IDENTISKE med varmekartets,
-   som var hele poenget. */
-.hist-heat { margin-bottom: 16px; }
-.hist-heat .vk-scroll-inner { min-width: 0; }
-/* Under 520 px er det ikke plass til etikettkolonnen OG tretten fire-sifrede
-   årstall: aksen faller til ~15 px per tiår, og «2000» og «2020» legger seg
-   oppå hverandre. Å skjule annethvert årstall (som sjangerkortet gjør) holder
-   ikke her, for etikettene er bredere enn sporene sine og flyter utenfor
-   uansett. Blokka faller derfor tilbake på varmekartets vannrette scroller,
-   som er den samme bevegelsen studentene kjenner derfra. */
-@media (max-width: 520px) {
-  .hist-heat .vk-scroll-inner { min-width: 600px; }
-}
-
-.gx-heat-missing {
-  margin: 5px 0 0;
-  font-size: 0.76rem;
-  color: var(--muted);
-}
-
-/* Å knytte navnet til riktig stripe var vanskelig i en gruppe med mange rader
-   (Jazz har 12). Derfor lyser HELE raden opp under pekeren — båndet går tvers
-   over både etiketten og stripa, så øyet kobler dem uten å telle linjer.
-   Bakgrunnen er det som bærer koblingen; halvfet etikett og en tynn ring rundt
-   stripa er bare forsterkning.
-   Bare hover-enheter får :hover — på berøring ville den hengt igjen etter et
-   trykk. Der settes .is-active fra JS i stedet (samme utseende), og
-   :focus-within tar tastaturet gjennom lærerens celleknapper. */
-/* Raden er to spor: etiketten og ÉN sammenhengende stripe. Aksehodet bruker
-   samme grid, ellers glir årstallene ut av stilling over segmentene sine. */
-.vk-row, .vk-axisrow {
-  display: grid;
-  grid-template-columns: 128px 1fr;
-  gap: 10px;
-  align-items: center;
-}
-.vk-axisrow { align-items: end; margin-bottom: 6px; }
-.vk-scroll { overflow-x: auto; }
-.vk-scroll-inner { min-width: 600px; }
-.vk-row { border-radius: var(--radius-s); margin-bottom: 2px; padding: 2px 0; transition: background-color .12s; }
-@media (hover: hover) {
-  .vk-row:hover { background: var(--surface-2); }
-}
-.vk-row.is-active,
-.vk-row:focus-within { background: var(--surface-2); }
-
-/* Etiketten er en knapp (klikk åpner sjangerkortet, v4.83). Knappestilen
-   nullstilles så raden leser som ren tekst — familiefargen i border-left og
-   typografien kommer fra element-stilen, som slår denne regelen. */
-.vk-rowlabel {
-  transition: font-weight .12s;
-  appearance: none;
-  background: none;
-  border: 0;
-  border-radius: 0;
-  font: inherit;
-  text-align: left;
-  width: 100%;
-  cursor: pointer;
-}
-@media (hover: hover) {
-  .vk-rowlabel:hover { text-decoration: underline; }
-}
-.vk-row.is-active .vk-rowlabel,
-.vk-row:focus-within .vk-rowlabel { font-weight: 600; }
-@media (hover: hover) {
-  .vk-row:hover .vk-rowlabel { font-weight: 600; }
-}
-
-.vk-strip {
-  position: relative;
-  height: 15px;
-  border-radius: var(--radius-s);
-  overflow: hidden;
-  transition: box-shadow .12s;
-}
-.vk-row.is-active .vk-strip,
-.vk-row:focus-within .vk-strip { box-shadow: 0 0 0 1px var(--line-strong); }
-@media (hover: hover) {
-  .vk-row:hover .vk-strip { box-shadow: 0 0 0 1px var(--line-strong); }
-}
-.vk-cell {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  -webkit-appearance: none;
-  appearance: none;
-}
-button.vk-cell { cursor: pointer; }
-button.vk-cell:hover { background: rgba(var(--white-rgb), 0.34); }
-button.vk-cell:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: -2px;
-  border-radius: var(--radius-2xs);
 }
 
 /* Hover-kortet på tidslinjens blokker: bilde + navn + aktiv-periode. Ligger i
@@ -3310,6 +3102,16 @@ html.pensum-locked, html.pensum-locked body { background: var(--bg); }
 .gen-kryss { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; }
 .gen-blokk { border-left: 3px solid var(--danger, var(--danger-solid)); padding: 2px 0 2px 10px; margin: 0 0 12px; border-radius: 0; }
 .gen-blokk p { margin: 0 0 2px; }
+/* Tidsrom-skjemaet (fase 2): én rad per tidsrom, smale årsfelt. */
+.gen-tr-tabell { overflow-x: auto; }
+.gen-tr-tabell table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.gen-tr-tabell th { text-align: left; font-weight: 500; color: var(--muted); padding: 0 6px 6px; white-space: nowrap; }
+.gen-tr-tabell td { padding: 3px 6px; vertical-align: middle; }
+.gen-tr-tabell td:first-child { width: 1.5em; text-align: right; }
+.gen-tr-tabell input { width: 100%; min-width: 7em; }
+.gen-tr-tabell input.gen-tr-aar { min-width: 5.5em; max-width: 7em; }
+.gen-tr-knapper { white-space: nowrap; }
+.gen-tr-knapper .btn + .btn { margin-left: 4px; }
 
 /* Podkast-episode som ikke lot seg spille av: en forklaring med direktelenke
    under spilleren, siden nettleserens egne kontroller bare sier «Feil». */
@@ -3387,14 +3189,6 @@ html.pensum-locked, html.pensum-locked body { background: var(--bg); }
   position: absolute; top: 6px; transform: translateX(-50%);
   font-size: 0.74rem; color: var(--muted);
 }
-/* Tiårene som lenker til tiårskortet (metasjanger-oversikten, v6.46): samme
-   plass og skrift som tallene, med litt luft rundt for et større klikkområde. */
-.sp-akse .sp-tiar {
-  position: absolute; top: 3px; transform: translateX(-50%);
-  padding: 3px 4px; border: 0; border-radius: calc(var(--radius-xs) - 1px); background: none;
-  font: inherit; font-size: 0.74rem; line-height: 1.2; color: var(--muted); cursor: pointer;
-}
-.sp-akse .sp-tiar:hover, .sp-akse .sp-tiar:focus-visible { color: var(--accent-2); text-decoration: underline; }
 .sp-forklaring { margin: 16px 0 0; font-size: 0.8rem; line-height: 1.6; color: var(--muted); }
 /* Fargeprøven og teksten den forklarer brytes alltid sammen. */
 .sp-forklaring-par { display: inline-flex; align-items: center; gap: 8px; }
@@ -3709,8 +3503,6 @@ body.presentasjon a[href^="student.html"],
 body.presentasjon #detail-propose,
 body.presentasjon #sj-foot,
 body.presentasjon #td-foot,
-body.presentasjon #dv-society-propose,
-body.presentasjon #dv-tech-propose,
 body.presentasjon #btn-tech-new,
 body.presentasjon [data-action="voteUp"] { display: none !important; }
 /* Utskrift- og visningssymbolene hører til forberedelsen, ikke lerretet
@@ -4365,8 +4157,8 @@ body.presentasjon .meta-merke { display: none; }
    Strukturgjennomgangen 3.10, runde 3 (v6.07)
    =========================================================================== */
 
-/* Tiårsvinduet med faner (S1). Fanene som en understreket rad, ikke knapper,
-   så de leses som perspektiver på samme tiår. */
+/* Fanene (S1, først i tiårsvinduet): en understreket rad, ikke knapper.
+   Brukes av instrumentene, historiene og Sjangre-kortene. */
 .dv-faner { display: flex; gap: 22px; border-bottom: 1px solid var(--line); margin: 4px 0 16px; }
 .dv-fane {
   padding: 7px 1px; margin-bottom: -1px; border: 0; border-bottom: 2px solid transparent;
@@ -4374,43 +4166,8 @@ body.presentasjon .meta-merke { display: none; }
 }
 .dv-fane:hover { color: var(--text); }
 .dv-fane.active { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
-/* (Høyrespalta fra v6.07, D2, og listene i den er fjernet i v6.23: fanene
-   har vært i full bredde siden v6.11, se .dv-panel lenger ned.) */
-.dv-handling { margin-top: 10px; }
-.dv-sub { display: block; font-size: 0.76rem; color: var(--muted); }
-.dv-navn .dv-sub { display: inline; margin-left: 6px; }
-.dv-lenke {
-  padding: 0; border: 0; background: none; cursor: pointer;
-  font: inherit; font-size: 0.8rem; color: var(--accent-2);
-}
-.dv-lenke:hover, .dv-lenke:focus-visible { text-decoration: underline; }
-.dv-tom { font-size: 0.86rem; margin: 0 0 6px; }
-/* Musikkfanens sjangre: prikk i familiefargen, navn, metasjanger, og hvor
-   toneangivende sjangeren var (varmekartets nivå, 1–5). */
-.dv-sjangre { display: flex; flex-direction: column; gap: 1px; margin-bottom: 8px; }
-.dv-sjanger {
-  display: flex; align-items: center; gap: 10px; width: 100%; padding: 5px 6px; margin: 0 -6px;
-  border: 0; border-radius: var(--radius-xs); background: none; cursor: pointer; text-align: left;
-  font: inherit; font-size: 0.9rem; color: var(--text); box-sizing: content-box;
-}
-.dv-sjanger:hover, .dv-sjanger:focus-visible { background: var(--surface-2); }
-.dv-prikk { width: 9px; height: 9px; border-radius: 50%; flex: none; }
-.dv-navn { flex: 1; min-width: 0; }
-.dv-varme { position: relative; flex: none; width: 64px; height: 6px; border-radius: var(--radius-2xs); background: var(--surface-2); overflow: hidden; }
-.dv-varme i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: var(--radius-2xs); }
-.dv-artist { padding: 0; border: 0; background: none; cursor: pointer; font: inherit; color: var(--text); }
-.dv-artist:hover, .dv-artist:focus-visible { color: var(--accent-2); text-decoration: underline; }
-
 /* Lenken over artistlista for et instrument (K6). */
 .al-lenke-rad { margin: 0 0 10px; }
-
-/* Tiårene på tidsstripene er lenker til tiårsvinduet (K1), men skal se ut
-   som de rolige årstallene de var. */
-.tiar-lenke { padding: 0; border: 0; background: none; cursor: pointer; font: inherit; color: inherit; line-height: inherit; }
-.tiar-lenke:hover, .tiar-lenke:focus-visible { color: var(--accent-2); text-decoration: underline; }
-/* Større trykkflate på berøringsskjerm uten å flytte teksten (v6.23, Fable):
-   årstallene er under 20 px høye og står tett. */
-@media (pointer: coarse) { .tiar-lenke { padding: 6px 3px; margin: -6px -3px; } }
 
 /* Instrumentsiden: en høyrespalte ved teksten (D2), fra v6.16 artistene som
    spiller instrumentet. contain: size gjør at spalta ikke bestemmer høyden:
@@ -4595,61 +4352,6 @@ body.presentasjon .meta-merke { display: none; }
 /* ===========================================================================
    v6.11 (brukervalg 2026-10-03)
    =========================================================================== */
-/* Tiårsfanene: Teknologi og Samfunn i full bredde, kildene nederst. */
-.dv-panel { display: block; }
-/* v6.12 (brukervalg 2026-10-03): teksten bruker hele bredden (den felles
-   grensen på 68ch ga samme smale spalte som før), og kortet har alltid full
-   høyde, så tiårsstripa øverst og «forrige/neste» nederst står på samme sted
-   uansett hvor mye tiåret har. Tomrom under korte tiår er greit. Ikke i
-   presentasjonen, som har sin egen linjelengde og høyde. Fra v7.00 har alle
-   innholdskortene fast høyde (.modal-innhold); her står bare spaltene. */
-body:not(.presentasjon) #modal-decade-view .dv-panel :is(p, .rt, .info-text) { max-width: none; }
-body:not(.presentasjon) #modal-decade-view > .modal { display: flex; flex-direction: column; }
-body:not(.presentasjon) #modal-decade-view > .modal > * { flex-shrink: 0; }
-body:not(.presentasjon) #modal-decade-view .dv-nav { margin-top: auto; padding-top: 16px; }
-.dv-panel .kilder { margin-top: 1.2rem; }
-/* Kildene i Teknologi og Samfunn er skjult (v6.18, brukervalg 2026-10-03).
-   De tegnes fortsatt (explore-decade.js), så de kan slås på igjen her. */
-#dv-kilder-tech, #dv-kilder-society { display: none; }
-/* Musikk-fanen: tre kolonner (sjangre, artister, lytt). Fra v6.18
-   (brukervalg 2026-10-03) er lytteeksemplene bredest: titlene og artistene
-   står på samme rad og trengte plassen mer enn de to andre. v6.20: litt
-   smalere igjen, og en tynn loddrett strek mellom kolonnene (midt i
-   mellomrommet: polstring på hver side av streken). */
-.dv-panel.dv-musikk { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(0, 1.3fr); gap: 0; align-items: start; }
-.dv-panel.dv-musikk > .dv-kol { padding: 0 1.1rem; }
-.dv-panel.dv-musikk > .dv-kol:first-child { padding-left: 0; }
-.dv-panel.dv-musikk > .dv-kol:last-child { padding-right: 0; }
-.dv-panel.dv-musikk > .dv-kol + .dv-kol { border-left: 1px solid var(--line); }
-@media (max-width: 760px) {
-  .dv-panel.dv-musikk { grid-template-columns: minmax(0, 1fr); }
-  .dv-kol + .dv-kol { margin-top: 1.4rem; }
-  .dv-panel.dv-musikk > .dv-kol { padding: 0; }
-  .dv-panel.dv-musikk > .dv-kol + .dv-kol { border-left: 0; border-top: 1px solid var(--line); padding-top: 1.1rem; }
-}
-/* Artist- og lyttelistene i spillelistenes stil: grå strek mellom radene,
-   dempet tekst, navn/tittel til venstre og år/artist til høyre. */
-.dv-pl { margin: 0 0 8px; padding: 0; list-style: none; }
-.dv-pl .pl-item {
-  display: flex; align-items: baseline; gap: 0.8rem;
-  padding: 0.42rem 0.2rem; border-bottom: 1px solid var(--line); line-height: 1.4; font-size: 0.88rem;
-}
-.dv-pl .pl-item:last-child { border-bottom: 0; }
-.dv-pl .pl-item:hover { background: var(--surface-2); }
-.dv-pl .pl-item a, .dv-pl .dv-artist {
-  font-weight: 400; text-decoration: none; text-align: left;
-  color: color-mix(in srgb, var(--text) 50%, var(--muted));
-}
-.dv-pl .pl-item a:hover, .dv-pl .dv-artist:hover, .dv-pl .dv-artist:focus-visible { color: var(--accent-2); text-decoration: none; }
-.dv-pl .pl-aar { color: var(--muted); font-size: 0.85em; }
-.dv-pl .pl-hoyre { margin-left: auto; flex-shrink: 0; max-width: 45%; text-align: right; font-size: 0.8rem; color: var(--muted); }
-/* Lyttelista i Tiår har sjangerboblen foran artistnavnet (v6.36), som
-   spillelistene: boblen og navnet på linje til høyre, og bryter pent. */
-#dv-musikk-lytt .dv-pl .pl-hoyre { display: flex; align-items: baseline; justify-content: flex-end; flex-wrap: wrap; gap: 0 0.4rem; max-width: 55%; }
-#dv-musikk-lytt .dv-pl .tag.tag-pl { margin-left: 0; }
-.dv-kol .pl-alle { margin: 0 0 6px; }
-.dv-musikk .dv-sjanger { font-size: 0.86rem; }
-.dv-musikk .dv-varme { width: 44px; }
 /* Artistgalleriet ved søk og filter (v6.11; v6.14 brukervalg 2026-10-03:
    sju i bredden på laptop, fem på nettbrett, tre på mobil). Bildet har
    samme stående form som på artistkortene: 4:5 er midtverdien for bildene

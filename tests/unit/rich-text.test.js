@@ -1,7 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { renderRichText } from "../../js/felles/rich-text.js";
-import { formatInfoText } from "../../js/ui/ui-helpers.js";
 
 // renderRichText er DELT av historiene, innholdssidene og alle beskrivelsene
 // (artist, sjanger, kobling, innovasjon, tiår). Testene her låser syntaksen
@@ -121,25 +120,3 @@ test("tomme og manglende tekster gir tom streng", () => {
   assert.equal(renderRichText(undefined), "");
 });
 
-test("formatInfoText: gamle tiårstekster med én linje per punkt blir fortsatt liste", () => {
-  // Elleve teknologi-felter i Firestore er skrevet slik, uten markering.
-  const gammel = "Elektrisitet blir vanlig i byene.\nRadio eksperimenteres med.\nGrammofonen blir standard.";
-  assert.equal(
-    formatInfoText(gammel),
-    "<ul><li>Elektrisitet blir vanlig i byene.</li><li>Radio eksperimenteres med.</li><li>Grammofonen blir standard.</li></ul>"
-  );
-});
-
-test("formatInfoText: så snart teksten har markering eller avsnitt, gjelder vanlig formatering", () => {
-  assert.equal(formatInfoText("- ett\n- to"), "<ul><li>ett</li><li>to</li></ul>");
-  assert.equal(formatInfoText("Avsnitt én.\n\nAvsnitt to."), "<p>Avsnitt én.</p><p>Avsnitt to.</p>");
-  assert.ok(formatInfoText("### Tittel\nTekst").includes("<h3>Tittel</h3>"));
-  assert.equal(formatInfoText("Bare én linje."), "<p>Bare én linje.</p>");
-  assert.ok(formatInfoText("Med **fet** i en enkelt linje.").includes("<strong>fet</strong>"));
-});
-
-test("formatInfoText: fet tekst i en gammel linjeliste virker uten å bryte lista", () => {
-  const html = formatInfoText("**1948**: LP-formatet.\n**1949**: 45-singelen.");
-  assert.ok(html.startsWith("<ul>"));
-  assert.ok(html.includes("<strong>1948</strong>"));
-});

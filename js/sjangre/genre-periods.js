@@ -16,6 +16,7 @@
 // ============================================================================
 
 import { resolveDescAny } from "./genre-descriptions.js";
+import { aksePos, tidsromGrenser } from "../felles/tidsakse.js";
 
 // tab10-paletten (samme som diagrammet brukeren likte) pluss to ekstra.
 export const PERIOD_COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
@@ -103,28 +104,42 @@ export function periodGroups(metas, genreDescs = {}, genealogy = [], naa = new D
   }).filter((g) => g.rows.length);
 }
 
-// Aksen følger dataene. Den starter på tiåret før den tidligste perioden, men
-// aldri senere enn 1900, så den leses likt med varmekartets tiårsakse. Den
-// slutter noen år etter i dag, så åpne perioder har plass til å tone ut. Siden
-// årstall fram i tid er hull (se statusFor), kan ingen enkeltrad strekke aksen
-// for resten av figuren. Tiårsmerkene går til siste hele tiår.
-export function periodAxis(groups, naa) {
+// Aksen er TIDSROMMENE i treet når de finnes (fase 2, js/felles/tidsakse.js):
+// hvert tidsrom like bredt, årene lineære innenfor, og et merke ved starten av
+// hvert tidsrom. Da står periodene på samme akse som treet og tidslinja, og
+// antikkens 650 år klemmer ikke de siste hundre til en strek.
+//
+// Uten tidsrom (et tre fra før fase 2) er aksen lineær som før: fra et rundt
+// årstall før den tidligste perioden til noen år etter i dag, så åpne perioder
+// har plass til å tone ut. Steget mellom merkene velges så det blir høyst
+// femten. Siden årstall fram i tid er hull (se statusFor), kan ingen enkeltrad
+// strekke aksen for resten av figuren.
+const STEG = [10, 20, 25, 50, 100, 200, 250, 500, 1000];
+
+export function periodAxis(groups, naa, tidsrom = []) {
+  const grenser = tidsromGrenser(tidsrom, naa);
+  if (grenser.length) {
+    return { tidsrom, naa, start: grenser[0].start, slutt: grenser[grenser.length - 1].slutt, ticks: grenser.map((g) => g.start) };
+  }
   const rader = (groups || []).flatMap((g) => g.rows).filter((r) => r.status === "ok");
-  const minFra = rader.length ? Math.min(...rader.map((r) => r.from)) : 1900;
-  const start = Math.min(1900, Math.floor(minFra / 10) * 10);
+  const minFra = rader.length ? Math.min(...rader.map((r) => r.from)) : naa - 100;
+  const steg = STEG.find((st) => (naa - minFra) / st <= 15) || STEG[STEG.length - 1];
+  const start = Math.floor(minFra / steg) * steg;
   const ticks = [];
-  for (let t = start; t <= Math.floor(naa / 10) * 10; t += 10) ticks.push(t);
+  for (let t = start; t <= naa; t += steg) ticks.push(t);
   return { start, slutt: naa + 5, ticks };
 }
 
 // Posisjon på aksen i prosent av sporets bredde.
-export const pctAv = (axis, aarstall) => ((aarstall - axis.start) / (axis.slutt - axis.start)) * 100;
+export const pctAv = (axis, aarstall) => (axis.tidsrom
+  ? aksePos(axis.tidsrom, aarstall, axis.naa) * 100
+  : ((aarstall - axis.start) / (axis.slutt - axis.start)) * 100);
 
 // Alt figuren tegnes av, som én streng. Visningen tegner bare på nytt når den
 // endres: snapshotet for sjangerbeskrivelsene fyrer ved ENHVER endring i
 // samlingen (beskrivelser, kilder, historier), og en omtegning nullstiller
 // sidelengs scroll og fokus for den som bruker figuren.
 export function periodSignatur(groups, axis) {
-  return JSON.stringify([axis.start, axis.slutt,
+  return JSON.stringify([axis.start, axis.slutt, axis.ticks,
     groups.map((g) => [g.meta, g.rows.map((r) => [r.genre, r.from, r.to, r.status])])]);
 }

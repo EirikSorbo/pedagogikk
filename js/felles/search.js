@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------------------
 //  Bygger en flat liste over ALT som er skrevet i pensumet — artister,
 //  lytteeksempler, sjangre, undersjangre, sjangerhistorier, metasjanger-oversikter, innovasjonskort,
-//  tiårstekster, innholdssider, instrumentsammendrag, sjangerkoblinger,
+//  innholdssider, instrumentsammendrag, sjangerkoblinger,
 //  plateselskaper og podkaster — og rangerer treff i
 //  den. Hver post bærer med seg hvordan den åpnes (`apne`), så visningen bare
 //  sender payloaden videre til ruteren i explore-search.js. Samme grep som
@@ -38,8 +38,6 @@ export const TYPE_LABEL = {
   historie: "Sjangerhistorie",
   tech: "Innovasjon",
   hendelse: "Hendelse",
-  samfunn: "Samfunn",
-  teknologi: "Teknologi",
   side: "Innholdsside",
   instrument: "Instrument",
   kobling: "Sjangerkobling",
@@ -60,8 +58,6 @@ export const TYPE_FLERTALL = {
   historie: "Sjangerhistorier",
   tech: "Innovasjoner",
   hendelse: "Hendelser",
-  samfunn: "Samfunn",
-  teknologi: "Teknologi",
   side: "Innholdssider",
   instrument: "Instrumenter",
   kobling: "Sjangerkoblinger",
@@ -76,7 +72,7 @@ export const TYPE_FLERTALL = {
 // etter først.
 export const TYPE_ORDER = [
   "artist", "lytteeksempel", "oversikt", "sjanger", "rot", "undersjanger", "tech", "hendelse",
-  "historie", "galleri", "side", "instrument", "plateselskap", "samfunn", "teknologi", "kobling", "podkast", "slide",
+  "historie", "galleri", "side", "instrument", "plateselskap", "kobling", "podkast", "slide",
 ];
 
 const SIDE_TITTEL = { rotter: "Røtter før 1910", omHistorie: "Om historie", appGuide: "Slik bruker du appen" };
@@ -249,22 +245,11 @@ export function byggIndeks(state = {}, { erLærer = false, skjul = {}, skjulHub 
   for (const t of state.techItems || []) {
     ut.push(post(t.type === "hendelse" ? "hendelse" : "tech", t.id, t.name || "(uten navn)",
       [t.category, t.instrument].filter(Boolean).join(" · "),
-      [t.description, t.category, t.instrument, t.adoptedLabel, t.inventedYear, t.adoptedYear, t.decade],
+      [t.description, t.category, t.instrument, t.adoptedLabel, t.inventedYear, t.adoptedYear],
       { hva: "tech", id: t.id }));
   }
 
-  // --- Tiårstekstene (samfunn og teknologi hver for seg) -------------------
-  for (const [id, d] of Object.entries(state.decadeDescs || {})) {
-    if (!d) continue;
-    if (d.society) {
-      ut.push(post("samfunn", id, `${id}-tallet`, "Samfunnsutvikling", [d.society],
-        { hva: "tiår", id, modus: "society" }));
-    }
-    if (d.tech) {
-      ut.push(post("teknologi", id, `${id}-tallet`, "Teknologiutvikling", [d.tech],
-        { hva: "tiår", id, modus: "tech" }));
-    }
-  }
+  // (Tiårstekstene, samfunn og teknologi per tiår, ble tatt ut i fase 2.)
 
   // --- Innholdssidene -------------------------------------------------------
   // Røtter, Om historie og «Slik bruker du appen» nås KUN fra hvert sitt kort i

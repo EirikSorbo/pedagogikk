@@ -3,8 +3,9 @@
 // ----------------------------------------------------------------------------
 //  Config-en er slanket til det som faktisk er en lærer-innstilling
 //  (instrument-vokabularet). Metasjangre utledes alltid fra slektstreet
-//  (GENEALOGY_META_GENRES) og tiårene fra DECADES-konstanten — de er
-//  strukturakser i appen, ikke innstillinger. Grense-apparatet (maks totalt /
+//  (GENEALOGY_META_GENRES), og det samme gjør tidsrommene (TIDSROM, fase 2;
+//  før var tiårene en DECADES-konstant her) — de er strukturakser i appen,
+//  ikke innstillinger. Grense-apparatet (maks totalt /
 //  per tiår / per sjanger / per instrument + checkWarnings) er fjernet (v3.20):
 //  det hørte til den opprinnelige forslagsfasen med spredningspress, og hadde
 //  til slutt ingen reell funksjon i den kuraterte pensum-appen.
@@ -12,6 +13,8 @@
 
 import { resolveSpan } from "./timeline-lanes.js";
 import { artistSjekketOk } from "./sjekket.js";
+import { tidsromForSpenn } from "./tidsakse.js";
+import { TIDSROM } from "../sjangre/genre-model.js";
 
 // Firestore tar maks 500 operasjoner i én batch (v7.03: flyttet hit fra
 // js/sjangre/genre-migrate.js). store.js og migreringsplanene leser samme tall,
@@ -22,7 +25,7 @@ export const BATCH_MAX = 500;
 // ----------------------------------------------------------------------------
 //  INSTRUMENT-VOKABULARET — to nivåer, som sjangertreet
 // ----------------------------------------------------------------------------
-//  Fast liste i kode, som DECADES og sjangertreet (v3.68: erstattet config-
+//  Fast liste i kode (v3.68: erstattet config-
 //  dokumentet i Firestore, det siste som lå der). Artister med verdier utenfor
 //  lista flagges i Oversikten og ved import, så lista og dataene ikke kan drive
 //  fra hverandre slik config-tekstfeltet tillot (Saxofon/Saksofon...).
@@ -148,18 +151,8 @@ export function instrumentPageId(group) {
   return `instrument-${slug}`;
 }
 
-// Tiårene appen dekker — strukturakse for histogram, filtre, tiårs-
-// beskrivelser og Skrivebordet. Utvides her når 2030-tallet melder seg.
-export const DECADES = [
-  1900, 1910, 1920, 1930, 1940, 1950,
-  1960, 1970, 1980, 1990, 2000, 2010, 2020,
-];
-
-// Tiårene som nedtrekk (teknologikortenes `decade`-felt). VERDIEN må være
-// STRENGEN «1950», ikke tallet: buildTechTimeline filtrerer med
-// `t.decade === String(decadeId)`, og et tall ville falt ut av den
-// sammenligningen og tømt tiårets tidslinje uten feilmelding.
-export const DECADE_OPTIONS = DECADES.map((d) => ({ value: String(d), label: `${d}-tallet` }));
+// (DECADES og DECADE_OPTIONS, tiårene 1900–2020, sto her til fase 2. Tidsaksen
+// er nå tidsrommene i treet: TIDSROM i genre-model.js og js/felles/tidsakse.js.)
 
 // Kjønnskategorier brukt i skjema og statistikk. Etikettene er det eneste
 // brukeren ser (GENDER_LABEL i ui-helpers utleder alt fra denne lista) —
@@ -239,48 +232,37 @@ export function artistsInGenre(artists, label) {
     .sort(byInfluenceThenName);
 }
 
-// Regner ut hvilke tiår et ÅRSSPENN dekker. Ren primitiv: begge endene må være
-// avklart av kalleren. Bruk decadesForArtist under for artister — den vet hva
-// en manglende sluttdato betyr.
-export function decadesForRange(startYear, endYear) {
-  if (!startYear) return [];
-  const end = endYear || startYear;
-  const first = Math.floor(startYear / 10) * 10;
-  const last = Math.floor(end / 10) * 10;
-  const result = [];
-  for (let d = first; d <= last; d += 10) result.push(d);
-  return result;
-}
-
-// Tiårene EN ARTIST teller i. Tom influenceEnd betyr «pågår» — artisten regnes
-// da fra influenceStart og HELT FRAM TIL I DAG, ikke bare i startåret sitt
-// (v3.95). Før falt decadesForRange tilbake på `end = startYear`, så en artist
-// uten sluttår forsvant ut av alle senere tiår: Beyoncé (fra 1997) og Kendrick
-// Lamar (fra 2012) fantes ikke i 2020-tallsfiltrene, tellingene, kartet eller
-// dashbordet — nettopp de tiårene de definerer.
+// Tidsrommene EN ARTIST teller i (fase 2; før tiårene, decadesForArtist), som
+// indekser i TIDSROM. Tom influenceEnd betyr «pågår» — artisten regnes da fra
+// influenceStart og HELT FRAM TIL I DAG, ikke bare i startåret sitt (v3.95:
+// før forsvant en artist uten sluttår ut av alle senere tiår).
 //
 // Spennet kommer fra resolveSpan, SAMME kilde som artistenes tidslinje bruker.
-// Det er hele poenget med å gå via den: tidslinjen og tiårsfiltrene kan ikke
-// lenger svare ulikt på «når var denne artisten aktiv». Det gir også dødsåret
-// som tak på kjøpet — en avdød artist uten influenceEnd løper til dødsåret, ikke
-// til i dag. (Ingen i pensumet har den kombinasjonen nå, men regelen bør stå.)
-export function decadesForArtist(artist, nowYear = new Date().getFullYear()) {
+// Det er hele poenget med å gå via den: tidslinjen og filtrene kan ikke svare
+// ulikt på «når var denne artisten aktiv». Det gir også dødsåret som tak på
+// kjøpet — en avdød artist uten influenceEnd løper til dødsåret, ikke til i
+// dag. `tidsrom` kan sendes inn (testene); ellers leses treets ved kall-tid.
+export function tidsromForArtist(artist, nowYear = new Date().getFullYear(), tidsrom = TIDSROM) {
   const span = resolveSpan(artist, nowYear);
-  return span ? decadesForRange(span.start, span.end) : [];
+  return span ? tidsromForSpenn(tidsrom, span.start, span.end, nowYear) : [];
 }
 
+// Er et tidsromfilter valgt? Verdien er indeksen som tekst fra nedtrekket
+// («0» er det første tidsrommet, og et gyldig valg).
+const harTidsrom = (v) => v != null && v !== "";
+
 // Delt innholdsfilter for artistlister (sjanger/meta/instrument/undersjanger/
-// prioritet/tiår/søk). Status-/synlighetsfiltrering gjøres av kalleren FØR dette,
+// prioritet/tidsrom/søk). Status-/synlighetsfiltrering gjøres av kalleren FØR dette,
 // siden student- og lærer-visningen har ulike regler der. Ren funksjon —
 // enhetstestbar, og holder filterlogikken ett sted (landing.js + ui.js delte den
 // før i to kopier som allerede hadde driftet fra hverandre).
-// Er noe innholdsfilter aktivt? (søk/sjanger/meta/instrument/tiår/undersjanger/
+// Er noe innholdsfilter aktivt? (søk/sjanger/meta/instrument/tidsrom/undersjanger/
 // prioritet). Delt av landing (spotlight vs. kompakt liste) og ui.renderArtists
 // (sortert vs. tilfeldig rekkefølge), så de to flatene aldri driver fra
 // hverandre om hva «filtrert» betyr — landing utelot før prioritet og
 // undersjanger, som ga inkonsistent visning ved prioritet-bare-filter.
 export function hasActiveFilters(f = {}) {
-  return !!(f.search || f.mainGenre || f.metaGenre || f.instrument || f.decade || f.subgenre || f.priority);
+  return !!(f.search || f.mainGenre || f.metaGenre || f.instrument || harTidsrom(f.tidsrom) || f.subgenre || f.priority);
 }
 
 // Er artisten med på viktighetsnivået (v6.85)? 3 = bare viktigst, 2 = viktig
@@ -311,9 +293,9 @@ export function filterArtists(list, filters = {}) {
   // alt over. «Skjult» (-1, lærerlista) er filteret for de skjulte (erSkjult).
   if (filters.priority === -1) list = list.filter(erSkjult);
   else if (filters.priority) list = list.filter((a) => iViktighetsnivaa(a, filters.priority));
-  if (filters.decade) {
-    const d = Number(filters.decade);
-    list = list.filter((a) => decadesForArtist(a).includes(d));
+  if (harTidsrom(filters.tidsrom)) {
+    const i = Number(filters.tidsrom);
+    list = list.filter((a) => tidsromForArtist(a).includes(i));
   }
   if (filters.search) {
     const q = filters.search.toLowerCase();
@@ -337,18 +319,19 @@ function countBy(list, key) {
   return map;
 }
 
-// En artist teller i ALLE tiår perioden deres spenner over
 function countByInstrument(list) {
   const map = {};
   for (const a of list) for (const i of instrumenterFor(a)) map[i] = (map[i] || 0) + 1;
   return map;
 }
 
-function countByDecade(list) {
+// En artist teller i ALLE tidsrom perioden spenner over. Nøkkelen er
+// tidsrommets indeks i TIDSROM.
+function countByTidsrom(list) {
   const map = {};
   for (const a of list) {
-    for (const d of decadesForArtist(a)) {
-      map[d] = (map[d] || 0) + 1;
+    for (const i of tidsromForArtist(a)) {
+      map[i] = (map[i] || 0) + 1;
     }
   }
   return map;
@@ -358,7 +341,7 @@ export function computeCounts(artists) {
   const active = activeArtists(artists);
   return {
     total: active.length,
-    perDecade: countByDecade(active),
+    perTidsrom: countByTidsrom(active),
     perMetaGenre: countBy(active, "metaGenre"),
     // Begge instrumentene teller (v6.39): Ray Charles er med under både
     // Tangenter og Vokal, slik han står i begge listene.

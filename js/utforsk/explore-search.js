@@ -46,7 +46,6 @@ function hentIndeks(s, { tvingNy = false } = {}) {
     (s.artists || []).length,
     Object.keys(s.genreDescs || {}).length,
     (s.techItems || []).length,
-    Object.keys(s.decadeDescs || {}).length,
     Object.keys(s.content || {}).length,
     Object.keys(s.edgeDescs || {}).length,
     (s.podcasts || []).length,

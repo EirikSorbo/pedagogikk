@@ -1,42 +1,20 @@
 // ============================================================================
 //  UI — TIDSLINJER
 // ----------------------------------------------------------------------------
-//  Bygger proporsjonale tidslinjer for tiår (hendelser fra tekst), teknologi og
-//  sjangerfamilier. Intern layout-logikk holdes privat her. Importerer
+//  Bygger proporsjonale tidslinjer for instrumentene og rekkefølgen i
+//  sjangerfamiliene. Intern layout-logikk holdes privat her. Importerer
 //  GENEALOGY (treet er fasit for sjangertidslinjen) — trygt, fordi genealogy.js
-//  ikke importerer denne modulen.
+//  ikke importerer denne modulen. (Tiårsvelgeren og tiårenes tidslinjer ble
+//  tatt ut i fase 2 sammen med tiårskortene.)
 // ============================================================================
 
 import { escapeHtml } from "../felles/util.js";
-import { formatInfoText } from "./ui-helpers.js";
-import { DECADES } from "../felles/limits.js";
-import { GENEALOGY } from "../sjangre/genre-model.js";
+import { GENEALOGY, TIDSROM } from "../sjangre/genre-model.js";
+import { visAar } from "../felles/aarstall.js";
 // Epoken bor i genreDescriptions fra v4.64. Vi går til den rene oppslags-
 // modulen, ikke til genealogy.js: den importerer denne veien rundt ellers.
 import { resolveDescAny } from "../sjangre/genre-descriptions.js";
 import { isHendelse } from "./ui-tech.js";
-
-// Tiårsvelgeren (klikkbar tidslinje-stripe): delt av studentenes tiårsvisning
-// (explore-decade.js), lærerens tiårsmodal (teacher-content.js) og kartet, så flatene
-// aldri driver fra hverandre. onSelect får tiåret som tall.
-//
-// Kolonnetallet sendes til CSS som variabel, så sporet følger DECADES den dagen
-// et nytt tiår melder seg. («Alle»-prikken forsvant med kartet i v4.39; se
-// KART-OPPSKRIFT.md hvis den skal tilbake.)
-export function renderDecadeRibbon(el, active, onSelect) {
-  if (!el) return;
-  el.innerHTML =
-    `<div class="dr-track" style="--dr-cols:${DECADES.length}">` +
-    DECADES.map((y) =>
-      `<button type="button" class="dr-node${y === active ? " active" : ""}" data-decade="${y}"` +
-      ` aria-label="${y}-tallet"${y === active ? ` aria-current="true"` : ""}>` +
-      `<span class="dr-dot"></span><span class="dr-year">${y}</span></button>`
-    ).join("") + `</div>`;
-  el.querySelectorAll("[data-decade]").forEach((btn) => {
-    btn.addEventListener("click", () =>
-      onSelect(btn.dataset.decade === "" ? null : Number(btn.dataset.decade)));
-  });
-}
 
 // Etikettene er 130px brede (CSS .tl-prop .tl-label) — ca. 24 % av minste
 // sporbredde (560px). Grupper hvis intervaller overlapper horisontalt må
@@ -48,7 +26,7 @@ const CHARS_PER_LINE = 20;
 const LINE_H = 17;
 
 // lineH må følge den FAKTISKE skriftstørrelsen på .tl-desc. Sjangertidslinjen
-// setter navnene større (0.82rem, halvfet) enn tiår-/teknologitidslinjene, og
+// setter navnene større (0.82rem, halvfet) enn teknologitidslinjene gjorde, og
 // med standardhøyden 17px undervurderte estimatet stabler på tre navn nok til
 // at etiketten kolliderte med naboen (Neo-soul/Gangsta rap/Cont. R&B mot Trap).
 function estimateLabelHeight(entries, lineH = LINE_H) {
@@ -130,11 +108,9 @@ function enforceMinGap(sorted, desiredGap, pad, limit) {
 }
 
 // opts.color farger strek, prikker, stilker og årstall (CSS-variabelen
-// --tl-color, som faller tilbake på --accent når den ikke er satt — derfor er
-// tiårs- og teknologitidslinjene uendret grønne).
-// opts.minGapPct, opts.stemLevels og opts.edgeAlign settes kun av
-// sjangertidslinjen, så innovasjons- og tiårstidslinjene beholder plasseringen
-// og kant-justeringen de har i dag.
+// --tl-color, som faller tilbake på --accent når den ikke er satt).
+// opts.minGapPct, opts.stemLevels og opts.edgeAlign styrer plasseringen og
+// kant-justeringen.
 function buildProportionalTimeline(items, startYear, {
   color = null, extraClass = "", minGapPct = 0, lineH = LINE_H,
   stemLevels = 0, edgeAlign = true,
@@ -142,10 +118,8 @@ function buildProportionalTimeline(items, startYear, {
   if (items.length < 2) return "";
   // Hendelser på samme punkt samles til én gruppe — ett punkt, én stilk, navnene
   // under hverandre — i stedet for flere etiketter oppå hverandre på samme x.
-  // Grupperes på ÅRSTALL (posisjonen), ikke på etiketten: for tiår- og
-  // teknologitidslinjene er de to identiske, men sjangertidslinjen viser nodens
-  // `era` ordrett («sent 1960-tall»), og da må to noder på samme x havne i samme
-  // gruppe selv om teksten er ulik.
+  // Grupperes på ÅRSTALL (posisjonen), ikke på etiketten: to punkter på samme
+  // x skal i samme gruppe selv om teksten er ulik.
   const byPos = new Map();
   for (const e of items) {
     const key = e.year == null ? "?" : e.year;
@@ -195,53 +169,11 @@ function buildProportionalTimeline(items, startYear, {
   return html;
 }
 
-// Delt tiårs-render: samfunn/teknologi-tekst + tidslinjer + «les mer»-knapper.
-// Kalt fra forsidens tiårsvisning (explore-decade.js) OG lærer-tiårsmodalen (også etter
-// lagring), så de tre tidligere kopiene holdes ett sted. `refs` er DOM-elementer
-// (ulike ID-prefikser dv-/ds- per bruk); manglende refs hoppes over.
-export function renderDecadeSections(refs, desc, decadeId, techItems, { isSociety = true, onTechClick } = {}) {
-  const noText = "Ingen beskrivelse ennå.";
-  if (refs.societyEl) {
-    refs.societyEl.innerHTML = desc.society ? formatInfoText(desc.society) : noText;
-    refs.societyEl.className = "info-text" + (desc.society ? "" : " muted");
-  }
-  if (refs.techEl) {
-    refs.techEl.innerHTML = desc.tech ? formatInfoText(desc.tech) : noText;
-    refs.techEl.className = "info-text" + (desc.tech ? "" : " muted");
-  }
-  if (refs.techTl) {
-    refs.techTl.innerHTML = buildTechTimeline(techItems, decadeId);
-    if (onTechClick) {
-      refs.techTl.querySelectorAll("[data-tech-id]").forEach((el) => {
-        el.addEventListener("click", () => {
-          const t = techItems.find((x) => x.id === el.dataset.techId);
-          if (t) onTechClick(t);
-        });
-      });
-    }
-  }
-}
-
-export function buildTechTimeline(techItems, decadeId) {
-  const d = String(decadeId);
-  const filtered = techItems.filter(t => t.decade === d);
-  if (filtered.length < 2) return "";
-  filtered.sort((a, b) => (a.adoptedYear || 0) - (b.adoptedYear || 0));
-  const startYear = parseInt(d, 10);
-  const items = filtered.map(t => ({
-    year: t.adoptedYear || null,
-    label: t.adoptedYear ? String(t.adoptedYear) : `${d}+`,
-    desc: t.name,
-    techId: t.id,
-  }));
-  return buildProportionalTimeline(items, startYear);
-}
-
 // ----------------------------------------------------------------------------
 //  INSTRUMENTTIDSLINJE — nyvinningene for én instrumentgruppe
 // ----------------------------------------------------------------------------
-//  Samme kort som teknologiseksjonen (samlingen `tech`), men gruppert på
-//  `instrument` i stedet for `decade`: ett kort = én stilk. Kortene skrives av
+//  Samme kort som teknologiseksjonen (samlingen `tech`), gruppert på
+//  `instrument`: ett kort = én stilk. Kortene skrives av
 //  studentene, så tidslinjen må bygges av dataene og ikke av noen liste i
 //  koden — en ny godkjent nyvinning skal dukke opp av seg selv.
 //
@@ -263,7 +195,7 @@ export function buildInstrumentTimeline(techItems, group) {
       // KUN årstallet (brukervalg): adoptedLabel er fritekst som ofte er en hel
       // setning («utviklet 1993, gjennombrudd sent på 1990-tallet»), og den
       // sprengte den lille etiketten. Den lange formen står på selve kortet.
-      label: t.adoptedYear ? String(t.adoptedYear) : "",
+      label: t.adoptedYear ? visAar(t.adoptedYear) : "",
       desc: t.name,
       techId: t.id,
       hendelse: isHendelse(t),
@@ -289,8 +221,15 @@ export function buildInstrumentTimeline(techItems, group) {
 //  Cont. R&B og Cont. hip-hop manglet). Her utledes den av GENEALOGY, så en ny
 //  node dukker opp i historien sin uten at noen må huske å oppdatere teksten.
 
-// rad → tiårets startår. Samme mapping som DEC i genealogy.js (r1 = 1900).
-const rowYear = (r) => 1890 + r * 10;
+// rad → tidsrommets startår (fase 2; før tiåret, rad 1 = 1900). En rad uten
+// tidsrom låner året fra nærmeste tidsrom over, så rekkefølgen holder.
+function rowYear(r) {
+  const rad = Math.floor(Number(r) || 0);
+  for (let i = Math.min(rad, TIDSROM.length - 1); i >= 0; i--) {
+    if (Number.isInteger(TIDSROM[i]?.fra)) return TIDSROM[i].fra + (rad - i);
+  }
+  return rad;
+}
 
 // Epoken for en node, fra genreDescriptions. Fram til v4.64 lå den som `era` på
 // treets node; da kunne sjangerkortet og denne tidslinjen vise ULIK epoke for
@@ -301,21 +240,26 @@ function nodeEpoke(n, genreDescs) {
 
 // Årstallet en node plasseres på, i fallende presisjon:
 //   1. activeFrom — strukturert og validert, lærerens egen retting
-//   2. et firesifret årstall lest ut av fritekst-epoken («ca. 1979» → 1979)
-//   3. radens tiår, som alltid er satt
-// Uten steg 1 og 2 ville rot-nodene kollidert med sjangeren de føder (Work
-// songs og Blues står begge på rad 1).
+//   2. et årstall lest ut av fritekst-epoken («ca. 1979» → 1979,
+//      «ca. 450 f.Kr.» → -450)
+//   3. startåret til tidsrommet noden står i
+// Uten steg 1 og 2 ville to noder i samme tidsrom kollidert.
 function nodeYear(n, e) {
   if (Number.isInteger(e?.activeFrom)) return e.activeFrom;
-  const m = String(e?.era || "").match(/\b(1[5-9]\d{2}|20[0-2]\d)\b/);
-  return m ? parseInt(m[1], 10) : rowYear(n.r);
+  // Første tall i teksten. Det er før Kristus når «f.Kr.» står rett etter
+  // det, eller etter neste tall i et spenn («450–300 f.Kr.»). Ett- og
+  // tosifrede tall uten f.Kr. er for tvetydige («2. verdenskrig»).
+  const m = String(e?.era || "").match(/\b(\d{1,4})(?:\s*(f\.\s?kr)|\s*[–-]\s*\d{1,4}\s*(f\.\s?kr))?/i);
+  if (m && (m[2] || m[3])) return -parseInt(m[1], 10);
+  if (m && m[1].length >= 3) return parseInt(m[1], 10);
+  return rowYear(n.r);
 }
 
 // Etiketten over punktet er fritekst-epoken ORDRETT («1957», «sent 1960-tall»,
 // «midten av 1940-tallet»). Vi viser altså ikke det utleste årstallet: der
 // epoken er upresis, ville tallet både sett feil ut og kunne havnet til høyre
 // for et høyere tall etter avstamnings-låsingen under. Mangler friteksten,
-// brukes årstallet, og ellers tiåret.
+// brukes årstallet, og ellers tidsrommet.
 // Årstallet over for én node (metasjanger-oversikten, v5.94: forbindelsene
 // til andre familier i tidsrekkefølge, også røttene uten activeFrom).
 export function nodeStartAar(n, genreDescs) {
@@ -325,8 +269,8 @@ export function nodeStartAar(n, genreDescs) {
 function nodeLabel(n, e) {
   const era = String(e?.era || "").trim();
   if (era) return era;
-  if (Number.isInteger(e?.activeFrom)) return String(e.activeFrom);
-  return `${rowYear(n.r)}-t`;
+  if (Number.isInteger(e?.activeFrom)) return visAar(e.activeFrom);
+  return TIDSROM[Math.floor(Number(n.r) || 0)]?.etikett || visAar(rowYear(n.r));
 }
 
 // Sjangerfamilien til én metasjanger, i tidsrekkefølge. KUN ekte sjangre —
@@ -357,8 +301,7 @@ export function genreFamilyNodes(metaGenre, genreDescs = {}) {
     .sort((a, b) => a.year - b.year);
 }
 
-// buildGenreTimeline lå her til v5.16. Sjangerhistoriene viser nå varmestriper
-// for hele familien i stedet for startårene deres (se explore-innhold.js), og
-// genreFamilyNodes over er det eneste som ble igjen: den gir fortsatt
-// rekkefølgen, kronologisk etter startår. buildProportionalTimeline lever
-// videre for tiårs- og instrumenttidslinjene.
+// buildGenreTimeline lå her til v5.16. genreFamilyNodes over er det eneste
+// som ble igjen: den gir rekkefølgen, kronologisk etter startår, til
+// historiene (epokene som bobler, fase 2) og metasjanger-oversikten.
+// buildProportionalTimeline lever videre for instrumenttidslinjene.

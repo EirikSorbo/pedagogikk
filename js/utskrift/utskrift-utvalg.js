@@ -64,17 +64,17 @@ const synligeArtister = () => ((hentData?.() || {}).artists || []).filter(isVisi
 // Det utvalget drar med seg akkurat nå: Map vis → opphav (se utvidUtvalg).
 // Huskes (v5.69): harMed kalles én gang per kort når artistlistene tegnes,
 // og utvidUtvalg går gjennom alle artistene hver gang. Nøkkelen er det som
-// faktisk ligger lagret pluss sidens artist- og beskrivelsesreferanser, så
-// et nytt snapshot eller en lagring regner på nytt.
-let avledetHusk = { raa: null, artister: null, descs: null, map: null };
+// faktisk ligger lagret pluss sidens artistreferanse, så et nytt snapshot
+// eller en lagring regner på nytt.
+let avledetHusk = { raa: null, artister: null, map: null };
 function avledet(u) {
   const s = hentData?.() || {};
   let raa = null;
   try { raa = localStorage.getItem(NOKKEL); } catch (e) { /* som i lesUtvalg */ }
   const h = avledetHusk;
-  if (h.map && h.raa === raa && h.artister === s.artists && h.descs === s.genreDescs) return h.map;
-  const map = utvidUtvalg(u.valg, u.fravalg, synligeArtister(), new Date().getFullYear(), s.genreDescs || {}).kilde;
-  avledetHusk = { raa, artister: s.artists, descs: s.genreDescs, map };
+  if (h.map && h.raa === raa && h.artister === s.artists) return h.map;
+  const map = utvidUtvalg(u.valg, u.fravalg, synligeArtister()).kilde;
+  avledetHusk = { raa, artister: s.artists, map };
   return map;
 }
 
@@ -213,7 +213,7 @@ export const UTSKRIFT_HAKE_SVG = '<svg width="16" height="16" viewBox="0 0 24 24
 
 const TITTEL_MED = "Tatt med i utskriften. Klikk for å ta den ut.";
 const TITTEL_UTEN = "Ta med i utskriften";
-const TITTEL_IKKE = "Kan ikke stå i heftet. Bare kort, tiår, sider og lytteeksempler kan skrives ut.";
+const TITTEL_IKKE = "Kan ikke stå i heftet. Bare kort, sider og lytteeksempler kan skrives ut.";
 
 function knappTilstand(b, k) {
   const med = harMed(k);
@@ -256,7 +256,7 @@ function oppdaterKortKnapper() {
 // Knappen følger modalens mål. Fra v5.80 (brukervalg 2026-09-28: tittellinja
 // skal ha de samme knappene på alle kort) står den så snart kortet bærer et
 // mål, som visningsknappen, og er grået ut med forklaring når målet ikke kan
-// stå i heftet (varmekart, tidslinje, koblinger …). Uten mål: skjult, som de
+// stå i heftet (tidslinje, koblinger …). Uten mål: skjult, som de
 // andre knappene i hodet.
 function oppdaterKnapp(modal) {
   const b = modal?.querySelector?.(".modal-head .utskrift-ta-med");

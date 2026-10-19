@@ -37,19 +37,14 @@ test("forslag 1: «Dupliser» lager en ny plan med kopi av stoppene", () => {
   assert.match(dup, /if \(aktivSamleokt\(\)\?\.planId === id\) await medFrist\(avsluttInnsamling\(\), 4000\);\n\s*const p = planerNaa\(\)\[id\];/);
 });
 
-test("funn 15: varmekartet tar bare en kjent metasjanger, aldri klikkhendelsen", () => {
-  const vk = kilde("explore-varmekart.js");
-  assert.match(vk, /const m = typeof meta === "string" && META_GENRE_ORDER\.includes\(meta\) \? meta : null;/);
+// Funn 15 gjaldt varmekartet, og tiårsdelen av funn 16 tiårsvinduet. Begge ble
+// tatt ut i fase 2 (pedagogikkappen); testen under holder dem ute.
+test("fase 2: varmekartet og tiårsvinduet er borte fra Utforsk", () => {
   const ex = kilde("explore.js");
-  assert.doesNotMatch(ex, /addEventListener\("click", openVarmekart\)/);
-  assert.doesNotMatch(ex, /paaKort\("sb-varmekart", openVarmekart\)/);
+  assert.doesNotMatch(ex, /openVarmekart|sb-varmekart|openDecade|data-tiar/);
 });
 
-test("funn 16: tiåret og teknologikategorien følger med i data-vis", () => {
-  const dec = kilde("explore-decade.js");
-  const render = dec.slice(dec.indexOf("function renderDecadeView("));
-  assert.match(render, /const vis = `tiår:\$\{d\}:\$\{contextMode\}`;\n\s*if \(modal\.dataset\.vis !== vis\) modal\.dataset\.vis = vis;/,
-    "settes i renderDecadeView, som båndet og forrige/neste kaller");
+test("funn 16: teknologikategorien følger med i data-vis", () => {
   const tech = kilde("explore-tech.js");
   assert.match(tech, /const vis = category \? `teknologi:\$\{category\}` : "teknologi";/);
 });
@@ -64,7 +59,6 @@ test("funn 18: dype lenker venter på dataene kortet tegnes av, og tech-snapshot
   assert.match(apne, /case "teknologi":\n\s*return s\.techLoaded \? "klar" : "vent";/);
   assert.match(apne, /case "kobling":\n\s*return isGenreModelReady\(\) && s\.edgeDescsLoaded && s\.genreDescsLoaded \? "klar" : "vent";/);
   assert.match(apne, /case "himmel": case "tidslinje":\n\s*return isGenreModelReady\(\) && s\.artistsLoaded \? "klar" : "vent";/);
-  assert.match(apne, /\(apne\.modus !== "tech" \|\| s\.techLoaded\)/);
   for (const f of ["landing.js", "tre-page.js"]) {
     const src = kilde(f);
     assert.match(src, /onTech: \(\) => \{[^}]*refreshTeknologi\?\.\(\);[^}]*provVisMaal\(\);/, f);

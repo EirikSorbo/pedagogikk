@@ -2,32 +2,32 @@
 //  DELT DATAROT — alle sider abonnerer på de delte samlingene herfra
 // ----------------------------------------------------------------------------
 //  De delte komponentene (sjangerkortet, artistlista, spillelista, innovasjons-
-//  kortet, instrumentsidene, slektstreet) leses fra SYV samlinger: artists,
-//  genreDescs, edgeDescs, tech, content, decades og podcasts. Før v4.44
+//  kortet, instrumentsidene, slektstreet) leses fra SEKS samlinger: artists,
+//  genreDescs, edgeDescs, tech, content og podcasts. (decades, tiårs-
+//  beskrivelsene, var den sjuende til fase 2.) Før v4.44
 //  abonnerte hver side på sitt eget utvalg av dem, hver for seg, og da ga samme
 //  komponent ulikt innhold avhengig av hvilken inngang den ble åpnet fra:
 //
-//    · slektstresiden lastet ikke content, så varmestripa manglet på
-//      sjangerkortet der mens den vistes overalt ellers (lappet i v3.98)
+//    · slektstresiden lastet ikke content, så det som bodde der manglet på
+//      sjangerkortet i treet mens det vistes overalt ellers (lappet i v3.98)
 //    · forsiden lastet ikke edgeDescs i det hele tatt, så den kunne ikke vise
 //      koblingsbeskrivelser selv om den delte kortet som viser dem
 //    · slektstresiden bygget sin egen sjangerOpts uten onShowTimeline, så
 //      «Tidslinje»-knappen på kortet fantes på forsiden, men ikke i treet
 //
-//  Her er den ene ruta inn. Alle sider får nøyaktig samme syv samlinger i
+//  Her er den ene ruta inn. Alle sider får nøyaktig samme seks samlinger i
 //  nøyaktig samme state-form, og en ny side kan ikke lenger gå glipp av én.
 //
-//  decades og podcasts er med selv om de ser sidespesifikke ut: explore-
-//  decade.js gjør `s.decadeDescs[String(d)]` og explore-instrument.js gjør
-//  `s.podcasts.length` UTEN vakt, og begge flatene er nåbare fra enhver side
-//  som injiserer utforsk-modalene (instrumentlenkene på innovasjonskortene
-//  åpner instrumentsiden). Manglet de i state, ville et klikk kastet
-//  TypeError i stedet for å vise innhold. Samlingene er dessuten små.
+//  podcasts er med selv om den ser sidespesifikk ut: explore-instrument.js
+//  gjør `s.podcasts.length` UTEN vakt, og flaten er nåbar fra enhver side som
+//  injiserer utforsk-modalene (instrumentlenkene på innovasjonskortene åpner
+//  instrumentsiden). Manglet den i state, ville et klikk kastet TypeError i
+//  stedet for å vise innhold. Samlingen er dessuten liten.
 //
 //  Lærersidens egne samlinger (pendingEdits) holdes utenfor. Sjekkene
 //  (config/teacherChecks) leses fra v6.89 også på studentflatene, for regelen
 //  «Bare sjekket innhold» (js/felles/sjekket.js): da er genreDescs, edgeDescs,
-//  techItems, content og decadeDescs i state studentenes utgave, uten det
+//  techItems og content i state studentenes utgave, uten det
 //  usjekkede (js/data/sjekket-filter.js). Rådataene står i `raa` her, og
 //  utgaven regnes ut på nytt ved hvert snapshot og hver gang regelen eller
 //  sjekkene endres («pensum:synlighet»). Lærersiden (laererside) får alltid
@@ -40,14 +40,13 @@ import {
   subscribeEdgeDescs,
   subscribeTech,
   subscribeContent,
-  subscribeDecades,
   subscribePodcasts,
   subscribeTeacherChecks,
 } from "./store.js";
 import { applyGenealogyDoc } from "../sjangre/genre-model.js";
 import { brukSynlighet } from "../felles/feature-flags.js";
 import { sjekketRegelAktiv, sjekkene, brukSjekker, settSjekketLaerer } from "../felles/sjekket.js";
-import { filtrerGenreDescs, filtrerEdgeDescs, filtrerTech, filtrerDecades, filtrerContent } from "./sjekket-filter.js";
+import { filtrerGenreDescs, filtrerEdgeDescs, filtrerTech, filtrerContent } from "./sjekket-filter.js";
 
 // Feltene hver side må ha i sin `state` for at de delte komponentene skal
 // virke. Spres inn i sidens eget state-objekt ved oppstart, så ingen side kan
@@ -70,14 +69,12 @@ export function sharedStateDefaults() {
     content: {},
     // contentLoaded skiller «laster fortsatt» fra «mangler faktisk tekst».
     contentLoaded: false,
-    decadeDescs: {},
     podcasts: [],
     // Resten av lastet-flaggene (v5.35, audit-funn 26): lærerens eksport leser
     // ALLE samlingene rett fra state, og vakten foran den må kunne se at hver
     // enkelt har landet, ikke bare artister og content.
     edgeDescsLoaded: false,
     techLoaded: false,
-    decadesLoaded: false,
     podcastsLoaded: false,
   };
 }
@@ -92,20 +89,19 @@ export function sharedStateDefaults() {
 // forskjellene mellom sidene — alt annet er likt med vilje.
 export function subscribeSharedData(state, hooks = {}) {
   const {
-    onArtists, onGenreDescs, onEdgeDescs, onTech, onContent, onDecades, onPodcasts,
+    onArtists, onGenreDescs, onEdgeDescs, onTech, onContent, onPodcasts,
     keepPendingTech = false,
     laererside = false,
   } = hooks;
   if (laererside) settSjekketLaerer(true);
 
   // Rådataene fra Firestore. state får studentenes utgave av dem (utled).
-  const raa = { genreDescs: {}, edgeDescs: {}, techItems: [], content: {}, decadeDescs: {} };
+  const raa = { genreDescs: {}, edgeDescs: {}, techItems: [], content: {} };
   const FILTER = {
     genreDescs: filtrerGenreDescs,
     edgeDescs: filtrerEdgeDescs,
     techItems: filtrerTech,
     content: filtrerContent,
-    decadeDescs: filtrerDecades,
   };
   const utled = (navn) => {
     state[navn] = sjekketRegelAktiv() ? FILTER[navn](raa[navn], sjekkene()) : raa[navn];
@@ -153,12 +149,6 @@ export function subscribeSharedData(state, hooks = {}) {
     onContent?.(utled("content"));
   });
 
-  subscribeDecades((d) => {
-    raa.decadeDescs = d || {};
-    state.decadesLoaded = true;
-    onDecades?.(utled("decadeDescs"));
-  });
-
   // Sjekkene (v6.89). Lærersiden abonnerer selv (teacher.js) og trenger dem
   // ikke her, siden regelen aldri gjelder der.
   if (!laererside) subscribeTeacherChecks(brukSjekker);
@@ -180,7 +170,6 @@ export function subscribeSharedData(state, hooks = {}) {
       if (state.edgeDescsLoaded) onEdgeDescs?.(utled("edgeDescs"));
       if (state.techLoaded) onTech?.(utled("techItems"));
       if (state.contentLoaded) onContent?.(utled("content"));
-      if (state.decadesLoaded) onDecades?.(utled("decadeDescs"));
     });
   }
 

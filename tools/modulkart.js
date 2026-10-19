@@ -28,7 +28,7 @@ const MAPPER = [
   ["", "Sidene og oppsettet",
     "Én fil per HTML-side (landing, student, teacher, tre med tre-page, utskrift), sperrene hver side laster først (gate, load-guard), appversjonen og Firebase-oppsettet."],
   ["utforsk", "Utforsk",
-    "Det store bildet, tiårene, sjangrene, varmekartet, tidslinja, Lytt, Instrumenter, referansene, søket og ?vis=-ruteren. explore.js kobler dem sammen, og explore-context.js er limet de deler."],
+    "Det store bildet, sjangrene, sjangerperiodene, tidslinja, Lytt, Instrumenter, referansene, søket og ?vis=-ruteren. explore.js kobler dem sammen, og explore-context.js er limet de deler."],
   ["sjangre", "Sjangrene og slektstreet",
     "Sjangermodellen (treet bor i Firestore, og alt annet avledes av det), beskrivelsene, sjangerkortet, slektstreet, sjangerhimmelen og migreringen når en sjanger bytter navn."],
   ["visning", "Visning",
@@ -44,7 +44,7 @@ const MAPPER = [
   ["data", "Data",
     "Firestore (store.js er den eneste fila som snakker med databasen), den delte dataroten, appens tilstand, artistskjemaet og importformatet."],
   ["felles", "Felles hjelpere",
-    "Små hjelpere og vokabular som flere deler av appen bruker: tekst og lenker, kilder, søkeindeksen, tiår og instrumenter, dype lenker og bryterne."],
+    "Små hjelpere og vokabular som flere deler av appen bruker: tekst og lenker, kilder, søkeindeksen, årstall og tidsakse, instrumenter, dype lenker og bryterne."],
   ["vendor", "Tredjepart",
     "Kode skrevet av andre, brukt uendret."],
 ];

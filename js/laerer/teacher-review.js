@@ -21,7 +21,6 @@ function entityTypeLabel(t) {
   return ({
     artist: "Artist", tech: "Innovasjonskort", subgenre: "Sjanger",
     instrument: "Instrumentsammendrag",
-    "decade-society": "Samfunnstiår", "decade-tech": "Teknologitiår",
     "new-tech": "Nytt innovasjonskort",
   })[t] || t;
 }
@@ -87,12 +86,12 @@ function openDiffModal(editId) {
   activeEditId = editId;
 
   // entityName er FRITT satt av innsenderen, mens entityId er det som faktisk
-  // skrives til. For de NAVNEBASERTE typene (subgenre, instrument, decade-*)
+  // skrives til. For de NAVNEBASERTE typene (subgenre, instrument)
   // er ID-en et lesbart navn: spriker de, kunne et forslag stå som «Bebop» i
   // køen og skrive til Blues, så begge vises. Artist- og tech-forslag bærer en
   // tilfeldig Firestore-ID som ALLTID er ulik navnet (audit-funn 28): der var
   // «(skriver til: 7Kd2xQ…)» bare støy på hvert eneste forslag.
-  const navnebasert = ["subgenre", "instrument", "decade-society", "decade-tech"].includes(edit.entityType);
+  const navnebasert = ["subgenre", "instrument"].includes(edit.entityType);
   const visning = navnebasert && edit.entityName && edit.entityName !== edit.entityId
     ? `${edit.entityName} (skriver til: ${edit.entityId})`
     : (edit.entityName || edit.entityId || "");

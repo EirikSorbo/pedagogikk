@@ -17,17 +17,18 @@
 //  ikke kunne forlates ved et feiltrykk).
 // ============================================================================
 
-// Gyldige mål. De ni første peker på et dokument eller navn (id), resten er
+// Gyldige mål. De åtte første peker på et dokument eller navn (id), resten er
 // visninger uten id: historie uten id åpner oversikten, teknologi kan ta en
 // kategori som id. «slektstre» ruter til tre.html via opts.onSlektstre.
+// «tiår» og «varmekart» er tatt ut (fase 2, pedagogikkappen): en gammel lenke
+// til dem er ukjent og ignoreres stille, som andre ukjente typer.
 export const VIS_TYPER = new Set([
-  "artist", "sjanger", "undersjanger", "historie", "tech", "tiår", "side",
+  "artist", "sjanger", "undersjanger", "historie", "tech", "side",
   "instrument", "kobling",
-  "tidslinje", "varmekart", "sjangerperioder", "himmel", "referanser",
+  "tidslinje", "sjangerperioder", "himmel", "referanser",
   "store-bildet", "podkaster", "teknologi", "slektstre",
   // Et lytteeksempel (v5.28): «yt:<video-id>» eller «yt:<video-id>:<liste>».
-  // YouTube-ID-er er kolonfrie, så de passer i vis-formatet. Varmekartet kan
-  // også bære en metasjanger som id («varmekart:Country») fra samme versjon.
+  // YouTube-ID-er er kolonfrie, så de passer i vis-formatet.
   "yt",
   // Oversikten over en metasjanger (v5.94) og artistgalleriet for en
   // sjanger (v5.96): bare for visningsmodus.
