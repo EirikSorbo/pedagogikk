@@ -6,12 +6,12 @@
 // ============================================================================
 
 export const firebaseConfig = {
-  apiKey: "DIN_API_KEY",
-  authDomain: "DIN_PROSJEKT_ID.firebaseapp.com",
-  projectId: "DIN_PROSJEKT_ID",
-  storageBucket: "DIN_PROSJEKT_ID.firebasestorage.app",
-  messagingSenderId: "DIN_SENDER_ID",
-  appId: "DIN_APP_ID",
+  apiKey: "AIzaSyADJnm1KCchp4-tWBV1KeX3Kfd0IjScXzI",
+  authDomain: "pedagogikkhistorie.firebaseapp.com",
+  projectId: "pedagogikkhistorie",
+  storageBucket: "pedagogikkhistorie.firebasestorage.app",
+  messagingSenderId: "940313073759",
+  appId: "1:940313073759:web:04240f0bd1f7b6a5a623ea",
 };
 
 // ----------------------------------------------------------------------------
