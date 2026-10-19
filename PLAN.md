@@ -10,7 +10,8 @@ Teknisk hovedlinje: hele koden, filnavnene og databasenøklene beholdes (`artist
 - Epokene dekker hele historien, fra de gamle grekerne til i dag. Hovedsakelig internasjonalt blikk, men norsk skolehistorie skal med.
 - Nodene i treet er **epoker**. Metasjangrene er **retninger** (farge og gruppe). Strekene viser påvirkning mellom epoker. Undersjangre blir **begreper**. «Grunnlinje» og «retning» er det samme: bruk «retning» i appen.
 - Påvirkning mellom enkeltpedagoger står i beskrivelsen. Det blir ikke noe eget felt.
-- Venter: emne og studenter, domene og endelig navn.
+- Domene: **pedagogikk.historieappen.no** (underdomene av musikkappens domene, vedtatt 2026-10-19). Filen `CNAME` i repoet har navnet. DNS: CNAME `pedagogikk` til `eiriksorbo.github.io.` i cPanel Zone Editor hos domene.no.
+- Venter: emne og studenter, og endelig navn.
 
 ## Oversettelse av begrepene
 
@@ -51,7 +52,7 @@ Teknisk hovedlinje: hele koden, filnavnene og databasenøklene beholdes (`artist
 - Opprette et Firebase-prosjekt (Firestore i EU-region, Google og Anonym innlogging) og lime verdiene inn i `js/firebase-config.js`.
 - Publisere `firestore.rules` i det nye prosjektet. Lærer-e-posten ligger både i `js/firebase-config.js` og i `firestore.rules`.
 - Opprette et GitHub-repo (privat til domenet er avgjort).
-- Domene, når det er bestemt: legg det til under Authentication, Authorized domains, og lag `CNAME`.
+- Domenet: legg `pedagogikk.historieappen.no` til under Authentication, Authorized domains i Firebase-prosjektet, og sett det som Custom domain i repoets Pages-innstillinger.
 
 ## Husk
 
