@@ -1,4 +1,4 @@
-# historieappen.no — undervisningsapp for MUR114 (Populærmusikkhistorie).
+# Pedagogikkhistorie (arbeidsnavn), undervisningsapp.
 # Ikke ment for offentlig søk eller innhøsting; lenken deles med klassen.
 #
 # NB: Alle sidene er merket <meta name="robots" content="noindex">. For at en

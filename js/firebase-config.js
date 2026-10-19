@@ -6,12 +6,12 @@
 // ============================================================================
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyAmV83wiZdNlLg70hmxNFLouWGgfTq_OF0",
-  authDomain: "musikkhistorie-fb43d.firebaseapp.com",
-  projectId: "musikkhistorie-fb43d",
-  storageBucket: "musikkhistorie-fb43d.firebasestorage.app",
-  messagingSenderId: "928123603712",
-  appId: "1:928123603712:web:cd283499d4139bad7641e5",
+  apiKey: "DIN_API_KEY",
+  authDomain: "DIN_PROSJEKT_ID.firebaseapp.com",
+  projectId: "DIN_PROSJEKT_ID",
+  storageBucket: "DIN_PROSJEKT_ID.firebasestorage.app",
+  messagingSenderId: "DIN_SENDER_ID",
+  appId: "DIN_APP_ID",
 };
 
 // ----------------------------------------------------------------------------

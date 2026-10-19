@@ -1,3 +1,7 @@
+> **Kopi av musikkhistorie-appen (v7.11), under ombygging til pedagogikkens historie.**
+> Planen og vedtakene står i [PLAN.md](PLAN.md). Resten av denne fila, JSON-OPPSKRIFT.md,
+> MODULKART.md og KART-OPPSKRIFT.md beskriver fortsatt musikkappen til fase 5.
+
 # Populærmusikkhistorie – pensum-app
 
 En webapp for et kuratert musikkhistorie-pensum (MUR114). Læreren bygger og

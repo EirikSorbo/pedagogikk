@@ -28,10 +28,10 @@
   "use strict";
 
   var GATE = {
-    version: 2,
-    salt: "KD9qnvBXOCDIdumCjJOZGA==",
+    version: 1,
+    salt: "sYRsHPXZ93hOrNTFr65jTw==",
     iterations: 150000,
-    hash: "2472fd367b153d0ac44e3eafb491f46c8c4d506ec6d1f051770724a8ec4878f2",
+    hash: "ac67154152d800e582010f614228eaa3b1e1815759c6f026d0ef2013b3f05c8c",
   };
 
   var KEY = "pensum-klasse";
