@@ -35,7 +35,7 @@ Teknisk hovedlinje: hele koden, filnavnene og databasenøklene beholdes (`artist
 
 **Fase 0: Kopien.** Egen mappe, upstream satt opp, musikkappens Firebase-oppsett og domene koblet fra, ny klassekode, versjon 0.01. Appen starter i oppsettmodus til `js/firebase-config.js` fylles ut.
 
-**Fase 1: Skjelettet (Opus).** Forslag til retninger, epoker, røtter (antikk og middelalder som felles grå røtter), tidsrom og påvirkningsstrekene. Eirik bestemmer. Bare struktur, ingen tekster. Leveres som importfil (`genealogy`).
+**Fase 1: Skjelettet (Opus). Ferdig 2026-10-19.** Eirik godtok hele forslaget: 8 retninger, 45 epoker, 16 tidsrom, 55 påvirkninger og 8 motreaksjoner (stiplede streker). Ingen grå røtter: antikken hører til retningene, siden noder uten retning ikke kan tagges på teoretikere. «Skolen for alle» og «Erfaring og demokrati» er egne retninger. Dataene står i `tools/pedagogikk-skjelett.js` (med `era` og `personer` som notater til fase 6), og `node tools/lag-pedagogikk-skjelett.js` validerer treet med appens egen kode og skriver `json files/pedagogikk-skjelett.json`, som Eirik importerer på lærersiden. Til fase 2 er gjort, viser treet tiårsetiketter på radene; tidsrommene står i `TIDSROM` i skjelettet.
 
 **Fase 2: Tidsaksen (Opus).** Radene i treet blir tidsrom av ulik lengde, lagret som data i stedet for `1900 + 10 år per rad` (`buildDecadeRows` i `js/sjangre/genre-model.js`, `DECADES` i `js/felles/limits.js`, 18 filer bruker tiårslista). Årstall før Kristus lagres som negative tall og vises som «427 f.Kr.»; skjemaene (min/max 1800–2030) og tidslinja må tilpasses. Tiårskortene og varmekartet tas ut, hvis ikke Eirik ber om noe annet.
 
