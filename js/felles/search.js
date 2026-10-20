@@ -28,39 +28,39 @@ import { ytMaal } from "../visning/presentasjon-modell.js";
 
 // Etikettene som vises på treffene. Nøkkelen er postens `type`.
 export const TYPE_LABEL = {
-  artist: "Artist",
+  artist: "Teoretiker",
   lytteeksempel: "Lytteeksempel",
-  sjanger: "Sjanger",
+  sjanger: "Epoke",
   rot: "Rot",
-  undersjanger: "Undersjanger",
-  historie: "Sjangerhistorie",
-  tech: "Innovasjon",
+  undersjanger: "Prinsipp",
+  historie: "Epokehistorie",
+  tech: "Reform",
   hendelse: "Hendelse",
   side: "Innholdsside",
-  instrument: "Instrument",
-  kobling: "Sjangerkobling",
+  instrument: "Fagbakgrunn",
+  kobling: "Epokekobling",
   podkast: "Podkast",
-  oversikt: "Metasjanger",
-  galleri: "Artistgalleri",
+  oversikt: "Retning",
+  galleri: "Teoretikergalleri",
   slide: "Slide",
 };
 
 // Overskriften over en gruppe treff.
 export const TYPE_FLERTALL = {
-  artist: "Artister",
+  artist: "Teoretikere",
   lytteeksempel: "Lytteeksempler",
-  sjanger: "Sjangre",
+  sjanger: "Epoker",
   rot: "Røtter",
-  undersjanger: "Undersjangre",
-  historie: "Sjangerhistorier",
-  tech: "Innovasjoner",
+  undersjanger: "Prinsipper",
+  historie: "Epokehistorier",
+  tech: "Reformer",
   hendelse: "Hendelser",
   side: "Innholdssider",
-  instrument: "Instrumenter",
-  kobling: "Sjangerkoblinger",
+  instrument: "Fagbakgrunner",
+  kobling: "Epokekoblinger",
   podkast: "Podkaster",
-  oversikt: "Metasjangre",
-  galleri: "Artistgallerier",
+  oversikt: "Retninger",
+  galleri: "Teoretikergallerier",
   slide: "Slides",
 };
 
@@ -194,7 +194,7 @@ export function byggIndeks(state = {}, { erLærer = false, skjul = {}, skjulHub 
   for (const [navn, g] of Object.entries(genreDescs)) {
     const sub = g && g.sub;
     if (!sub || findTreeGenreNode(navn)) continue;
-    ut.push(post("undersjanger", navn, navn, "Undersjanger",
+    ut.push(post("undersjanger", navn, navn, "Prinsipp",
       [sub.description, sub.era], { hva: "undersjanger", id: navn }));
   }
 
@@ -203,7 +203,7 @@ export function byggIndeks(state = {}, { erLærer = false, skjul = {}, skjulHub 
     for (const meta of storyOrder(genreDescs)) {
       const story = storyFor(meta, genreDescs);
       if (!story) continue;
-      ut.push(post("historie", meta, `Historien om ${meta}`, "Metasjanger",
+      ut.push(post("historie", meta, `Historien om ${meta}`, "Retning",
         [story.body], { hva: "historie", id: meta }));
     }
   }
@@ -222,8 +222,8 @@ export function byggIndeks(state = {}, { erLærer = false, skjul = {}, skjulHub 
     // sjangeren med samme navn som de to første gruppene, ikke metasjangeren
     // bak undersjangre og artister. Ved likt poeng står metasjangeren først
     // (TYPE_ORDER): oversikten samler hele familien.
-    ut.push(post("oversikt", meta, meta, "Oversikt over metasjangeren",
-      [`Metasjanger${liste ? ` med ${sjangre.length === 1 ? "sjangeren" : "sjangrene"} ${liste}` : ""}`],
+    ut.push(post("oversikt", meta, meta, "Oversikt over retningen",
+      [`Retning${liste ? ` med ${sjangre.length === 1 ? "sjangeren" : "sjangrene"} ${liste}` : ""}`],
       { hva: "oversikt", id: meta }));
   }
   if (visningsflater) {
@@ -231,7 +231,7 @@ export function byggIndeks(state = {}, { erLærer = false, skjul = {}, skjulHub 
       // Artistgalleriene (v5.96), én per sjanger i de aktive familiene. Bare
       // for visningsmodus.
       for (const n of GENEALOGY.filter((x) => x.g === meta)) {
-        ut.push(post("galleri", n.l, `Artistgalleri: ${n.f || n.l}`, `Visningsmodus · ${meta}`,
+        ut.push(post("galleri", n.l, `Teoretikergalleri: ${n.f || n.l}`, `Visningsmodus · ${meta}`,
           [n.l, n.f, "galleri bilder"], { hva: "galleri", id: n.l }));
       }
     }
@@ -268,7 +268,7 @@ export function byggIndeks(state = {}, { erLærer = false, skjul = {}, skjulHub 
     const side = pageFor(instrumentPageId(gruppe), content);
     if (!side) continue;
     ut.push(post("instrument", gruppe, INSTRUMENT_TITLE[gruppe] || `Utviklingen av ${gruppe}`,
-      "Instrumenter", [side.body], { hva: "instrument", id: gruppe }));
+      "Fagbakgrunner", [side.body], { hva: "instrument", id: gruppe }));
   }
 
   // (Plateselskapene, søkbare fra v6.37, ble tatt ut i fase 4.)
@@ -282,7 +282,7 @@ export function byggIndeks(state = {}, { erLærer = false, skjul = {}, skjulHub 
       if (!edgeExists(key)) continue;
       const [fra, til] = String(key).split("__");
       const navn = `${genreNodeById(fra)?.l || fra} → ${genreNodeById(til)?.l || til}`;
-      ut.push(post("kobling", key, navn, "Sjangerkobling", [e.description],
+      ut.push(post("kobling", key, navn, "Epokekobling", [e.description],
         { hva: "kobling", id: key }));
     }
   }

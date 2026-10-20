@@ -164,7 +164,7 @@ const teardown = new WeakMap();
 // ----------------------------------------------------------------------------
 export function renderSjangerhimmel(container, artists, { onArtistClick, onGenreClick } = {}) {
   teardown.get(container)?.();
-  if (!artists.length) { container.innerHTML = `<p class="muted">Ingen artister ennå.</p>`; return; }
+  if (!artists.length) { container.innerHTML = `<p class="muted">Ingen teoretikere ennå.</p>`; return; }
 
   const { genres, roots, loose } = buildGraph(artists);
   const famsPresent = Object.keys(FAMILIES).filter((f) => genres.some((n) => n.fam === f));
@@ -176,7 +176,7 @@ export function renderSjangerhimmel(container, artists, { onArtistClick, onGenre
     <div class="sh-chips" id="sh-chips"></div>
     <div class="sh-toolbar">
       <label class="sh-bro-toggle"><input type="checkbox" id="sh-bro"> Alle broer (${bridgeCount})</label>
-      <span class="sh-counts">${genres.length} sjangre · klikk en stjerne for artistene${loose.length ? ` · <button type="button" id="sh-loose" class="sh-linkbtn">${loose.length} uten tre-sjanger</button>` : ""}</span>
+      <span class="sh-counts">${genres.length} epoker · klikk en stjerne for teoretikerne${loose.length ? ` · <button type="button" id="sh-loose" class="sh-linkbtn">${loose.length} uten tre-sjanger</button>` : ""}</span>
       <span class="sh-zoom-btns">
         <button type="button" class="btn ghost small" id="sh-zoom-out" aria-label="Zoom ut">−</button>
         <button type="button" class="btn ghost small" id="sh-zoom-in" aria-label="Zoom inn">+</button>
@@ -187,15 +187,15 @@ export function renderSjangerhimmel(container, artists, { onArtistClick, onGenre
       <div id="sh-focus-panel" class="sh-focus-panel" hidden></div>
     </div>
     <div class="sh-legend">
-      <span><span class="sh-lg-star"></span>sjanger (større = flere artister)</span>
-      <span><span class="sh-lg-dot"></span>artist</span>
-      <span><span class="sh-lg-bridge"></span>artist i flere sjangre</span>
+      <span><span class="sh-lg-star"></span>epoke (større = flere teoretikere)</span>
+      <span><span class="sh-lg-dot"></span>teoretiker</span>
+      <span><span class="sh-lg-bridge"></span>teoretiker i flere epoker</span>
       <span>klikk en stjerne · hold over en prikk for navn</span>
     </div>`;
 
   const svg = el("svg", { id: "sh-svg", viewBox: `0 0 ${VBW} ${VBH}`,
     preserveAspectRatio: "xMidYMid meet", role: "img",
-    "aria-label": "Stjernekart over sjangrene i slektstreets rekkefølge; hold over en sjanger for artistene" });
+    "aria-label": "Stjernekart over epokene i slektstreets rekkefølge; hold over en epoke for teoretikerne" });
   svg.style.width = "100%"; svg.style.display = "block";
   container.querySelector("#sh-svg-wrap").prepend(svg);
   const root = el("g"); svg.appendChild(root);
@@ -364,8 +364,8 @@ export function renderSjangerhimmel(container, artists, { onArtistClick, onGenre
     focusPanel.hidden = false;
     focusPanel.innerHTML =
       `<span class="sh-fp-dot" style="background:${(s.node.color || famColor(s.node.fam))}"></span>` +
-      `<strong>${escapeHtml(s.node.label)}</strong> <span class="sh-fp-meta">${s.members.length} artist${s.members.length === 1 ? "" : "er"}${bridges ? ` · ${bridges} bro` : ""}${lastPointerType === "touch" ? "" : " · hold over en prikk for navn"}</span>` +
-      `<button type="button" class="sh-linkbtn" id="sh-fp-open">les om sjangeren</button>` +
+      `<strong>${escapeHtml(s.node.label)}</strong> <span class="sh-fp-meta">${s.members.length} teoretiker${s.members.length === 1 ? "" : "er"}${bridges ? ` · ${bridges} bro` : ""}${lastPointerType === "touch" ? "" : " · hold over en prikk for navn"}</span>` +
+      `<button type="button" class="sh-linkbtn" id="sh-fp-open">les om epoken</button>` +
       `<button type="button" class="sh-linkbtn" id="sh-fp-close">lukk ✕</button>`;
     focusPanel.querySelector("#sh-fp-open")?.addEventListener("click", (e) => { e.stopPropagation(); onGenreClick?.(s.node.label); });
     focusPanel.querySelector("#sh-fp-close")?.addEventListener("click", (e) => { e.stopPropagation(); clearFocus(); });
@@ -493,7 +493,7 @@ export function renderSjangerhimmel(container, artists, { onArtistClick, onGenre
     clearFocus();   // rydder evt. åpen stjerne (tråder, gråtone, zoom)
     focusPanel.hidden = false;
     const names = loose.slice().sort((a, b) => (a.name || "").localeCompare(b.name || "", "no"));
-    focusPanel.innerHTML = `<strong>Uten tre-sjanger (${names.length})</strong> <span class="sh-fp-meta">kun metasjanger satt</span>` +
+    focusPanel.innerHTML = `<strong>Uten tre-sjanger (${names.length})</strong> <span class="sh-fp-meta">kun retning satt</span>` +
       `<button type="button" class="sh-linkbtn" id="sh-fp-close">lukk ✕</button>` +
       `<div class="sh-loose-list">` + names.map((a, i) => `<button type="button" class="sh-linkbtn sh-loose-item" data-i="${i}">${escapeHtml(a.name || "(uten navn)")}</button>`).join("") + `</div>`;
     focusPanel.querySelector("#sh-fp-close").addEventListener("click", clearFocus);

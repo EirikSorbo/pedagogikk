@@ -97,7 +97,7 @@ export function tegnSjangre() {
   el.innerHTML = familier.length
     ? `<div class="sj-spalter">${iSpalter(familier, (f) => f.noder.length)
         .map((sp) => `<div class="sj-spalte">${sp.map(familieHtml).join("")}</div>`).join("")}</div>`
-    : `<p class="muted">Ingen sjangre registrert ennå.</p>`;
+    : `<p class="muted">Ingen epoker registrert ennå.</p>`;
 }
 
 // Undersjangrene: de frie taggene fra artistene. Hver tagg hører til den
@@ -137,7 +137,7 @@ export function openUndersjangre() {
           <span class="sj-rad-navn">${escapeHtml(u.navn)}</span><span class="sj-rad-aar">${u.antall}</span>
         </button>`).join("")}
       </section>`).join("")}</div>`
-    : `<p class="muted">Ingen undersjangre registrert ennå.</p>`;
+    : `<p class="muted">Ingen prinsipper registrert ennå.</p>`;
 
   modalOpen(modal);
 }
@@ -165,7 +165,7 @@ export function openSubgenreInfo(subgenreId) {
     el.innerHTML = "";
   } else {
     el.innerHTML = `
-      <button class="btn ghost small sgi-toggle" style="margin-top:12px">Artister (${artists.length})</button>
+      <button class="btn ghost small sgi-toggle" style="margin-top:12px">Teoretikere (${artists.length})</button>
       <div class="sgi-list" style="display:none;margin-top:10px">
         ${artists.map(a => `<div class="result-row sgi-artist-row" data-id="${escapeHtml(a.id)}" tabindex="0" role="button">
           <span class="result-name">${escapeHtml(a.name)}</span>
@@ -180,7 +180,7 @@ export function openSubgenreInfo(subgenreId) {
       const list = el.querySelector(".sgi-list");
       const visible = list.style.display !== "none";
       list.style.display = visible ? "none" : "block";
-      e.target.textContent = visible ? `Artister (${artists.length})` : "Skjul artister";
+      e.target.textContent = visible ? `Teoretikere (${artists.length})` : "Skjul teoretikere";
     });
     // Klikk OG tastatur (tabindex + Enter/mellomrom) — samme mønster som den
     // delte artistlista (openArtistListModal); radene her var mus-only.

@@ -99,7 +99,7 @@ function tegnOversiktOgMangler() {
     onEditPage: (id) => openPageEditor(id),
     onEditEdge: (fromId, toId) => openSingleEdgeModal(fromId, toId),
     onEdgeCheck: (fromId, toId, on) => setContentCheck("edges", edgeKey(fromId, toId), on),
-    onShowArtistList: (title, list) => openArtistListModal(title, list, openDetail, "Ingen artister her ennå."),
+    onShowArtistList: (title, list) => openArtistListModal(title, list, openDetail, "Ingen teoretikere her ennå."),
     // Metasjangerens lytteeksempler: samme bygger som popupen, så tallet i
     // kolonnen og antallet i lista alltid er det samme.
     countExamplesFor: (list) => countArtistExamples(list),
@@ -197,7 +197,7 @@ async function godtaUkjenteSjangre(mainGenre) {
   const ukjente = (mainGenre || []).filter((g) => !isMainGenre(g));
   if (!ukjente.length) return true;
   return bekreft(
-    `Disse sjangrene finnes ikke i slektstreet: ${ukjente.join(", ")}.\n\n` +
+    `Disse epokene finnes ikke i slektstreet: ${ukjente.join(", ")}.\n\n` +
     "De vil ikke vises i tre-visningene og kan bli behandlet som undersjangre. " +
     "Sjekk for skrivefeil. Lagre likevel?",
     { ja: "Lagre likevel" }
@@ -233,9 +233,9 @@ const UTKAST_LAERER = "pensum-artistutkast:laerer";
 export function openNyArtist(navn = "") {
   const api = apneArtistSkjema({
     modus: "laerer-ny",
-    tittel: "Ny artist",
+    tittel: "Ny teoretiker",
     utkastNokkel: UTKAST_LAERER,
-    sendTekst: "Legg til artist",
+    sendTekst: "Legg til teoretiker",
     finnDuplikat: async (n) => {
       const x = String(n || "").trim().toLowerCase();
       return state.artists.find((a) => a.status !== "removed" && (a.name || "").trim().toLowerCase() === x) || null;

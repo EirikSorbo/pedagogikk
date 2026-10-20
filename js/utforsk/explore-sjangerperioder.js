@@ -71,7 +71,7 @@ function stolpeHtml(r, axis, naa) {
   const midt = (x0 + synligSlutt) / 2;
   const anker = midt < 7 ? "start" : midt > 93 ? "slutt" : "midt";
   const navnPos = anker === "start" ? x0 : anker === "slutt" ? synligSlutt : midt;
-  return `<button type="button" class="sp-rad" data-sp-open="${escapeHtml(r.genre)}" title="${escapeHtml(tittel)}" aria-label="${escapeHtml(tittel)}. Åpne sjangerkortet">`
+  return `<button type="button" class="sp-rad" data-sp-open="${escapeHtml(r.genre)}" title="${escapeHtml(tittel)}" aria-label="${escapeHtml(tittel)}. Åpne epokekortet">`
     + `<span class="sp-navn" data-anker="${anker}" style="left:${navnPos.toFixed(3)}%">${escapeHtml(r.genre)}</span>`
     + `<span class="sp-stolpe" style="left:${x0.toFixed(3)}%;width:${(x1 - x0).toFixed(3)}%;background:${bakgrunn}"></span>`
     + `</button>`;
@@ -79,7 +79,7 @@ function stolpeHtml(r, axis, naa) {
 
 function hullHtml(r) {
   const hva = HULL_TEKST[r.status] || HULL_TEKST.mangler;
-  return `<button type="button" class="sp-rad sp-rad--mangler" data-sp-open="${escapeHtml(r.genre)}" title="Åpne sjangerkortet for ${escapeHtml(r.genre)}">`
+  return `<button type="button" class="sp-rad sp-rad--mangler" data-sp-open="${escapeHtml(r.genre)}" title="Åpne epokekortet for ${escapeHtml(r.genre)}">`
     + `<span class="sp-navn">${escapeHtml(r.genre)}</span><span class="sp-mangler">${hva}</span></button>`;
 }
 
@@ -131,8 +131,8 @@ function figurHtml(groups, axis, naa) {
   });
   // Fargeprøven og forklaringen står i ett element, så de aldri brytes fra
   // hverandre på mellombredder.
-  html += `<p class="sp-forklaring">Stolpene viser når sjangeren var aktiv, med de samme årstallene som sjangerkortet. `
-    + `<span class="sp-forklaring-par"><span class="sp-toning" aria-hidden="true"></span>betyr at sjangeren fortsatt er aktiv.</span></p>`;
+  html += `<p class="sp-forklaring">Stolpene viser når epoken var aktiv, med de samme årstallene som epokekortet. `
+    + `<span class="sp-forklaring-par"><span class="sp-toning" aria-hidden="true"></span>betyr at epoken fortsatt er aktiv.</span></p>`;
   return html;
 }
 
@@ -142,14 +142,14 @@ function beregn() {
   const tilstand = (tekst) => ({ html: `<p class="gx-missing">${tekst}</p>`, signatur: `tilstand:${tekst}`, figur: false });
   // Treet kommer via content-snapshotet. Er content lastet og treet likevel tomt,
   // mangler det i basen, og det skal sies tydelig i stedet for «laster» for alltid.
-  if (!GENEALOGY.length) return tilstand(s.contentLoaded ? "Sjangertreet er ikke lagt inn ennå." : "Laster sjangrene …");
+  if (!GENEALOGY.length) return tilstand(s.contentLoaded ? "Epoketreet er ikke lagt inn ennå." : "Laster epokene …");
   // Årstallene kommer via sitt eget snapshot. Er de lastet men tomme, tegnes
   // figuren likevel, og hver sjanger står som «mangler årstall».
-  if (s.genreDescsLoaded === false) return tilstand("Laster sjangrene …");
+  if (s.genreDescsLoaded === false) return tilstand("Laster epokene …");
   const naa = new Date().getFullYear();
   const genreDescs = s.genreDescs || {};
   const groups = periodGroups(storyOrder(genreDescs), genreDescs, GENEALOGY, naa, familieFarge);
-  if (!groups.length) return tilstand("Ingen sjangre å vise ennå.");
+  if (!groups.length) return tilstand("Ingen epoker å vise ennå.");
   const axis = periodAxis(groups, naa, TIDSROM);
   return { html: figurHtml(groups, axis, naa), signatur: periodSignatur(groups, axis), figur: true };
 }

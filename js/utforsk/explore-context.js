@@ -117,7 +117,7 @@ export function showPlaylistForMainGenre({ fullName, node }) {
 }
 
 export function showArtistsForSjanger({ label }) {
-  openArtistListModal(label, artistsInGenre(getState().artists, label), opts.onArtistClick, "Ingen forslag i denne sjangeren ennå.");
+  openArtistListModal(label, artistsInGenre(getState().artists, label), opts.onArtistClick, "Ingen forslag i denne epoken ennå.");
 }
 
 // Med vei til instrumentets egen side når instrumentet hører til en gruppe
@@ -128,5 +128,5 @@ export function showArtistsForInstrument(instrument) {
   const lenke = gruppe && INSTRUMENT_TIMELINE_GROUPS.includes(gruppe)
     ? { tekst: INSTRUMENT_TITLE[gruppe] || gruppe, onClick: () => nav.openInstrumenter(gruppe) }
     : null;
-  openArtistListModal(instrument, artistsByInstrument(getState().artists, instrument), opts.onArtistClick, "Ingen forslag med dette instrumentet ennå.", { lenke });
+  openArtistListModal(instrument, artistsByInstrument(getState().artists, instrument), opts.onArtistClick, "Ingen forslag med dette fagbakgrunnen ennå.", { lenke });
 }

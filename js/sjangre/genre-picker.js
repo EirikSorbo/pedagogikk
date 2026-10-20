@@ -90,7 +90,7 @@ function lagBrikke(navn) {
   const x = document.createElement("button");
   x.type = "button";
   x.className = "gp-fjern";
-  x.setAttribute("aria-label", `Fjern sjangeren ${navn}`);
+  x.setAttribute("aria-label", `Fjern epoken ${navn}`);
   x.textContent = "✕";
   b.append(x);
   return b;
@@ -108,7 +108,7 @@ function tegnOpp(root) {
   if (!valgt.length && !tom) {
     const s = document.createElement("span");
     s.className = "gp-tom";
-    s.textContent = "Ingen sjangre valgt ennå.";
+    s.textContent = "Ingen epoker valgt ennå.";
     wrap.append(s);
   }
 
@@ -128,8 +128,8 @@ function tegnOpp(root) {
   velg.disabled = ordforrad.length === 0;
   velg.append(new Option(
     ordforrad.length === 0
-      ? "Sjangertreet er ikke lastet ennå …"
-      : (ledige.length ? "Legg til sjanger …" : "Alle sjangre er valgt"),
+      ? "Epoketreet er ikke lastet ennå …"
+      : (ledige.length ? "Legg til epoke …" : "Alle epoker er valgt"),
     ""
   ));
   for (const g of ledige) velg.append(new Option(g, g));

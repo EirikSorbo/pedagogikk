@@ -62,13 +62,13 @@ test("et dokument med andre nivåer beholdes, bare sub-feltet flyttes", () => {
 });
 
 test("avviser treets sjangre, kollisjoner og tomme eller ulovlige navn", () => {
-  assert.match(planSubRename(STATE, "Soul", "Soul music").feil.join(" "), /sjanger i treet/);
-  assert.match(planSubRename(STATE, "Motown", "Soul").feil.join(" "), /allerede navnet på en sjanger i treet/);
-  assert.match(planSubRename(STATE, "Motown", "R&B").feil.join(" "), /allerede navnet på en sjanger i treet/);
+  assert.match(planSubRename(STATE, "Soul", "Soul music").feil.join(" "), /epoke i treet/);
+  assert.match(planSubRename(STATE, "Motown", "Soul").feil.join(" "), /allerede navnet på en epoke i treet/);
+  assert.match(planSubRename(STATE, "Motown", "R&B").feil.join(" "), /allerede navnet på en epoke i treet/);
   assert.match(planSubRename(STATE, "Motown", "Southern soul").feil.join(" "), /finnes allerede som undersjanger/);
   assert.match(planSubRename(STATE, "Motown", "").feil.join(" "), /tomt/);
   assert.match(planSubRename(STATE, "Motown", "Motown/Tamla").feil.join(" "), /«\/»/);
-  assert.match(planSubRename(STATE, "Finnes ikke", "Noe").feil.join(" "), /Fant ingen undersjanger/);
+  assert.match(planSubRename(STATE, "Finnes ikke", "Noe").feil.join(" "), /Fant ingen prinsipp/);
   assert.match(planSubRename(STATE, "Motown", "Motown").feil.join(" "), /det samme som det gamle/);
 });
 

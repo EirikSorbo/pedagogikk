@@ -45,7 +45,7 @@ export const TECH_CATEGORIES = [
 //  fantes før v3.84 ikke trengte migrering — og hvorfor techType() alltid må
 //  brukes i stedet for å lese t.type rått.
 export const TECH_TYPES = [
-  { value: "innovasjon", label: "Teknologisk innovasjon" },
+  { value: "innovasjon", label: "Reform eller milepæl" },
   { value: "hendelse",   label: "Viktig hendelse" },
 ];
 
@@ -114,6 +114,6 @@ function artisterSomNevnerHtml(t, lc) {
     .filter((a) => isVisible(a) && nevnerNavn(a.description, t.name))
     .sort((a, b) => (a.influenceStart || 0) - (b.influenceStart || 0) || a.name.localeCompare(b.name, "no"));
   if (!liste.length) return "";
-  return `<div class="related"><h4 class="related-head">Artister som nevner den</h4><div class="related-list">${
+  return `<div class="related"><h4 class="related-head">Teoretikere som nevner den</h4><div class="related-list">${
     liste.map((a) => `<button type="button" class="related-chip" data-related-id="${escapeHtml(String(a.id))}">${escapeHtml(a.name)}</button>`).join("")}</div></div>`;
 }

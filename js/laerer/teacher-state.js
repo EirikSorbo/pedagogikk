@@ -89,7 +89,7 @@ export const handlers = {
   // forslagsflyt, ikke lærerens eget bruk av kortene.
   notat: (id) => {
     const a = state.artists.find(x => x.id === id);
-    redigerNotatForKort("artist", id, a?.name || "Artist");
+    redigerNotatForKort("artist", id, a?.name || "Teoretiker");
   },
 };
 
@@ -196,16 +196,16 @@ export function renderAll() {
 }
 
 export function refreshControls() {
-  fillSelect($("#f-sjanger"), GENEALOGY_MAIN_GENRES, { placeholder: "Alle sjangre" });
-  fillSelect($("#f-genre"), GENEALOGY_META_GENRES, { placeholder: "Alle metasjangre" });
+  fillSelect($("#f-sjanger"), GENEALOGY_MAIN_GENRES, { placeholder: "Alle epoker" });
+  fillSelect($("#f-genre"), GENEALOGY_META_GENRES, { placeholder: "Alle retninger" });
   // Tidsrommene (fase 2) kommer fra treet, så nedtrekket fylles på nytt når
   // det lander, og valget settes tilbake under.
   fillSelect($("#f-tidsrom"), tidsromValg(), { placeholder: "Alle tidsrom" });
-  fillSelect($("#f-instrument"), instrumentsInUse(state.artists, state.filters.instrument), { placeholder: "Alle instrumenter" });
+  fillSelect($("#f-instrument"), instrumentsInUse(state.artists, state.filters.instrument), { placeholder: "Alle fagbakgrunner" });
   const allSubs = [...new Set(
     (state.artists || []).flatMap((a) => [...(a.mainGenre || []), ...(a.subGenre || [])])
   )].sort((a, b) => a.localeCompare(b, "no"));
-  fillSelect($("#f-subgenre"), allSubs, { placeholder: "Alle undersjangre" });
+  fillSelect($("#f-subgenre"), allSubs, { placeholder: "Alle prinsipper" });
   if (state.filters.mainGenre)  $("#f-sjanger").value = state.filters.mainGenre;
   if (state.filters.metaGenre)    $("#f-genre").value = state.filters.metaGenre;
   if (state.filters.subgenre) $("#f-subgenre").value = state.filters.subgenre;

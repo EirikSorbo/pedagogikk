@@ -54,7 +54,7 @@ function isFlatPrimitiveList(v) {
 // Returnerer { ok, errors: [{ row, name, problems: string[] }] }.
 export function validateArtistsForImport(list) {
   if (!Array.isArray(list)) {
-    return { ok: false, errors: [{ row: 0, name: "", problems: ["Fila inneholder ingen artistliste."] }] };
+    return { ok: false, errors: [{ row: 0, name: "", problems: ["Fila inneholder ingen teoretikerliste."] }] };
   }
   const errors = [];
   list.forEach((a, i) => {
@@ -63,7 +63,7 @@ export function validateArtistsForImport(list) {
     const name = a && typeof a.name === "string" ? a.name : "";
 
     if (!a || typeof a !== "object" || Array.isArray(a)) {
-      problems.push("Raden er ikke et artistobjekt.");
+      problems.push("Raden er ikke et teoretikerobjekt.");
     } else {
       if (typeof a.name !== "string" || !a.name.trim()) {
         problems.push("mangler gyldig «name» (må være en ikke-tom tekst).");

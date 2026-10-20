@@ -162,7 +162,7 @@ export function planGenreRename(state, fra, til) {
   const noder = Array.isArray(tre.nodes) ? tre.nodes : [];
 
   const ref = findReferences(state, fra);
-  if (!ref.node) feil.push(`Fant ingen sjanger med etiketten «${fra}».`);
+  if (!ref.node) feil.push(`Fant ingen epoke med etiketten «${fra}».`);
   if (!nyttNavn) feil.push("Det nye navnet er tomt.");
   if (nyttNavn.includes("/")) feil.push("Navnet kan ikke inneholde «/»: etiketten er dokument-ID i genreDescriptions, og Firestore forbyr det. Bruk «&».");
   // Eksakt likhet, ikke lik(): en ren case-retting («Early hip-hop» →
@@ -176,7 +176,7 @@ export function planGenreRename(state, fra, til) {
   // Finnes det allerede en MAIN-beskrivelse på det nye navnet, ville flyttingen
   // skrevet over den. Det er tap av tekst, så det blokkeres.
   if (state?.genreDescs?.[nyttNavn]?.main) {
-    feil.push(`Det finnes allerede en sjangerbeskrivelse lagret på «${nyttNavn}». Slå dem sammen først.`);
+    feil.push(`Det finnes allerede en epokebeskrivelse lagret på «${nyttNavn}». Slå dem sammen først.`);
   }
   if (feil.length) return { ops: [], feil, advarsler };
 
@@ -190,7 +190,7 @@ export function planGenreRename(state, fra, til) {
   //    en FRI undersjanger som tilfeldigvis heter det samme, ikke tre-sjangeren.
   if (ref.harMain) {
     ops.push(op("doc.merge", "genreDescriptions", nyttNavn, { main: ref.beskrivelse.main },
-      `Sjangerbeskrivelsen flyttes til «${nyttNavn}»`));
+      `Epokebeskrivelsen flyttes til «${nyttNavn}»`));
     // doc.delete KUN når dokumentet ikke bærer noe annet. sub er en fri
     // undersjanger, meta/story er metasjangerens beskrivelse og historie —
     // en sjekk som bare så på sub, slettet historien for etiketter som deler
@@ -198,14 +198,14 @@ export function planGenreRename(state, fra, til) {
     if (ref.harSub || ref.harMeta || ref.harStory) {
       ops.push(op("field.delete", "genreDescriptions", fra, { felt: "main" },
         `«${fra}» beholdes for de andre nivåene på samme navn`));
-      if (ref.harSub) advarsler.push(`«${fra}» har også en undersjanger-beskrivelse. Den blir liggende igjen på det gamle navnet, som er riktig: den hører til en fri undersjanger, ikke til tre-sjangeren.`);
-      if (ref.harMeta || ref.harStory) advarsler.push(`«${fra}» er også en metasjanger. Metasjanger-beskrivelsen og sjangerhistorien blir stående på det gamle navnet, som er riktig: de hører til metasjangeren, ikke tre-sjangeren.`);
+      if (ref.harSub) advarsler.push(`«${fra}» har også en undersjanger-beskrivelse. Den blir liggende igjen på det gamle navnet, som er riktig: den hører til en fri prinsipp, ikke til tre-sjangeren.`);
+      if (ref.harMeta || ref.harStory) advarsler.push(`«${fra}» er også en metasjanger. Metasjanger-beskrivelsen og epokehistorien blir stående på det gamle navnet, som er riktig: de hører til retningen, ikke tre-sjangeren.`);
     } else {
       ops.push(op("doc.delete", "genreDescriptions", fra, null,
         `Det gamle beskrivelsesdokumentet «${fra}» slettes`));
     }
   } else {
-    advarsler.push(`«${fra}» har ingen sjangerbeskrivelse ennå. Ingenting å flytte.`);
+    advarsler.push(`«${fra}» har ingen epokebeskrivelse ennå. Ingenting å flytte.`);
   }
 
   // 3) Artistene
@@ -215,7 +215,7 @@ export function planGenreRename(state, fra, til) {
       `Artist: ${a.name}`));
   }
   if (ref.artister.length) {
-    advarsler.push(`${ref.artister.length} artist(er) blir tagget om.`);
+    advarsler.push(`${ref.artister.length} teoretiker(er) blir tagget om.`);
   }
 
   // 3b) Sjangeren på lytteeksemplene. Artister som allerede får en skriving
@@ -228,13 +228,13 @@ export function planGenreRename(state, fra, til) {
       `Lytteeksempel hos ${a.name}`));
   }
   if (ref.eksempler.length) {
-    advarsler.push(`${ref.eksempler.length} artist(er) har lytteeksempler merket med sjangeren. De følger med.`);
+    advarsler.push(`${ref.eksempler.length} teoretiker(er) har lytteeksempler merket med sjangeren. De følger med.`);
   }
 
   // 3c) Frie undersjangre med samme navn røres IKKE. De er et annet vokabular,
   //     og et automatisk bytte ville endret noe læreren ikke ba om.
   if (ref.friUndersjanger.length) {
-    advarsler.push(`${ref.friUndersjanger.length} artist(er) har «${fra}» som FRI undersjanger. Den taggen står igjen med vilje: den er et eget vokabular, ikke tre-sjangeren. Rett den manuelt om den skulle følge med.`);
+    advarsler.push(`${ref.friUndersjanger.length} teoretiker(er) har «${fra}» som FRI undersjanger. Den taggen står igjen med vilje: den er et eget vokabular, ikke tre-sjangeren. Rett den manuelt om den skulle følge med.`);
   }
 
   // 5) Lærerens avkryssing
@@ -272,12 +272,12 @@ export function planGenreRename(state, fra, til) {
     const felter = artistForslagOmskriving(e, fra, nyttNavn);
     if (Object.keys(felter).length) {
       ops.push(op("doc.merge", "pendingEdits", e.id, { proposedFields: { ...e.proposedFields, ...felter } },
-        `Artistforslag «${e.entityName || e.entityId}» får det nye navnet`));
+        `Teoretikerforslag «${e.entityName || e.entityId}» får det nye navnet`));
     }
   }
   const friSub = forslagMedFriSub(state, fra);
   if (friSub.length) {
-    advarsler.push(`${friSub.length} artistforslag i køen har «${fra}» som fri undersjanger-tagg. Den står igjen med vilje, som på artistene.`);
+    advarsler.push(`${friSub.length} teoretikerforslag i køen har «${fra}» som fri undersjanger-tagg. Den står igjen med vilje, som på artistene.`);
   }
 
   return { ops, feil, advarsler };
@@ -314,10 +314,10 @@ export function planSubRename(state, fra, til) {
   if (!nyttNavn) feil.push("Det nye navnet er tomt.");
   if (nyttNavn.includes("/")) feil.push("Navnet kan ikke inneholde «/»: navnet er dokument-ID i genreDescriptions, og Firestore forbyr det. Bruk «&».");
   if (gammelt === nyttNavn) feil.push("Det nye navnet er det samme som det gamle.");
-  if (noder.some((n) => lik(n.l, gammelt))) feil.push(`«${gammelt}» er en sjanger i treet. Den får nytt navn i sjangertre-editoren.`);
-  if (!tagget.length && !eksempler.length && !descNokkel) feil.push(`Fant ingen undersjanger som heter «${gammelt}».`);
+  if (noder.some((n) => lik(n.l, gammelt))) feil.push(`«${gammelt}» er en epoke i treet. Den får nytt navn i epoketre-editoren.`);
+  if (!tagget.length && !eksempler.length && !descNokkel) feil.push(`Fant ingen prinsipp som heter «${gammelt}».`);
   const kollisjon = noder.find((n) => lik(n.l, nyttNavn) || lik(n.g, nyttNavn));
-  if (kollisjon) feil.push(`«${nyttNavn}» er allerede navnet på en sjanger i treet.`);
+  if (kollisjon) feil.push(`«${nyttNavn}» er allerede navnet på en epoke i treet.`);
   if (Object.keys(descs).some((k) => lik(k, nyttNavn) && descs[k]?.sub)
       || artister.some((a) => tagger(a).some((g) => lik(g, nyttNavn)))) {
     feil.push(`«${nyttNavn}» finnes allerede som undersjanger. Slå dem sammen for hånd først.`);
@@ -383,7 +383,7 @@ export function planSubRename(state, fra, til) {
     }
     if (Object.keys(felter).length) {
       ops.push(op("doc.merge", "pendingEdits", e.id, { proposedFields: { ...f, ...felter } },
-        `Artistforslag «${e.entityName || e.entityId}» får det nye navnet`));
+        `Teoretikerforslag «${e.entityName || e.entityId}» får det nye navnet`));
     }
   }
 
@@ -425,7 +425,7 @@ export function planMetaRename(state, fra, til) {
   const noder = Array.isArray(tre.nodes) ? tre.nodes : [];
   const metaer = Array.isArray(tre.metaGenres) ? tre.metaGenres : [];
 
-  if (!metaer.some((m) => lik(m.name, fra))) feil.push(`Fant ingen metasjanger «${fra}».`);
+  if (!metaer.some((m) => lik(m.name, fra))) feil.push(`Fant ingen retning «${fra}».`);
   if (!nyttNavn) feil.push("Det nye navnet er tomt.");
   if (nyttNavn.includes("/")) feil.push("Navnet kan ikke inneholde «/».");
   // Eksakt likhet: en ren case-retting skal gjennom (se planGenreRename).
@@ -434,7 +434,7 @@ export function planMetaRename(state, fra, til) {
   if (state?.genreDescs?.[nyttNavn]?.meta) feil.push(`Det finnes allerede en metasjanger-beskrivelse på «${nyttNavn}».`);
   // Samme vern for historien som for beskrivelsen: doc.merge under ville
   // ellers skrevet over målets sjangerhistorie stille.
-  if (state?.genreDescs?.[nyttNavn]?.story) feil.push(`Det finnes allerede en sjangerhistorie på «${nyttNavn}». Slå dem sammen først.`);
+  if (state?.genreDescs?.[nyttNavn]?.story) feil.push(`Det finnes allerede en epokehistorie på «${nyttNavn}». Slå dem sammen først.`);
   if (feil.length) return { ops: [], feil, advarsler };
 
   // STORY_SKJULT bor i KODEN (js/felles/story-format.js) og filtrerer på eksakt navn.
@@ -456,7 +456,7 @@ export function planMetaRename(state, fra, til) {
     nodes: noder.map((n) => (lik(n.g, fra) ? { ...n, g: nyttNavn } : n)),
     metaGenres: metaer.map((m) => (lik(m.name, fra) ? { ...m, name: nyttNavn } : m)),
     metaOrderHint: hint.map((h) => (lik(h, fra) ? nyttNavn : h)),
-  }, `Treet: metasjangeren, ${berorteNoder.length} sjanger(e) og den pedagogiske rekkefølgen`));
+  }, `Treet: retningen, ${berorteNoder.length} epoke(e) og den pedagogiske rekkefølgen`));
 
   // Beskrivelsen OG sjangerhistorien. Historien er et `story`-felt på
   // metasjangerens genreDescriptions-dokument (ikke en egen samling), så den
@@ -477,14 +477,14 @@ export function planMetaRename(state, fra, til) {
       ops.push(op("doc.delete", "genreDescriptions", fra, null, `Gammelt dokument slettes`));
     }
   } else {
-    advarsler.push(`«${fra}» har verken metasjanger-beskrivelse eller sjangerhistorie ennå.`);
+    advarsler.push(`«${fra}» har verken metasjanger-beskrivelse eller epokehistorie ennå.`);
   }
 
   const artister = (state?.artists || []).filter((a) => lik(a.metaGenre, fra));
   for (const a of artister) {
     ops.push(op("doc.merge", "artists", a.id, { metaGenre: nyttNavn }, `Artist: ${a.name}`));
   }
-  if (artister.length) advarsler.push(`${artister.length} artist(er) blir tagget om.`);
+  if (artister.length) advarsler.push(`${artister.length} teoretiker(er) blir tagget om.`);
 
   // Artistforslag i køen med den gamle metasjangeren (v5.31, audit-funn 6):
   // uten dette skrev en godkjenning ETTER planen det døde navnet tilbake, og
@@ -496,7 +496,7 @@ export function planMetaRename(state, fra, til) {
     if (!("metaGenre" in f) || !lik(f.metaGenre, fra)) continue;
     ops.push(op("doc.merge", "pendingEdits", e.id,
       { proposedFields: { ...f, metaGenre: nyttNavn } },
-      `Artistforslag «${e.entityName || e.entityId}» får den nye metasjangeren`));
+      `Teoretikerforslag «${e.entityName || e.entityId}» får den nye retningen`));
   }
 
   const sjekket = (state?.teacherChecks?.metaGenres || []);
@@ -525,7 +525,7 @@ export function planGenreDelete(state, label) {
   const ref = findReferences(state, label);
 
   if (!ref.node) {
-    return { ops: [], feil: [`Fant ingen sjanger med etiketten «${label}».`], advarsler, blokkeringer: [] };
+    return { ops: [], feil: [`Fant ingen epoke med etiketten «${label}».`], advarsler, blokkeringer: [] };
   }
 
   // HARDE blokkeringer: ting som ville blitt foreldreløse og som læreren må
@@ -534,14 +534,14 @@ export function planGenreDelete(state, label) {
   const blokkeringer = [];
   if (ref.artister.length) {
     blokkeringer.push({
-      hva: `${ref.artister.length} artist(er) er tagget med «${label}»`,
-      losning: "Tagg dem om til en annen sjanger først.",
+      hva: `${ref.artister.length} teoretiker(er) er tagget med «${label}»`,
+      losning: "Tagg dem om til en annen epoke først.",
       detaljer: ref.artister.slice(0, 12).map((a) => a.name),
     });
   }
   if (ref.barn.length) {
     blokkeringer.push({
-      hva: `${ref.barn.length} sjanger(e) har «${label}» som forelder`,
+      hva: `${ref.barn.length} epoke(e) har «${label}» som forelder`,
       losning: "Gi dem en annen forelder først, ellers mister de slektskapet sitt.",
       detaljer: ref.barn.map((n) => n.l),
     });
@@ -551,8 +551,8 @@ export function planGenreDelete(state, label) {
   // taggene levde videre i skjemaene. Samme prinsipp som artist-taggene.
   if (ref.eksempler.length) {
     blokkeringer.push({
-      hva: `${ref.eksempler.length} artist(er) har lytteeksempler merket «${label}»`,
-      losning: "Endre sjangeren på lytteeksemplene først.",
+      hva: `${ref.eksempler.length} teoretiker(er) har lytteeksempler merket «${label}»`,
+      losning: "Endre epoken på lytteeksemplene først.",
       detaljer: ref.eksempler.slice(0, 12).map((a) => a.name),
     });
   }
@@ -570,11 +570,11 @@ export function planGenreDelete(state, label) {
     // sjanger) OG meta/story (metasjangeren) — de skal overleve tre-sjangeren.
     if (ref.harSub || ref.harMeta || ref.harStory) {
       ops.push(op("field.delete", "genreDescriptions", label, { felt: "main" },
-        "Sjangerbeskrivelsen slettes (de andre nivåene på samme navn beholdes)"));
+        "Epokebeskrivelsen slettes (de andre nivåene på samme navn beholdes)"));
     } else {
-      ops.push(op("doc.delete", "genreDescriptions", label, null, "Sjangerbeskrivelsen slettes"));
+      ops.push(op("doc.delete", "genreDescriptions", label, null, "Epokebeskrivelsen slettes"));
     }
-    advarsler.push("Sjangerbeskrivelsen slettes sammen med sjangeren.");
+    advarsler.push("Epokebeskrivelsen slettes sammen med sjangeren.");
   }
   for (const k of ref.koblinger) {
     ops.push(op("doc.delete", "edgeDescriptions", k, null, `Koblingsbeskrivelse «${k}» slettes`));
@@ -588,7 +588,7 @@ export function planGenreDelete(state, label) {
       "Avkryssingen fjernes"));
   }
   for (const e of ref.forslag) {
-    ops.push(op("doc.delete", "pendingEdits", e.id, null, "Åpent forslag på sjangeren slettes"));
+    ops.push(op("doc.delete", "pendingEdits", e.id, null, "Åpent forslag på epoken slettes"));
   }
   // Artistforslag slettes IKKE — de handler om artisten, ikke om sjangeren.
   // Men den slettede etiketten strykes fra dem, ellers kunne en godkjenning
@@ -597,12 +597,12 @@ export function planGenreDelete(state, label) {
     const felter = artistForslagOmskriving(e, label, null);
     if (Object.keys(felter).length) {
       ops.push(op("doc.merge", "pendingEdits", e.id, { proposedFields: { ...e.proposedFields, ...felter } },
-        `Sjangeren strykes fra artistforslaget «${e.entityName || e.entityId}»`));
+        `Epoken strykes fra teoretikerforslaget «${e.entityName || e.entityId}»`));
     }
   }
   const friSubSlett = forslagMedFriSub(state, label);
   if (friSubSlett.length) {
-    advarsler.push(`${friSubSlett.length} artistforslag i køen har «${label}» som fri undersjanger-tagg. Den står igjen med vilje, som på artistene.`);
+    advarsler.push(`${friSubSlett.length} teoretikerforslag i køen har «${label}» som fri undersjanger-tagg. Den står igjen med vilje, som på artistene.`);
   }
 
   return { ops, feil, advarsler, blokkeringer: [] };
@@ -628,7 +628,7 @@ export function planMetaDelete(state, navn) {
 
   const meta = metaer.find((m) => lik(m.name, navn));
   if (!meta) {
-    return { ops: [], feil: [`Fant ingen metasjanger «${navn}».`], advarsler, blokkeringer: [] };
+    return { ops: [], feil: [`Fant ingen retning «${navn}».`], advarsler, blokkeringer: [] };
   }
 
   // HARDE blokkeringer, samme prinsipp som ved sletting av en sjanger: vi
@@ -639,15 +639,15 @@ export function planMetaDelete(state, navn) {
   const blokkeringer = [];
   if (egne.length) {
     blokkeringer.push({
-      hva: `${egne.length} sjanger(e) ligger i «${meta.name}»`,
-      losning: "Flytt dem til en annen metasjanger først, eller slett dem.",
+      hva: `${egne.length} epoke(e) ligger i «${meta.name}»`,
+      losning: "Flytt dem til en annen retning først, eller slett dem.",
       detaljer: egne.slice(0, 12).map((n) => n.l),
     });
   }
   if (artister.length) {
     blokkeringer.push({
-      hva: `${artister.length} artist(er) er tagget med «${meta.name}»`,
-      losning: "Tagg dem om til en annen metasjanger først.",
+      hva: `${artister.length} teoretiker(er) er tagget med «${meta.name}»`,
+      losning: "Tagg dem om til en annen retning først.",
       detaljer: artister.slice(0, 12).map((a) => a.name),
     });
   }
@@ -657,8 +657,8 @@ export function planMetaDelete(state, navn) {
     e.entityType === "artist" && lik(e.proposedFields?.metaGenre, meta.name));
   if (forslagMedMeta.length) {
     blokkeringer.push({
-      hva: `${forslagMedMeta.length} artistforslag i køen foreslår metasjangeren «${meta.name}»`,
-      losning: "Behandle forslagene først. Blir ett av dem godkjent etterpå, kommer den slettede metasjangeren tilbake.",
+      hva: `${forslagMedMeta.length} teoretikerforslag i køen foreslår retningen «${meta.name}»`,
+      losning: "Behandle forslagene først. Blir ett av dem godkjent etterpå, kommer den slettede retningen tilbake.",
       detaljer: forslagMedMeta.slice(0, 12).map((e) => e.entityName || e.entityId),
     });
   }
@@ -669,7 +669,7 @@ export function planMetaDelete(state, navn) {
     ...tre,
     metaGenres: metaer.filter((m) => !lik(m.name, meta.name)),
     metaOrderHint: hint.filter((h) => !lik(h, meta.name)),
-  }, `Treet: «${meta.name}» fjernes fra metasjangrene og fra den pedagogiske rekkefølgen`));
+  }, `Treet: «${meta.name}» fjernes fra retningene og fra den pedagogiske rekkefølgen`));
 
   // Beskrivelsen OG sjangerhistorien bor begge på metasjangerens
   // genreDescriptions-dokument. Et main- eller sub-nivå på samme navn er et
@@ -680,14 +680,14 @@ export function planMetaDelete(state, navn) {
     if (desc.main || desc.sub) {
       for (const felt of felter) {
         ops.push(op("field.delete", "genreDescriptions", meta.name, { felt },
-          felt === "story" ? "Sjangerhistorien slettes" : "Metasjanger-beskrivelsen slettes"));
+          felt === "story" ? "Epokehistorien slettes" : "Metasjanger-beskrivelsen slettes"));
       }
       advarsler.push(`«${meta.name}» finnes også som sjanger- eller undersjanger-tekst. Den blir liggende, og det er riktig: den hører til et annet vokabular.`);
     } else {
       ops.push(op("doc.delete", "genreDescriptions", meta.name, null,
         `Dokumentet «${meta.name}» slettes`));
     }
-    if (desc.story) advarsler.push("Sjangerhistorien i «Det store bildet» forsvinner med metasjangeren.");
+    if (desc.story) advarsler.push("Epokehistorien i «Det store bildet» forsvinner med metasjangeren.");
   }
 
   const sjekket = state?.teacherChecks?.metaGenres || [];
@@ -724,7 +724,7 @@ export function planEdgeCleanup(state) {
   const noder = Array.isArray(state?.tree?.nodes) ? state.tree.nodes : [];
   const edgeDescs = state?.edgeDescs || {};
   if (!noder.length) {
-    return { ops: [], feil: ["Sjangertreet er ikke lastet inn."], advarsler, blokkeringer: [] };
+    return { ops: [], feil: ["Epoketreet er ikke lastet inn."], advarsler, blokkeringer: [] };
   }
   const foreldrelose = edgeOrphanKeys(noder, edgeDescs);
   if (!foreldrelose.length) {

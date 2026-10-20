@@ -98,9 +98,9 @@ function markup(modus) {
 
     <section class="steg" data-steg="1" hidden>
       <h3 class="steg-tittel" tabindex="-1">${STEGNAVN[1]}</h3>
-      <p class="hint steg-ingress">Hvor hører artisten hjemme, og når var innflytelsen størst?</p>
+      <p class="hint steg-ingress">Hvor hører teoretikeren hjemme, og når var innflytelsen størst?</p>
       <div class="add-grid">
-        <label>Metasjanger${stj("metaGenre")}
+        <label>Retning${stj("metaGenre")}
           <select data-felt="metaGenre"></select>
         </label>
         <label>Fagbakgrunn${stj("instrument")}
@@ -116,11 +116,11 @@ function markup(modus) {
           <input type="number" data-felt="influenceEnd" min="${AAR_MIN}" max="${AAR_MAKS}" placeholder="f.eks. 1827" />
         </label>
         <div class="full genre-picker" data-felt="mainGenre">
-          <span class="field-label">Sjangre (fra slektstreet)</span>
-          <select class="gp-velg" aria-label="Legg til sjanger"></select>
+          <span class="field-label">Epoker (fra slektstreet)</span>
+          <select class="gp-velg" aria-label="Legg til epoke"></select>
           <div class="gp-valgte"></div>
         </div>
-        <label class="full">Undersjangre / tags (frie, kommaseparert)
+        <label class="full">Prinsipper / tags (frie, kommaseparert)
           <input type="text" data-felt="subGenre" placeholder="f.eks. Delta blues, Akustisk blues" />
         </label>
       </div>
@@ -128,7 +128,7 @@ function markup(modus) {
 
     <section class="steg" data-steg="2" hidden>
       <h3 class="steg-tittel" tabindex="-1">${STEGNAVN[2]}</h3>
-      <p class="hint steg-ingress">Fortell kort hvorfor artisten er viktig i musikkhistorien.</p>
+      <p class="hint steg-ingress">Fortell kort hvorfor teoretikeren er viktig i musikkhistorien.</p>
       <details class="instr-guide skrivehjelp" data-as-skrivehjelp hidden>
         <summary>Slik skriver du beskrivelsen</summary>
         <div class="rt" data-as-skrivehjelp-tekst></div>
@@ -170,7 +170,7 @@ function markup(modus) {
           <button type="button" class="btn ghost small" data-legg-til="kilder">+ Legg til kilde</button>
         </div>
         <label class="full">Bilde-URL
-          <input type="url" data-felt="imageUrl" placeholder="https://… (lenke til bilde av artisten${laerer ? "" : ", valgfritt"})" />
+          <input type="url" data-felt="imageUrl" placeholder="https://… (lenke til bilde av teoretikeren${laerer ? "" : ", valgfritt"})" />
         </label>
         <label class="full">Bildekreditering / kilde
           <input type="text" data-felt="imageCredit" placeholder="f.eks. Wikipedia / CC BY-SA 4.0" />
@@ -220,7 +220,7 @@ const tall = (v) => {
 const erHttpUrl = (u) => /^https?:\/\//i.test((u || "").trim());
 
 const FELTNAVN = {
-  name: "Navn", gender: "Kjønn", metaGenre: "Metasjanger", instrument: "Instrument",
+  name: "Navn", gender: "Kjønn", metaGenre: "Retning", instrument: "Fagbakgrunn",
   influenceStart: "Innflytelse fra", kilder: "Kilder", proposedBy: "Ditt navn",
 };
 // Steget hvert obligatorisk felt står i.
@@ -293,8 +293,8 @@ export function lagArtistSkjema(beholder, cfg) {
   // --- Vokabular -------------------------------------------------------------
   function oppdaterVokabular() {
     fyllNedtrekk(felt("gender"), GENDERS, { tom: "Velg kjønn …" });
-    fyllNedtrekk(felt("metaGenre"), GENEALOGY_META_GENRES, { tom: "Velg metasjanger …", ukjentTekst: "finnes ikke i treet" });
-    fyllNedtrekk(felt("instrument"), INSTRUMENTS, { tom: laerer ? "Ingen / ukjent" : "Velg instrument …" });
+    fyllNedtrekk(felt("metaGenre"), GENEALOGY_META_GENRES, { tom: "Velg retning …", ukjentTekst: "finnes ikke i treet" });
+    fyllNedtrekk(felt("instrument"), INSTRUMENTS, { tom: laerer ? "Ingen / ukjent" : "Velg fagbakgrunn …" });
     if (felt("instrument2")) fyllNedtrekk(felt("instrument2"), INSTRUMENTS, { tom: "Ingen" });
     fillGenrePicker(felt("mainGenre"), sorterteSjangre());
   }
@@ -395,7 +395,7 @@ export function lagArtistSkjema(beholder, cfg) {
         const n = String(v[k] ?? "").length;
         if (n > g.maks) legg(felt(k), `${g.navn} kan være høyst ${g.maks} tegn (er ${n}).`, g.steg);
       }
-      if (v.subGenre.length > STUDENT_MAKS_UNDERSJANGRE) legg(felt("subGenre"), `Høyst ${STUDENT_MAKS_UNDERSJANGRE} undersjangre (er ${v.subGenre.length}).`, 1);
+      if (v.subGenre.length > STUDENT_MAKS_UNDERSJANGRE) legg(felt("subGenre"), `Høyst ${STUDENT_MAKS_UNDERSJANGRE} prinsipper (er ${v.subGenre.length}).`, 1);
     }
     if (v.birthYear && v.deathYear && v.deathYear < v.birthYear) legg(felt("deathYear"), "Dødsår kan ikke være før fødselsår.", 0);
     if (v.influenceStart && v.influenceEnd && v.influenceEnd < v.influenceStart) legg(felt("influenceEnd"), "«Innflytelse til»-året kan ikke være før «fra»-året.", 1);
@@ -496,7 +496,7 @@ export function lagArtistSkjema(beholder, cfg) {
     if (!cfg.finnDuplikat) return true;
     const navn = felt("name").value.trim();
     if (!navn || navn.toLowerCase() === tilstand.godkjentNavn) return true;
-    melding("Sjekker om artisten finnes fra før …");
+    melding("Sjekker om teoretikeren finnes fra før …");
     let dup = null;
     try {
       dup = await Promise.race([cfg.finnDuplikat(navn), new Promise((r) => setTimeout(() => r(null), 4000))]);
@@ -752,7 +752,7 @@ export function lukkArtistSkjema() {
 export function apneArtistSkjema(cfg) {
   const m = hentVindu();
   const gen = ++vinduGen;
-  m.querySelector("#as-vindu-tittel").textContent = cfg.tittel || "Artist";
+  m.querySelector("#as-vindu-tittel").textContent = cfg.tittel || "Teoretiker";
   const api = lagArtistSkjema(m.querySelector("[data-as-vindu-kropp]"), cfg);
   // Lukker etter kvitteringen, uten å spørre (endringene er lagret), og bare
   // hvis dette skjemaet fortsatt er det som står i vinduet.

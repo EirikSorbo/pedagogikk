@@ -387,7 +387,7 @@ test("planOversikt: kobling med nodenavn, historie og visninger får lesbare nav
   const g = planOversikt(vis("kobling:blues__rnb", "historie:Rock", "historie", "side:rotter", "teknologi", "himmel"), { nodeNavn });
   const tekster = (id) => g.find((k) => k.id === id).punkter.map((p) => p.tekst);
   assert.deepEqual(tekster("sjangre"), ["Blues → R&B", "Historien om Rock"]);
-  assert.deepEqual(tekster("oversikter"), ["Røtter før 1910", "Sjangerhimmelen", "Sjangerhistoriene"]);
+  assert.deepEqual(tekster("oversikter"), ["Epokehimmelen", "Epokehistoriene", "Røtter før 1910"]);
   assert.deepEqual(tekster("teknologi"), ["Teknologioversikten"]);
 });
 
@@ -620,14 +620,14 @@ test("tastene er koblet: én felles lytter, svart skjerm i capture, samleøkt et
 
 test("metaRader: «Instrument: …» og «Sjanger: …» som egne rader, med samme knapper som før", () => {
   const html = metaRader({ instrument: "Vokal", mainGenre: ["Blues"], subGenre: [] });
-  assert.match(html, /<span class="meta-etikett">Instrument:<\/span> <button class="tag tag-instrument" data-instrument="Vokal">Vokal<\/button>/);
-  assert.match(html, /<span class="meta-etikett">Sjanger:<\/span> <button class="tag tag-sjanger" data-sjanger="Blues">Blues<\/button>/);
+  assert.match(html, /<span class="meta-etikett">Fagbakgrunn:<\/span> <button class="tag tag-instrument" data-instrument="Vokal">Vokal<\/button>/);
+  assert.match(html, /<span class="meta-etikett">Epoke:<\/span> <button class="tag tag-sjanger" data-sjanger="Blues">Blues<\/button>/);
   assert.equal((html.match(/class="meta-rad"/g) || []).length, 2, "tom undersjanger-liste gir ingen rad");
-  assert.ok(html.indexOf("Instrument:") < html.indexOf("Sjanger:"), "instrumentet først, som før");
+  assert.ok(html.indexOf("Fagbakgrunn:") < html.indexOf("Epoke:"), "instrumentet først, som før");
   // Flertall og komma mellom flere verdier; undersjangre på egen rad.
   const flere = metaRader({ mainGenre: ["Blues", "Rock"], subGenre: ["Delta blues", "Chicago blues"] });
-  assert.match(flere, /Sjangre:<\/span> <button[^>]*>Blues<\/button><span class="meta-skille">, <\/span><button[^>]*>Rock<\/button>/);
-  assert.match(flere, /Undersjangre:<\/span>/);
+  assert.match(flere, /Epoker:<\/span> <button[^>]*>Blues<\/button><span class="meta-skille">, <\/span><button[^>]*>Rock<\/button>/);
+  assert.match(flere, /Prinsipper:<\/span>/);
   assert.doesNotMatch(flere, /Instrument/, "uten instrument ingen instrumentrad");
   // Escaping og tomme artister.
   assert.match(metaRader({ mainGenre: ['R&B "x"'] }), /data-sjanger="R&amp;B &quot;x&quot;"/);

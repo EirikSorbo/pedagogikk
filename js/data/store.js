@@ -721,7 +721,7 @@ export async function approvePendingEdit(pendingEditId, approvedKeys) {
   // forkastede funn om sub-nivået).
   if (data.entityType === "artist" && toApply.metaGenre
       && !GENEALOGY_META_GENRES.includes(toApply.metaGenre)) {
-    throw new Error(`Forslaget peker på metasjangeren «${toApply.metaGenre}», som ikke finnes i treet (lenger). Rett metasjangeren i forslaget, eller avvis det.`);
+    throw new Error(`Forslaget peker på retningen «${toApply.metaGenre}», som ikke finnes i treet (lenger). Rett retningen i forslaget, eller avvis det.`);
   }
 
   // Sjangerbeskrivelser er nivådelte ({ meta/main/sub: { description, … } });

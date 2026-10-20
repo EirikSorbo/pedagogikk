@@ -73,12 +73,12 @@ export const ROTTER = "Røtter";
 export const LITEN_GRENSE = 3;
 // Undersjangre som ikke lar seg plassere i en familie (ingen artist bærer
 // taggen, og navnet er ikke en tre-node) samles i en egen bolk bakerst.
-export const UNDERSJANGRE_LOSE = "Undersjangre";
+export const UNDERSJANGRE_LOSE = "Prinsipper";
 
 export const TYPE_ETIKETT = {
-  metasjanger: "Metasjanger",
-  artist: "Artist", sjanger: "Sjanger", undersjanger: "Undersjanger",
-  tech: "Innovasjon", instrument: "Instrument", historie: "Historie", side: "Side", yt: "Lytteeksempel",
+  metasjanger: "Retning",
+  artist: "Teoretiker", sjanger: "Epoke", undersjanger: "Prinsipp",
+  tech: "Reform", instrument: "Fagbakgrunn", historie: "Historie", side: "Side", yt: "Lytteeksempel",
 };
 
 // Metasjangeren finnes bare i heftet (ingen ?vis=-type, ingen modal): verdien
@@ -161,10 +161,10 @@ export const DELER = [
   // Historien om metasjangeren (v6.42, brukerbestilling 2026-10-06): først i
   // hvert metasjanger-kapittel. Av som standard, siden en historie er flere
   // sider lang; den kan også velges som eget kort som før.
-  { gruppe: "Metasjanger", valg: [
-    { id: "meta.historie", navn: "Historien om metasjangeren", standard: false, historie: true },
+  { gruppe: "Retning", valg: [
+    { id: "meta.historie", navn: "Historien om retningen", standard: false, historie: true },
   ] },
-  { gruppe: "Artistkort", valg: [
+  { gruppe: "Teoretikerkort", valg: [
     { id: "artist.bilde", navn: "Bilde" },
     { id: "artist.fakta", navn: "Faktalinje" },
     { id: "artist.virketid", navn: "Tidslinje for virketid" },
@@ -173,7 +173,7 @@ export const DELER = [
     { id: "artist.verk", navn: "Sentrale verk" },
     { id: "artist.lytte", navn: "Lytteeksempler" },
   ] },
-  { gruppe: "Sjangerkort", valg: [
+  { gruppe: "Epokekort", valg: [
     { id: "sjanger.era", navn: "Epoke" },
     { id: "sjanger.punkter", navn: "Oppsummering i punkter", punkter: true },
     { id: "sjanger.beskrivelse", navn: "Beskrivelse" },
@@ -181,9 +181,9 @@ export const DELER = [
     // Koblingstekstene (v5.74): strekene inn i og ut av sjangeren i slektstreet.
     // Av som standard: de er et tillegg, og læreren velger dem til.
     { id: "sjanger.koblinger", navn: "Koblingstekster fra slektstreet", standard: false },
-    { id: "sjanger.ordliste", navn: "Ordliste over undersjangrene på artistkortene" },
+    { id: "sjanger.ordliste", navn: "Ordliste over prinsippene på teoretikerkortene" },
   ] },
-  { gruppe: "Innovasjonskort", valg: [
+  { gruppe: "Reformskort", valg: [
     { id: "tech.bilde", navn: "Bilde" },
     { id: "tech.fakta", navn: "Årstall og kategori" },
     { id: "tech.punkter", navn: "Oppsummering i punkter", punkter: true },
@@ -958,8 +958,8 @@ export function foreslaaTittel(modell, { planTittel = "" } = {}) {
     const tekst = navn.length <= 3 ? listeTekst(navn) : `${navn.slice(0, 3).join(", ")} og ${navn.length - 3} til`;
     return normaliserTittel(tekst);
   }
-  if (modell?.innovasjoner?.length) return "Innovasjoner";
-  if (modell?.instrumenter?.length) return "Instrumentene";
+  if (modell?.innovasjoner?.length) return "Reformer";
+  if (modell?.instrumenter?.length) return "Fagbakgrunnene";
   const lytte = modell?.lytteliste || [];
   if (lytte.length && lytte.every((l) => l.valgt) && !(modell?.sider || []).length) return "Lytteeksempler";
   return "Pensumutdrag";

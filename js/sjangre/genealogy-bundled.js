@@ -116,7 +116,7 @@ export function renderGenealogyBundled({ root = document, getOpts }) {
   const gNodes = el("g", {
     class: "gxb-node-layer",
     role: "group",
-    "aria-label": "Sjangertreet: velg en sjanger for å lese om den",
+    "aria-label": "Epoketreet: velg en epoke for å lese om den",
   });
   cam.appendChild(gGrid);
   cam.appendChild(gBands);

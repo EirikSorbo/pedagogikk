@@ -32,7 +32,7 @@ import { openTechDetail } from "./explore-tech.js";
 
 // Kategorien nye instrumentkort får automatisk — instrumentnyvinninger hører
 // hjemme under «Instrumenter og lydutstyr», så ingen trenger å velge den selv.
-const INSTRUMENT_TECH_CATEGORY = "Instrumenter og lydutstyr";
+const INSTRUMENT_TECH_CATEGORY = "Fagbakgrunner og lydutstyr";
 
 // Valgt instrument huskes mellom åpninger, som sjangerhistoriene.
 let currentGroup = null;
@@ -182,7 +182,7 @@ function renderGroup(group, tvunget = false) {
       <div class="instr-sum">
         <div class="instr-sum-body story-body"></div>
       </div>
-      ${alfabetisk.length ? `<aside class="instr-side${alfabetisk.length <= KORT_LISTE ? " instr-side--kort" : ""}" aria-label="Artister">
+      ${alfabetisk.length ? `<aside class="instr-side${alfabetisk.length <= KORT_LISTE ? " instr-side--kort" : ""}" aria-label="Teoretikere">
         <div class="instr-side-ramme">
           <h4 class="related-head">Artister <span class="instr-side-tall">${alfabetisk.length}</span></h4>
           <ul class="instr-artister">${alfabetisk.map(artistRad).join("")}</ul>
@@ -213,7 +213,7 @@ function renderGroup(group, tvunget = false) {
     sum.innerHTML = (s.contentLoaded
       ? `<p class="instr-sum-hint">Teksten skrives av gruppen som lager ` +
         `<button type="button" class="sh-linkbtn" id="instr-til-podkast">podkast</button>` +
-        ` om instrumentets utvikling.</p>`
+        ` om fagbakgrunnens utvikling.</p>`
       : `<p class="gx-missing">Laster innhold …</p>`);
     sum.querySelector("#instr-til-podkast")?.addEventListener("click", () => openPodkaster());
   }
@@ -256,10 +256,10 @@ function renderGroup(group, tvunget = false) {
   // står i signaturen.
   knapper.push({
     side: "venstre",
-    tekst: `Alle artister (${artister.length})`,
+    tekst: `Alle teoretikere (${artister.length})`,
     gjør: () => openArtistListModal(
       `Artister: ${group}`, artistsInInstrumentGroup(getState().artists, group), opts.onArtistClick,
-      `Ingen artister er lagt inn på ${group} ennå.`
+      `Ingen teoretikere er lagt inn på ${group} ennå.`
     ),
   });
   knapper.push({
@@ -280,8 +280,8 @@ function renderGroup(group, tvunget = false) {
   // studentene går til skjemasiden. (Før v6.96 gikk også læreren dit og
   // godkjente sitt eget forslag: lærersiden hadde ingen «ny artist»-form.)
   knapper.push(opts.onNyArtist
-    ? { side: "høyre", tekst: "Legg til artist", gjør: () => opts.onNyArtist() }
-    : { side: "høyre", tekst: "Legg til artist", href: "student.html" });
+    ? { side: "høyre", tekst: "Legg til teoretiker", gjør: () => opts.onNyArtist() }
+    : { side: "høyre", tekst: "Legg til teoretiker", href: "student.html" });
 
   // data-k bærer indeksen i `knapper`, ikke i gruppen: klikk-koblingen under
   // slår opp i den samlede lista, og den må stemme uansett hvordan knappene

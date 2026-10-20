@@ -66,7 +66,7 @@ export function validateTree(tree) {
   const deklarerte = new Set((tree.metaGenres || []).map((m) => (typeof m === "string" ? m : m?.name)).filter(Boolean));
   if (deklarerte.size) {
     for (const n of nodes) {
-      if (n.g && !deklarerte.has(n.g)) advar(`«${n.id}» har metasjangeren «${n.g}», som ikke er deklarert i metaGenres.`);
+      if (n.g && !deklarerte.has(n.g)) advar(`«${n.id}» har retningen «${n.g}», som ikke er deklarert i metaGenres.`);
     }
   }
 
@@ -156,6 +156,6 @@ function finnSykler(nodes, idSett) {
 export function assertTreeOk(tree, hvor = "treet") {
   const feil = validateTree(tree).filter((p) => p.nivå === "feil");
   if (feil.length) {
-    throw new Error(`Ugyldig sjangertre i ${hvor}:\n· ` + feil.map((f) => f.melding).join("\n· "));
+    throw new Error(`Ugyldig epoketre i ${hvor}:\n· ` + feil.map((f) => f.melding).join("\n· "));
   }
 }

@@ -827,7 +827,7 @@ function byggTimeliste() {
       </div>
       <p class="muted timeliste-kontekst" id="timeliste-kontekst"></p>
       <form id="timeliste-skjema" class="timeliste-skjema" autocomplete="off">
-        <label>Artist <input type="text" id="timeliste-artist" maxlength="120" placeholder="Navn på artisten" required></label>
+        <label>Teoretiker <input type="text" id="timeliste-artist" maxlength="120" placeholder="Navn på teoretikeren" required></label>
         <label>Foreslått av <input type="text" id="timeliste-student" maxlength="60" placeholder="Fornavn (valgfritt)"></label>
         <button type="submit" class="btn primary small">Legg til</button>
       </form>
@@ -1175,7 +1175,7 @@ function tegnPanel(panel) {
       <hr class="pres-skille">`
     : `<p class="pres-panel-hode">Åpne et kort for å velge seksjoner.</p>`}
     <label class="pres-valg pres-qa"><input type="checkbox" id="pres-qa" ${qaPaa() ? "checked" : ""}>
-      Vis innhold som er skjult for studentene (sjangerhistorier, koblingstekster, «Hør etter», viktighetsgrad, alle hubkort, usjekket innhold)</label>
+      Vis innhold som er skjult for studentene (epokehistorier, koblingstekster, «Hør etter», viktighetsgrad, alle hubkort, usjekket innhold)</label>
     <label class="pres-valg"><input type="checkbox" id="pres-klokke-valg" ${klokkePaa() ? "checked" : ""}> Vis klokka i verktøylinja</label>
     ${paminnelserStartet() ? `<button type="button" class="btn ghost small" id="pres-ny-pam" title="Ny påminnelse i denne visningen (R)">Ny påminnelse …</button>` : ""}
     ${kanHuske() ? `<hr class="pres-skille">
@@ -1269,7 +1269,7 @@ function tegnRaskPanel(panel, beskjed = "", valg = null) {
     </div>` : ""}
     <p class="pres-rask-msg" id="pres-rask-msg" role="status">${escapeHtml(beskjed)}</p>
     <p class="pres-panel-tips">${valg
-      ? "Gjelder bare denne visningen. Navn på artister og sjangre blir lenker. Ctrl/Cmd+Enter legger til."
+      ? "Gjelder bare denne visningen. Navn på teoretikere og epoker blir lenker. Ctrl/Cmd+Enter legger til."
       : "Velg når påminnelsen skal komme. Den gjelder bare denne visningen."}</p>
     ${ventende.length ? `<hr class="pres-skille">
     <p class="pres-panel-hode">Kommer i denne visningen</p>

@@ -66,16 +66,16 @@ export const GENRE_ADMIN_HTML = `
 <div class="modal-backdrop" id="modal-genre-admin">
   <div class="modal modal-wide">
     <div class="modal-head">
-      <h2>Sjangertre-editor</h2>
+      <h2>Epoketre-editor</h2>
       <button class="modal-close btn ghost small">✕</button>
     </div>
     <p class="muted" style="margin:0 0 12px">
-      Legg inn, endre eller fjern sjangre. Plasseringen i kartet regnes ut av metasjanger,
+      Legg inn, endre eller fjern epoker. Plasseringen i kartet regnes ut av retning,
       tidsrom og slektskap, så du trenger ikke tenke på koordinater.
     </p>
     <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-      <button class="btn primary small" id="gen-ny-sjanger">Ny sjanger</button>
-      <button class="btn ghost small" id="gen-ny-meta">Ny metasjanger</button>
+      <button class="btn primary small" id="gen-ny-sjanger">Ny epoke</button>
+      <button class="btn ghost small" id="gen-ny-meta">Ny retning</button>
       <!-- Radene i treet (fase 2): tidsrom av fri lengde. -->
       <button class="btn ghost small" id="gen-tidsrom">Tidsrom</button>
       <!-- Foreldreløse koblingsbeskrivelser: doc-ID er «forelderid__barnid»,
@@ -90,7 +90,7 @@ export const GENRE_ADMIN_HTML = `
 <div class="modal-backdrop" id="modal-genre-edit">
   <div class="modal">
     <div class="modal-head">
-      <h2 id="gen-edit-title">Sjanger</h2>
+      <h2 id="gen-edit-title">Epoke</h2>
       <button class="modal-close btn ghost small">✕</button>
     </div>
     <div id="gen-edit-body"></div>
@@ -105,7 +105,7 @@ export const GENRE_ADMIN_HTML = `
 <div class="modal-backdrop" id="modal-genre-meta">
   <div class="modal">
     <div class="modal-head">
-      <h2 id="gen-meta-title">Metasjanger</h2>
+      <h2 id="gen-meta-title">Retning</h2>
       <button class="modal-close btn ghost small">✕</button>
     </div>
     <div id="gen-meta-body"></div>
@@ -165,7 +165,7 @@ function renderListe() {
   if (!el) return;
   const t = tre();
   if (!t?.nodes?.length) {
-    el.innerHTML = `<p class="gx-missing">Sjangertreet er ikke lastet inn. Importer Innholdspakka først.</p>`;
+    el.innerHTML = `<p class="gx-missing">Epoketreet er ikke lastet inn. Importer Innholdspakka først.</p>`;
     return;
   }
   const metaer = [...(t.metaGenres || [])].sort((a, b) => (a.column ?? 0) - (b.column ?? 0));
@@ -191,7 +191,7 @@ function renderListe() {
       <div class="gen-gruppe-head">
         <span class="gen-dot" style="background:${escapeHtml(m.color || FAMILIES[m.fam]?.stroke || "#999")}"></span>
         <strong>${escapeHtml(m.name)}</strong>
-        <span class="muted">${egne.length} sjangre</span>
+        <span class="muted">${egne.length} epoker</span>
         <button class="btn ghost small gen-meta-rediger" data-meta="${escapeHtml(m.name)}">Rediger</button>
       </div>
       <div class="gen-rader">${egne.map(radHtml).join("") || `<p class="muted">Ingen sjangre ennå.</p>`}</div>
@@ -200,7 +200,7 @@ function renderListe() {
   if (uten.length) {
     h += `<div class="gen-gruppe">
       <div class="gen-gruppe-head"><span class="gen-dot" style="background:#9bada1"></span>
-        <strong>Røtter</strong><span class="muted">${uten.length} noder, uten metasjanger</span></div>
+        <strong>Røtter</strong><span class="muted">${uten.length} noder, uten retning</span></div>
       <div class="gen-rader">${uten.sort((a, b) => a.r - b.r).map(radHtml).join("")}</div>
     </div>`;
   }
@@ -214,7 +214,7 @@ function radHtml(n) {
   return `<button class="gen-rad" data-node="${escapeHtml(n.id)}">
     <span class="gen-rad-navn">${escapeHtml(n.l)}</span>
     <span class="muted">${escapeHtml(tiar)}</span>
-    <span class="muted">${antall} artist(er)</span>
+    <span class="muted">${antall} teoretiker(er)</span>
   </button>`;
 }
 
@@ -228,7 +228,7 @@ function openNodeEditor(nodeId) {
   if (!t) return;
   redigerer = nodeId;
   const n = nodeId ? t.nodes.find((x) => x.id === nodeId) : null;
-  $("#gen-edit-title").textContent = n ? n.l : "Ny sjanger";
+  $("#gen-edit-title").textContent = n ? n.l : "Ny epoke";
   $("#gen-edit-msg").textContent = "";
   $("#gen-edit-slett").style.display = n ? "" : "none";
 
@@ -260,14 +260,14 @@ function openNodeEditor(nodeId) {
       <label>Fullt navn
         <input type="text" id="gen-f" value="${escapeHtml(n?.f || "")}" maxlength="120">
       </label>
-      <label>Metasjanger
-        <select id="gen-g"><option value="">(rot, ingen metasjanger)</option>${metaValg}</select>
+      <label>Retning
+        <select id="gen-g"><option value="">(rot, ingen retning)</option>${metaValg}</select>
       </label>
       <label>Tidsrom
         <select id="gen-r">${radValg}</select>
       </label>
       <label>Egen farge (unntak)
-        <select id="gen-fam"><option value="">(arv fra metasjangeren)</option>${famValg}</select>
+        <select id="gen-fam"><option value="">(arv fra retningen)</option>${famValg}</select>
       </label>
     </div>
     ${n ? `<p class="muted" style="margin:10px 0 4px">ID: <code>${escapeHtml(n.id)}</code> kan ikke endres. Koblingsbeskrivelsene henger i den.</p>` : ""}
@@ -321,7 +321,7 @@ async function lagre() {
   // «ny node»-grenen og gjenopprettet sjangeren med en FERSK id — treet fikk
   // en dublett, og alle koblingsbeskrivelsene pekte fortsatt på den gamle.
   if (redigerer && !gammel) {
-    msg.textContent = "Sjangeren finnes ikke lenger (slettet i en annen fane?). Lukk og åpne editoren på nytt.";
+    msg.textContent = "Epoken finnes ikke lenger (slettet i en annen fane?). Lukk og åpne editoren på nytt.";
     return;
   }
   const navnEndret = gammel && gammel.l !== felt.l;
@@ -376,7 +376,7 @@ async function lagre() {
   try {
     stempel = await saveGenealogyTree(nyttTre);
   } catch (err) {
-    console.error("Kunne ikke lagre sjangertreet:", err);
+    console.error("Kunne ikke lagre epoketreet:", err);
     msg.textContent = "Treet ble ikke lagret (" + (err?.message || err) + "). Ingenting er endret. Prøv igjen.";
     return;
   }
@@ -638,7 +638,7 @@ function openMetaEditor(navn) {
   if (navn && !m) return;
   redigererMeta = m ? m.name : null;
 
-  $("#gen-meta-title").textContent = m ? m.name : "Ny metasjanger";
+  $("#gen-meta-title").textContent = m ? m.name : "Ny retning";
   $("#gen-meta-msg").textContent = "";
   $("#gen-meta-slett").style.display = m ? "" : "none";
 
@@ -674,7 +674,7 @@ function openMetaEditor(navn) {
       </label>
     </div>
     <p class="muted" style="margin:10px 0 0">
-      Sjangrene i metasjangeren arver fargen, med mindre de har fått sin egen.
+      Epokene i retningen arver fargen, med mindre de har fått sin egen.
       Plasseringen i kartet og den pedagogiske rekkefølgen er to ulike akser:
       tidslinjen og listene leser den siste.
     </p>`;
@@ -700,7 +700,7 @@ async function lagreMeta() {
   // la inn en NY, tom metasjanger ved siden av den omdøpte. Fargeendringen
   // havnet på spøkelset, og validateTree fant 0 feil. Samme vakt som lagre().
   if (redigererMeta && !gammel) {
-    msg.textContent = "Metasjangeren finnes ikke lenger (endret eller slettet i en annen fane?). Lukk og åpne editoren på nytt.";
+    msg.textContent = "Retningen finnes ikke lenger (endret eller slettet i en annen fane?). Lukk og åpne editoren på nytt.";
     return;
   }
   if (metaer.some((x) => x !== gammel && x.name.toLowerCase() === navn.toLowerCase())) {
@@ -720,7 +720,7 @@ async function lagreMeta() {
   try {
     stempel = await saveGenealogyTree(nyttTre);
   } catch (err) {
-    console.error("Kunne ikke lagre sjangertreet:", err);
+    console.error("Kunne ikke lagre epoketreet:", err);
     msg.textContent = "Treet ble ikke lagret (" + (err?.message || err) + "). Ingenting er endret. Prøv igjen.";
     return;
   }
@@ -747,7 +747,7 @@ function slettMeta() {
   if (!redigererMeta) return;
   const navn = redigererMeta;
   modalClose($("#modal-genre-meta"));
-  visPlan(`Slette metasjangeren «${navn}»`, planMetaDelete(migrasjonsState(), navn),
+  visPlan(`Slette retningen «${navn}»`, planMetaDelete(migrasjonsState(), navn),
     () => planMetaDelete(migrasjonsState(), navn));
 }
 

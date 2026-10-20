@@ -271,7 +271,7 @@ function levetid(a) {
 // kortene: læreren ser det alltid, studentene bare når bryteren
 // «Viktighetsgraden» er på.
 export function artistGalleriHtml(liste, { visPrioritet = false } = {}) {
-  if (!liste.length) return `<p class="muted empty">Ingen artister matcher søket.</p>`;
+  if (!liste.length) return `<p class="muted empty">Ingen teoretikere matcher søket.</p>`;
   return `<div class="ar-galleri">${liste.map((a) => {
     const url = safeUrl(a.imageUrl);
     const sjangre = (a.mainGenre || []).join(", ");
@@ -616,7 +616,7 @@ function showGenreLevelInfo(label, level, opts = {}) {
   }, level);
 
   const btnArea = [
-    onShowArtists ? `<button type="button" class="btn ghost small gx-artists-btn">Artister</button>` : "",
+    onShowArtists ? `<button type="button" class="btn ghost small gx-artists-btn">Teoretikere</button>` : "",
     onShowPlaylist ? `<button type="button" class="btn ghost small gx-playlist-btn">Spilleliste</button>` : "",
   ].filter(Boolean).join(" ");
 
@@ -626,7 +626,7 @@ function showGenreLevelInfo(label, level, opts = {}) {
   // så oppslaget alltid treffer — datadrevet via treet, ingen hardkodet liste.
   const treeNode = findTreeGenreNode(label);
   const seeGenreBtn = treeNode
-    ? `<button type="button" class="btn ghost small gx-see-genre-btn" style="margin-bottom:10px">Se «${escapeHtml(treeNode.l)}» (sjanger)</button>`
+    ? `<button type="button" class="btn ghost small gx-see-genre-btn" style="margin-bottom:10px">Se «${escapeHtml(treeNode.l)}» (epoke)</button>`
     : "";
 
   const lc = { artists, techItems, genres, onArtistClick, onTechClick, onMainGenreClick };
@@ -814,7 +814,7 @@ function playlistRows(list, sj = null) {
       par.push({ a, m });
     }
   }
-  return eksempelRader(par, "Ingen musikkeksempler registrert for denne sjangeren ennå.");
+  return eksempelRader(par, "Ingen musikkeksempler registrert for denne epoken ennå.");
 }
 
 // Sjangerboblen(e) i en spillelisterad: et tagget eksempel viser sin EGEN

@@ -21,12 +21,12 @@ export const FLATER = {
   artist: [
     { id: "bilde", navn: "Bilde" },
     { id: "fakta", navn: "Fakta (levetid, fagbakgrunn …)" },
-    { id: "tags", navn: "Instrument og sjanger" },
+    { id: "tags", navn: "Fagbakgrunn og epoke" },
     { id: "stripe", navn: "Innflytelseslinje" },
     { id: "punkter", navn: "Oppsummering i punkter" },
     { id: "beskrivelse", navn: "Beskrivelse" },
     { id: "verk", navn: "Hovedverk" },
-    { id: "beslektede", navn: "Beslektede artister" },
+    { id: "beslektede", navn: "Beslektede teoretikere" },
   ],
   sjanger: [
     { id: "era", navn: "Epoke" },
@@ -38,7 +38,7 @@ export const FLATER = {
     { id: "skole", navn: "Skole og oppdragelse" },
     { id: "lytt", navn: "Hør etter" },
     { id: "relasjoner", navn: "Slektskap (vokste ut av …)" },
-    { id: "artister", navn: "Artister i sjangeren (navneliste)" },
+    { id: "artister", navn: "Teoretikere i epoken (navneliste)" },
   ],
   tech: [
     { id: "bilde", navn: "Bilde" },
@@ -46,7 +46,7 @@ export const FLATER = {
     { id: "punkter", navn: "Oppsummering i punkter" },
     { id: "beskrivelse", navn: "Beskrivelse" },
     // v6.07 (K6): artistene som nevner innovasjonen.
-    { id: "artister", navn: "Artister som nevner den" },
+    { id: "artister", navn: "Teoretikere som nevner den" },
   ],
   // Tiårsvinduet og varmestripene er tatt ut (fase 2). Over historien står
   // epokene i retningen som bobler (familie).
@@ -451,21 +451,21 @@ export function tellerTekst(i, antall) {
 }
 
 export const OVERSIKT_KATEGORIER = [
-  { id: "artister", navn: "Artister" },
+  { id: "artister", navn: "Teoretikere" },
   { id: "lytteeksempler", navn: "Lytteeksempler" },
-  { id: "sjangre", navn: "Sjangre" },
+  { id: "sjangre", navn: "Epoker" },
   { id: "teknologi", navn: "Teknologi" },
-  { id: "instrumenter", navn: "Instrumenter" },
+  { id: "instrumenter", navn: "Fagbakgrunner" },
   { id: "oversikter", navn: "Oversikter" },
 ];
 
 const VISNING_NAVN = {
-  tidslinje: "Tidslinjen", sjangerperioder: "Sjangerperiodene",
-  himmel: "Sjangerhimmelen", referanser: "Referansene",
+  tidslinje: "Tidslinjen", sjangerperioder: "Epokeperiodene",
+  himmel: "Epokehimmelen", referanser: "Referansene",
   "store-bildet": "Det store bildet", slektstre: "Slektstreet",
   podkaster: "Podkastene",
   // Vinduene med egen adresse fra v6.08 (S7).
-  sjangre: "Sjangrene", undersjangre: "Undersjangrene", artister: "Artistene", lytt: "Spillelistene",
+  sjangre: "Epokene", undersjangre: "Prinsippene", artister: "Teoretikerne", lytt: "Spillelistene",
 };
 const SIDE_NAVN = { omHistorie: "Om historie", rotter: "Røtter før 1910" };
 
@@ -492,11 +492,11 @@ function oversiktPunkt(m, oppslag) {
       return { kat: "sjangre", tekst: m.id || "(uten navn)" };
     case "historie":
       return m.id ? { kat: "sjangre", tekst: `Historien om ${m.id}` }
-        : { kat: "oversikter", tekst: "Sjangerhistoriene" };
+        : { kat: "oversikter", tekst: "Epokehistoriene" };
     case "oversikt":
       return { kat: "oversikter", tekst: `Oversikt over ${m.id || "metasjangeren"}` };
     case "galleri":
-      return { kat: "oversikter", tekst: `Artistgalleri: ${m.id || "sjangeren"}` };
+      return { kat: "oversikter", tekst: `Teoretikergalleri: ${m.id || "sjangeren"}` };
     case "kobling": {
       const [fra, til] = String(m.id || "").split("__");
       const navn = (id) => oppslag.nodeNavn?.(id) || id || "?";
@@ -509,7 +509,7 @@ function oversiktPunkt(m, oppslag) {
     case "teknologi":
       return { kat: "teknologi", tekst: m.id ? `Teknologi: ${m.id}` : "Teknologioversikten" };
     case "instrument":
-      return { kat: "instrumenter", tekst: m.id || "Instrumentene" };
+      return { kat: "instrumenter", tekst: m.id || "Fagbakgrunnene" };
     case "side":
       return { kat: "oversikter", tekst: SIDE_NAVN[m.id] || "Slik bruker du appen" };
     // Slides (v7.06) er lærerens private sider og står aldri på oversikten
@@ -851,8 +851,8 @@ export const PRES_TASTER = [
   ] },
   { gruppe: "Ellers", rader: [
     { taster: ["S"], hva: "Søk" },
-    { taster: ["L"], hva: "Lytt: spill det første lytteeksempelet til artisten som vises" },
-    { taster: ["N"], hva: "Navn fra timen: noter en artist som kom opp, og hvem som foreslo den", laerer: true },
+    { taster: ["L"], hva: "Lytt: spill det første lytteeksempelet til teoretikeren som vises" },
+    { taster: ["N"], hva: "Navn fra timen: noter en teoretiker som kom opp, og hvem som foreslo den", laerer: true },
     { taster: ["P"], hva: "Private notater for kortet som vises (bare på din skjerm)", laerer: true },
     { taster: ["Å"], hva: "Rediger de private notatene til kortet som vises", laerer: true },
     { taster: ["Esc"], hva: "Lukk øverste kort" },

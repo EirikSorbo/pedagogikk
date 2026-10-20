@@ -202,7 +202,7 @@ test("sletting BLOKKERES av artister og av barn, med liste over hva som må rydd
   const plan = planGenreDelete(lagState(), "R&B");
   assert.equal(plan.ops.length, 0, "ingenting skal skrives når det er blokkert");
   const tekster = plan.blokkeringer.map((b) => b.hva).join(" | ");
-  assert.ok(tekster.includes("artist"), tekster);
+  assert.ok(tekster.includes("teoretiker"), tekster);
   assert.ok(tekster.includes("forelder"), tekster);
   const barnBlokk = plan.blokkeringer.find((b) => b.hva.includes("forelder"));
   assert.deepEqual(barnBlokk.detaljer.sort(), ["Rock", "Soul"]);
@@ -321,7 +321,7 @@ function medTomMeta() {
 test("metasjanger med sjangre i seg blokkeres, med sjangrene listet", () => {
   const plan = planMetaDelete(lagState(), "R&B");
   assert.equal(plan.ops.length, 0, "ingenting skal skrives når noe blokkerer");
-  const b = plan.blokkeringer.find((x) => x.hva.includes("sjanger"));
+  const b = plan.blokkeringer.find((x) => x.hva.includes("epoke"));
   assert.ok(b, plan.blokkeringer.map((x) => x.hva).join(" | "));
   assert.deepEqual(b.detaljer.sort(), ["R&B", "Soul"]);
 });
@@ -350,7 +350,7 @@ test("tom metasjanger tar med beskrivelsen og sjangerhistorien", () => {
   assert.equal(d.length, 1);
   assert.equal(d[0].type, "doc.delete");
   assert.equal(d[0].id, "Klubbmusikk");
-  assert.ok(plan.advarsler.some((a) => a.includes("Sjangerhistorien")), plan.advarsler.join(" | "));
+  assert.ok(plan.advarsler.some((a) => a.includes("Epokehistorien")), plan.advarsler.join(" | "));
 });
 
 test("shadowing: main-teksten på samme navn overlever slettingen", () => {
@@ -519,7 +519,7 @@ test("planMetaDelete: blokkeres av artistforslag som foreslår metasjangeren", a
   const plan = planMetaDelete(state, "Klubbmusikk");
   assert.equal(plan.ops.length, 0);
   assert.equal(plan.blokkeringer.length, 1);
-  assert.match(plan.blokkeringer[0].hva, /artistforslag/);
+  assert.match(plan.blokkeringer[0].hva, /teoretikerforslag/);
   // Uten forslaget går slettingen gjennom.
   const uten = planMetaDelete({ ...state, pendingEdits: [] }, "Klubbmusikk");
   assert.deepEqual(uten.blokkeringer, []);

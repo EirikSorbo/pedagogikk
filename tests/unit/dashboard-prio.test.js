@@ -36,10 +36,10 @@ const tallFor = (html, grad) => {
   return Number(m[1]);
 };
 
-// «Artister uten viktighetsgrad» står nederst, blant det som gjenstår å fylle.
+// «Teoretikere uten viktighetsgrad» står nederst, blant det som gjenstår å fylle.
 const utenGrad = (html) => {
-  const m = html.match(/<span>Artister uten viktighetsgrad<\/span>\s*<span class="ov-count [^"]*">(\d+)</);
-  assert.ok(m, "fant ikke «Artister uten viktighetsgrad» under Innhold som mangler");
+  const m = html.match(/<span>Teoretikere uten viktighetsgrad<\/span>\s*<span class="ov-count [^"]*">(\d+)</);
+  assert.ok(m, "fant ikke «Teoretikere uten viktighetsgrad» under Innhold som mangler");
   return Number(m[1]);
 };
 
@@ -54,7 +54,7 @@ test("skjulte kort telles for seg — de ligger utenfor artisttallet ellers", ()
   const html = tegn(ARTISTER);
   assert.equal(tallFor(html, -1), 2);
   // «Artister»-nøkkeltallet er de SYNLIGE: 5 av de 7 aktive.
-  assert.match(html, /<span class="ov-kpi-n">5<\/span>\s*<span class="ov-kpi-l">Artister</);
+  assert.match(html, /<span class="ov-kpi-n">5<\/span>\s*<span class="ov-kpi-l">Teoretikere</);
 });
 
 test("forslag som venter på godkjenning teller ikke med", () => {
@@ -101,7 +101,7 @@ test("Sjangerhistorier og Kilder åpner hver sin visning (Instrumenter-tallet gi
     return Number(m[1]);
   };
   assert.equal(tall("Kilder"), 42);
-  assert.equal(tall("Sjangerhistorier"), 0);
+  assert.equal(tall("Epokehistorier"), 0);
   for (const hva of ["historier", "kilder"]) {
     const knapp = { dataset: { ovOpen: hva } };
     el.onclick({ target: { closest: (sel) => (sel === "[data-ov-open]" ? knapp : null) }, currentTarget: el });

@@ -61,7 +61,7 @@ function tegnMetaOversikt(meta, modal) {
     ? artGr.map((g) => `<h4 class="mo-gruppe">${escapeHtml(fulltNavn(g.sjanger))}</h4>
         <ul class="mo-liste">${g.artister.map((a) =>
           `<li><button type="button" class="sj-artist" data-related-id="${escapeHtml(String(a.id))}">${escapeHtml(a.name)}</button></li>`).join("")}</ul>`).join("")
-    : `<p class="gx-missing">Ingen artister i ${escapeHtml(meta)} ennå.</p>`;
+    : `<p class="gx-missing">Ingen teoretikere i ${escapeHtml(meta)} ennå.</p>`;
 
   const eksemplerHtml = eks.grupper.length
     ? eks.grupper.map((g) => `<h4 class="mo-gruppe">${escapeHtml(fulltNavn(g.sjanger))}</h4>
@@ -79,13 +79,13 @@ function tegnMetaOversikt(meta, modal) {
   body.style.setProperty("--mo-farge", META_GENRE_COLOR[meta] || FAMILIES.gray?.stroke || "#9bada1");
   body.innerHTML = `
     <div class="mo-kol mo-hoved">
-      <h3 class="mo-head">Sjangerperioder</h3>
+      <h3 class="mo-head">Epokeperioder</h3>
       ${figur.html || `<p class="gx-missing">Ingen perioder å vise ennå.</p>`}
       ${forb.length ? `<h3 class="mo-head">Forbindelser</h3>
         <ul class="mo-liste mo-forbindelser">${forb.map((n) => `<li>${sjLenke(n)}</li>`).join("")}</ul>` : ""}
     </div>
-    <section class="mo-kol mo-artister" aria-label="Artister">
-      <h3 class="mo-head">Artister <span class="mo-antall">${antallArt}</span></h3>
+    <section class="mo-kol mo-artister" aria-label="Teoretikere">
+      <h3 class="mo-head">Teoretikere <span class="mo-antall">${antallArt}</span></h3>
       ${artisterHtml}
     </section>
     <section class="mo-kol mo-eksempler" aria-label="Lytteeksempler">

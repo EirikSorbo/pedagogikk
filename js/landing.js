@@ -347,7 +347,7 @@ function renderDagensSection() {
 function renderDagensIArtister(el) {
   const artist = dagensArtist();
   if (!artist) {
-    el.innerHTML = `<p class="muted empty">${state.artistsLoaded ? "Ingen artister ennå." : "Laster forslag …"}</p>`;
+    el.innerHTML = `<p class="muted empty">${state.artistsLoaded ? "Ingen teoretikere ennå." : "Laster forslag …"}</p>`;
     delete el.dataset.dagensSig;
     return;
   }
@@ -355,8 +355,8 @@ function renderDagensIArtister(el) {
   // når verken artist eller tech-lenker har endret seg.
   const sig = artist.id + "|" + (state.techItems ? state.techItems.length : -1);
   if (el.dataset.dagensSig === sig) return;
-  el.innerHTML = `<div class="dagens-head"><p class="section-label" style="margin:0">Dagens artist</p>
-    <button type="button" class="btn ghost small" data-dagens-ny>Ny artist</button></div>
+  el.innerHTML = `<div class="dagens-head"><p class="section-label" style="margin:0">Dagens teoretiker</p>
+    <button type="button" class="btn ghost small" data-dagens-ny>Ny teoretiker</button></div>
     <div class="spotlight-grid" data-dagens-kort></div>`;
   renderSpotlightCards(el.querySelector("[data-dagens-kort]"), [artist], explore.buildLinkCtx());
   el.dataset.dagensSig = sig;
@@ -451,9 +451,9 @@ function openArtistModal() {
 }
 
 function refreshFilterControls() {
-  fillSelect($("#sp-sjanger"), GENEALOGY_MAIN_GENRES, { placeholder: "Sjanger" });
-  fillSelect($("#sp-genre"), GENEALOGY_META_GENRES.map(g => ({ value: g, label: g })), { placeholder: "Metasjanger" });
-  fillSelect($("#sp-instrument"), instrumentsInUse(state.artists, state.filters.instrument), { placeholder: "Instrument" });
+  fillSelect($("#sp-sjanger"), GENEALOGY_MAIN_GENRES, { placeholder: "Epoke" });
+  fillSelect($("#sp-genre"), GENEALOGY_META_GENRES.map(g => ({ value: g, label: g })), { placeholder: "Retning" });
+  fillSelect($("#sp-instrument"), instrumentsInUse(state.artists, state.filters.instrument), { placeholder: "Fagbakgrunn" });
   // Tidsrommene (fase 2) kommer fra treet, som de andre to nedtrekkene over.
   fillSelect($("#sp-tidsrom"), tidsromValg(), { placeholder: "Tidsrom" });
   if (state.filters.mainGenre)  $("#sp-sjanger").value = state.filters.mainGenre;
@@ -577,7 +577,7 @@ function visReturer(liste) {
   const el = $("#retur-liste");
   if (!el) return;
   if (!liste.length) { el.innerHTML = ""; return; }
-  const typeLabel = { artist: "Artistforslag", tech: "Innovasjonskort", edit: "Endringsforslag" };
+  const typeLabel = { artist: "Teoretikerforslag", tech: "Reformskort", edit: "Endringsforslag" };
   el.innerHTML = liste.map((r) => {
     const navn = r.type === "edit" ? (r.entityName || r.entityId || "") : (r.name || "(uten navn)");
     return `<div class="retur-student-kort">
@@ -707,7 +707,7 @@ function init() {
     if (!hasFilters() && pool.length > 20) {
       const ok = await askChoice({
         title: "Hele lista til utskriften?",
-        text: `Ingen filter er valgt, så dette legger alle ${pool.length} artistene i utskriften.`,
+        text: `Ingen filter er valgt, så dette legger alle ${pool.length} teoretikerne i utskriften.`,
         buttons: [{ label: "Legg til alle", value: true, className: "primary" }, { label: "Avbryt", value: false }],
         dismissValue: false,
       });

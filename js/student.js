@@ -173,7 +173,7 @@ function ensureArtists() {
   if (state.artists.length) return Promise.resolve();
   artisterHentes ||= fetchArtists()
     .then((liste) => { state.artists = liste; })
-    .catch((err) => console.warn("Kunne ikke hente artistlista til duplikatsjekk:", err?.message || err));
+    .catch((err) => console.warn("Kunne ikke hente teoretikerlista til duplikatsjekk:", err?.message || err));
   return artisterHentes;
 }
 

@@ -19,7 +19,7 @@ export const MODAL_HTML = `
 <div class="modal-backdrop" id="modal-teknologi" data-vis="teknologi">
   <div class="modal modal-innhold">
     <div class="modal-head">
-      <h2>Teknologiske innovasjoner</h2>
+      <h2>Reformer og milepæler</h2>
       <button class="modal-close btn ghost small">✕</button>
     </div>
     <!-- Kategoriene i sin egen rekkefølge; «Foreslå ny» (student) / admin-
@@ -42,7 +42,7 @@ export const MODAL_HTML = `
     <!-- Tittelen er tilbake i hodet (v5.07). Kortet hadde to faner her, men
          podkastene har fått sitt eget vindu, og én fane er ingen fane. -->
     <div class="modal-head">
-      <h2>Instrumenter</h2>
+      <h2>Fagbakgrunner</h2>
       <button class="modal-close btn ghost small">✕</button>
     </div>
     <!-- Podkast-inngangen står ØVERST, over instrumentknappene (brukervalg
@@ -52,22 +52,22 @@ export const MODAL_HTML = `
     <div id="instr-podkast-inngang" class="instr-podkast-inngang"></div>
     <!-- Instrumentene som faner (v6.23, brukervalg 2026-10-03), samme fanerad
          som Sjangre; før blå knapper i to rader. -->
-    <div class="dv-faner instr-faner" id="instr-faner" role="tablist" aria-label="Instrument"></div>
+    <div class="dv-faner instr-faner" id="instr-faner" role="tablist" aria-label="Fagbakgrunn"></div>
     <!-- Arbeidsforklaringen står UNDER instrumentfanene (brukervalg
          2026-09-01): den hører til arbeidet med det valgte instrumentet, ikke
          til selve valget. LUKKET som standard — den er en oppskrift man slår
          opp i, ikke noe man skal lese hver gang. -->
     <details class="instr-guide">
       <summary>Slik jobber dere med denne delen</summary>
-      <p>Hver gruppe har ansvar for sitt instrument. Fire ting skal på plass:</p>
+      <p>Hver gruppe har ansvar for sitt fagbakgrunn. Fire ting skal på plass:</p>
       <ol>
         <li><strong>Podkasten.</strong> Send den ferdige episoden til Eirik på e-post, så legges den ut under «Hør podkastene».</li>
-        <li><strong>Sammendraget.</strong> Skriv teksten om instrumentets utvikling, og legg ved kildene dere har brukt. Knappen heter «Skriv sammendrag».</li>
-        <li><strong>Nyvinningene.</strong> Sørg for at sentrale teknologiske nyvinninger (eller sentrale måter å bruke instrumentet på) er med, slik at tidslinjen blir god. Knappen heter «Legg til nyvinning».</li>
-        <li><strong>Artistene.</strong> Sjekk at de viktigste utøverne på instrumentet ligger i appen, og legg til dem som mangler. Knappen heter «Legg til artist».</li>
+        <li><strong>Sammendraget.</strong> Skriv teksten om fagbakgrunnens utvikling, og legg ved kildene dere har brukt. Knappen heter «Skriv sammendrag».</li>
+        <li><strong>Nyvinningene.</strong> Sørg for at sentrale teknologiske nyvinninger (eller sentrale måter å bruke fagbakgrunnen på) er med, slik at tidslinjen blir god. Knappen heter «Legg til nyvinning».</li>
+        <li><strong>Teoretikerne.</strong> Sjekk at de viktigste utøverne på fagbakgrunnen ligger i appen, og legg til dem som mangler. Knappen heter «Legg til teoretiker».</li>
       </ol>
     </details>
-    <div id="instr-body" role="tabpanel" aria-label="Valgt instrument"></div>
+    <div id="instr-body" role="tabpanel" aria-label="Valgt fagbakgrunn"></div>
   </div>
 </div>
 
@@ -107,7 +107,7 @@ export const MODAL_HTML = `
       <button class="modal-close btn ghost small">✕</button>
     </div>
     <input type="search" id="sok-felt" class="sok-felt" autocomplete="off"
-      placeholder="Søk i artister, sjangre, tekster …" aria-label="Søk i alt innholdet">
+      placeholder="Søk i teoretikere, epoker, tekster …" aria-label="Søk i alt innholdet">
     <!-- role=status: treffantallet endrer seg mens man skriver, og en
          skjermleserbruker fikk det ellers aldri lest opp. -->
     <p class="muted sok-status" id="sok-status" role="status" aria-live="polite"></p>
@@ -138,11 +138,11 @@ export const MODAL_HTML = `
 <div class="modal-backdrop" id="modal-sjangerperioder" data-vis="sjangerperioder">
   <div class="modal modal-innhold sj-fanevindu">
     <div class="modal-head">
-      <h2>Sjangre</h2>
+      <h2>Epoker</h2>
       <button class="modal-close btn ghost small">✕</button>
     </div>
     <div class="sj-faner" data-sj-faner="sjangerperioder"></div>
-    <p class="muted" style="margin-bottom:16px;font-size:0.9rem">Når sjangrene var aktive, gruppert etter metasjanger. Trykk på en sjanger for å åpne sjangerkortet.</p>
+    <p class="muted" style="margin-bottom:16px;font-size:0.9rem">Når epokene var aktive, gruppert etter retning. Trykk på en epoke for å åpne epokekortet.</p>
     <div id="sp-body"></div>
   </div>
 </div>
@@ -152,10 +152,10 @@ export const MODAL_HTML = `
 <div class="modal-backdrop" id="modal-sjangerhimmel" data-vis="himmel">
   <div class="modal modal-innhold">
     <div class="modal-head">
-      <h2>Sjangerhimmelen</h2>
+      <h2>Epokehimmelen</h2>
       <button class="modal-close btn ghost small">✕</button>
     </div>
-    <p class="muted" style="margin-bottom:10px;font-size:0.88rem">Sjangrene står i slektstreets rekkefølge. Klikk (eller trykk på) en stjerne, så spretter sjangerens artister frem, forbundet med stjernen. Hold musen over en prikk for navnet; klikk prikken for artistkortet. «Alle broer» viser artistene som hører til flere sjangre.</p>
+    <p class="muted" style="margin-bottom:10px;font-size:0.88rem">Epokene står i slektstreets rekkefølge. Klikk (eller trykk på) en stjerne, så spretter epokens teoretikere frem, forbundet med stjernen. Hold musen over en prikk for navnet; klikk prikken for teoretikerkortet. «Alle broer» viser teoretikerne som hører til flere epoker.</p>
     <div id="sh-body"></div>
   </div>
 </div>
@@ -164,11 +164,11 @@ export const MODAL_HTML = `
 <div class="modal-backdrop" id="modal-tidslinje" data-vis="tidslinje">
   <div class="modal modal-innhold sj-fanevindu">
     <div class="modal-head">
-      <h2>Sjangre</h2>
+      <h2>Epoker</h2>
       <button class="modal-close btn ghost small">✕</button>
     </div>
     <div class="sj-faner" data-sj-faner="tidslinje"></div>
-    <p class="muted" style="margin-bottom:16px;font-size:0.9rem">Hver blokk er en artists aktive periode, gruppert etter metasjanger. Flat høyrekant med › betyr at perioden pågår eller mangler sluttår. Trykk på en blokk for å åpne artistkortet.</p>
+    <p class="muted" style="margin-bottom:16px;font-size:0.9rem">Hver blokk er en teoretikers aktive periode, gruppert etter retning. Flat høyrekant med › betyr at perioden pågår eller mangler sluttår. Trykk på en blokk for å åpne teoretikerkortet.</p>
     <div id="tid-body"></div>
   </div>
 </div>
@@ -177,7 +177,7 @@ export const MODAL_HTML = `
 <div class="modal-backdrop" id="modal-subgenre-list" data-vis="sjangre">
   <div class="modal modal-innhold sj-fanevindu">
     <div class="modal-head">
-      <h2>Sjangre</h2>
+      <h2>Epoker</h2>
       <button class="modal-close btn ghost small">✕</button>
     </div>
     <div class="sj-faner" data-sj-faner="sjangre"></div>
@@ -191,11 +191,11 @@ export const MODAL_HTML = `
 <div class="modal-backdrop" id="modal-undersjangre" data-vis="undersjangre">
   <div class="modal modal-innhold sj-fanevindu">
     <div class="modal-head">
-      <h2>Sjangre</h2>
+      <h2>Epoker</h2>
       <button class="modal-close btn ghost small">✕</button>
     </div>
     <div class="sj-faner" data-sj-faner="undersjangre"></div>
-    <p class="muted" style="margin-bottom:14px;font-size:0.9rem">De frie taggene på artistkortene, under metasjangeren flest av artistene hører til. Tallet er antall artister.</p>
+    <p class="muted" style="margin-bottom:14px;font-size:0.9rem">De frie taggene på teoretikerkortene, under retningen flest av teoretikerne hører til. Tallet er antall teoretikere.</p>
     <div id="ul-chips"></div>
   </div>
 </div>
@@ -257,28 +257,28 @@ ${TECH_DETAIL_MODAL_HTML}
       </button>
       <button class="dash-card" id="sb-historier">
         <svg class="dash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="--ikon:var(--icon-historier)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
-        <span class="dash-title">Sjangerhistorier</span>
-        <span class="dash-desc">Én fortelling per metasjanger</span>
+        <span class="dash-title">Epokehistorier</span>
+        <span class="dash-desc">Én fortelling per retning</span>
       </button>
       <button class="dash-card" id="sb-tidslinje">
         <svg class="dash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="--ikon:var(--icon-tidslinje)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h8M9 12h12M5 17h10"/></svg>
-        <span class="dash-title">Artisttidslinje</span>
-        <span class="dash-desc">Artistenes aktive år visualisert</span>
+        <span class="dash-title">Teoretikertidslinje</span>
+        <span class="dash-desc">Teoretikernes aktive år visualisert</span>
       </button>
       <button class="dash-card" id="sb-slektstre">
         <svg class="dash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="--ikon:var(--icon-slektstre)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><circle cx="5" cy="20" r="2"/><circle cx="12" cy="20" r="2"/><circle cx="19" cy="20" r="2"/><path d="M12 6v5M12 11c-4 0-7 3-7 7M12 11c4 0 7 3 7 7M12 11v7"/></svg>
         <span class="dash-title">Slektstre</span>
-        <span class="dash-desc">Hvordan sjangrene henger sammen</span>
+        <span class="dash-desc">Hvordan epokene henger sammen</span>
       </button>
       <button class="dash-card" id="sb-sjangerperioder">
         <svg class="dash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="--ikon:var(--icon-sjangerperioder)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M4 16h7"/><path d="M8 11h8"/><path d="M13 6h7"/></svg>
-        <span class="dash-title">Sjangerperioder</span>
-        <span class="dash-desc">Når sjangrene var aktive</span>
+        <span class="dash-title">Epokeperioder</span>
+        <span class="dash-desc">Når epokene var aktive</span>
       </button>
       <button class="dash-card" id="sb-himmel">
         <svg class="dash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="--ikon:var(--icon-himmel)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.2"/><circle cx="19" cy="9" r="2.2"/><circle cx="11" cy="19" r="2.2"/><path d="M8.1 6.5l8.7 2M17.7 10.7l-5.5 6.5M6.8 8.1l3.5 8.8"/></svg>
-        <span class="dash-title">Sjangerhimmel</span>
-        <span class="dash-desc">Artistene rundt sjangrene sine</span>
+        <span class="dash-title">Epokehimmel</span>
+        <span class="dash-desc">Teoretikerne rundt epokene sine</span>
       </button>
       <button class="dash-card" id="sb-referanser">
         <svg class="dash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="--ikon:var(--icon-referanser)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4a2 2 0 012-2h7l5 5v13a2 2 0 01-2 2H7a2 2 0 01-2-2z"/><path d="M14 2v5h5"/><path d="M9 12h6M9 16h6"/></svg>
@@ -375,14 +375,14 @@ ${TECH_DETAIL_MODAL_HTML}
 <div class="modal-backdrop" id="modal-historier">
   <div class="modal modal-innhold">
     <div class="modal-head">
-      <h2>Sjangerhistorier</h2>
+      <h2>Epokehistorier</h2>
       <div id="hist-extra" class="head-actions"></div>
       <button class="modal-close btn ghost small">✕</button>
     </div>
     <!-- Metasjangrene som faner (v6.34, brukervalg 2026-10-04), som ellers i
          appen; prikken og understreken bærer metasjangerens farge. Før fargede
          knapper i et rutenett, med en innledning over som er fjernet. -->
-    <div class="dv-faner hist-faner" id="hist-faner" role="tablist" aria-label="Metasjanger"></div>
+    <div class="dv-faner hist-faner" id="hist-faner" role="tablist" aria-label="Retning"></div>
     <!-- Oversikten over metasjangeren (v5.94; i appen også fra v6.05, S2). -->
     <div class="hist-oversikt-rad"><button type="button" class="btn ghost small" id="hist-oversikt">Vis oversikt</button></div>
     <!-- Familien som bobler i tidsrekkefølge (fase 2). Her sto varmestripene
@@ -423,7 +423,7 @@ ${TECH_DETAIL_MODAL_HTML}
 <div class="modal-backdrop" id="modal-galleri">
   <div class="modal modal-innhold">
     <div class="modal-head">
-      <h2 id="ga-tittel">Artistgalleri</h2>
+      <h2 id="ga-tittel">Teoretikergalleri</h2>
       <button class="modal-close btn ghost small">✕</button>
     </div>
     <div id="ga-body" class="ga-body"></div>

@@ -155,7 +155,7 @@ export function openSingleEdgeModal(fromId, toId) {
   const docData = state.edgeDescs[edgeKey(fromId, toId)] || {};
   $("#edge-single-title").textContent = `${a.f} → ${b.f}`;
   $("#edge-single-type").textContent = react
-    ? "Motreaksjon: hvorfor gjorde den nye sjangeren opprør mot den gamle?"
+    ? "Motreaksjon: hvorfor gjorde den nye epoken opprør mot den gamle?"
     : "Avstamning / påvirkning: hva ble ført videre, og hva ble nytt?";
   $("#es-desc").value = docData.description || "";
   $("#es-msg").textContent = "";
@@ -278,7 +278,7 @@ export function setupSubgenreSingleSave() {
 // som navnebyttet i sjangertre-editoren.
 async function gaNyttNavnUndersjanger(fra) {
   if (!fra) return;
-  const til = await sporTekst(`Nytt navn på undersjangeren «${fra}». Artistene, beskrivelsen, sjekken og notatene følger med.`, fra,
+  const til = await sporTekst(`Nytt navn på prinsippet «${fra}». Teoretikerne, beskrivelsen, sjekken og notatene følger med.`, fra,
     { tittel: "Gi nytt navn", ok: "Vis hva som endres" });
   if (til == null || String(til).trim() === fra) return;
   const plan = planSubRename({
@@ -297,7 +297,7 @@ async function gaNyttNavnUndersjanger(fra) {
   try {
     await runMigrationPlan(plan.ops);
     closeAdminModal("modal-subgenre-single");
-    melding(`Undersjangeren heter nå «${String(til).trim()}».`);
+    melding(`Prinsippet heter nå «${String(til).trim()}».`);
   } catch (err) {
     melding(`Navnebyttet ble ikke gjort (${err?.message || err}). Ingenting er endret, siden alt skrives samlet.`);
   }
@@ -334,7 +334,7 @@ export function openTechEditor(t, preset = null) {
   if (title) {
     title.textContent = t ? `Rediger: ${t.name}`
       : preset?.instrument ? `Nytt kort: ${preset.instrument}`
-      : "Ny innovasjon";
+      : "Ny reform";
   }
   openAdminModal("modal-tech-single");
 }
@@ -389,14 +389,14 @@ function renderTechAdmin() {
     btn.addEventListener("click", () => {
       const id = btn.closest("[data-tech-id]").dataset.techId;
       const t = state.techItems.find(x => x.id === id);
-      redigerNotatForKort("tech", id, t?.name || "Innovasjon");
+      redigerNotatForKort("tech", id, t?.name || "Reform");
     });
   });
 
   el.querySelectorAll(".tech-del-btn").forEach(btn => {
     btn.addEventListener("click", async () => {
       const id = btn.closest("[data-tech-id]").dataset.techId;
-      if (await bekreft("Kortet slettes for godt.", { tittel: "Slette dette innovasjonskortet?", ja: "Slett", farlig: true })) await guardTeacherAction(deleteTech(id));
+      if (await bekreft("Kortet slettes for godt.", { tittel: "Slette dette reformskortet?", ja: "Slett", farlig: true })) await guardTeacherAction(deleteTech(id));
     });
   });
 
@@ -428,7 +428,7 @@ function fillTechForm(t, preset = null) {
   // Instrumentgruppen avgjør hvilken tidslinje kortet havner på i Instrumenter-
   // seksjonen. Tomt = kortet vises kun under Teknologi.
   fillSelect(document.getElementById("tech-instrument"), INSTRUMENT_TIMELINE_GROUPS,
-    { placeholder: "Ingen / gjelder ikke ett instrument" });
+    { placeholder: "Ingen / gjelder ikke ett fagbakgrunn" });
   document.getElementById("tech-instrument").value = t ? t.instrument || "" : (preset?.instrument || "");
   // Kilder som strukturerte rader (tekst + lenke), som i artistskjemaet.
   buildRows(document.getElementById("tech-source-rows"), SOURCE_SPEC,
@@ -770,7 +770,7 @@ export function openStoryEditor(genre) {
   // saveStoryBody bruker riktignok merge, så her holder det å hindre at
   // læreren skriver oppå en tekst hen ikke har fått se.
   if (!state.genreDescs || !Object.keys(state.genreDescs).length) {
-    melding("Sjangerbeskrivelsene laster fortsatt. Vent et øyeblikk og prøv igjen.");
+    melding("Epokebeskrivelsene laster fortsatt. Vent et øyeblikk og prøv igjen.");
     return;
   }
   openContentEditor({ type: "story", id: genre }, `historien om ${genre}`, storyFor(genre, state.genreDescs));

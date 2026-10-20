@@ -169,7 +169,7 @@ export function renderReferanser() {
 
   radListe = [];
   let html = `<p class="muted" style="margin:0 0 6px;font-size:0.86rem">`;
-  html += `${antallOrd(data.unike, "kilde", "kilder")} samlet fra artistkortene, sjangrene, koblingene i slektstreet og innovasjonskortene.</p>`;
+  html += `${antallOrd(data.unike, "kilde", "kilder")} samlet fra teoretikerkortene, epokene, koblingene i slektstreet og reformskortene.</p>`;
 
   // Seksjonene er overskrifter, ikke knapper: de står alltid åpne. Bare
   // nettstedene under «Nettsteder» har trekant, siden de kan romme hundrevis

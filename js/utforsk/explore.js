@@ -172,10 +172,10 @@ function wireModals() {
   // her, må hubkortet skjules samtidig, ellers er historiene fortsatt åpne.
   // Lærersiden gir onStoryEdit og beholder den.
   const SJ_FANER = [
-    { id: "sjangre", navn: "Sjangre", modal: "modal-subgenre-list", apne: () => openSubgenreList() },
-    { id: "sjangerperioder", navn: "Sjangerperioder", modal: "modal-sjangerperioder", apne: () => openSjangerperioder() },
-    { id: "tidslinje", navn: "Artisttidslinje", modal: "modal-tidslinje", apne: () => openTidslinje() },
-    { id: "undersjangre", navn: "Undersjangre", modal: "modal-undersjangre", apne: () => openUndersjangre() },
+    { id: "sjangre", navn: "Epoker", modal: "modal-subgenre-list", apne: () => openSubgenreList() },
+    { id: "sjangerperioder", navn: "Epokeperioder", modal: "modal-sjangerperioder", apne: () => openSjangerperioder() },
+    { id: "tidslinje", navn: "Teoretikertidslinje", modal: "modal-tidslinje", apne: () => openTidslinje() },
+    { id: "undersjangre", navn: "Prinsipper", modal: "modal-undersjangre", apne: () => openUndersjangre() },
   ];
   // Med «Bare sjekket innhold» på (v6.89) også bare når minst én historie er sjekket.
   const visHistorier = () => !!opts.onStoryEdit
@@ -185,11 +185,11 @@ function wireModals() {
     const vindu = rad.closest(".modal-backdrop");
     // Ikke role="tablist" (v6.23, Fable): hver «fane» er et eget kort, så
     // raden er en gruppe navigasjonsknapper, og den aktive er aria-current.
-    rad.innerHTML = `<div class="sj-fanerad" role="group" aria-label="Sjangre">${SJ_FANER.map((f) =>
+    rad.innerHTML = `<div class="sj-fanerad" role="group" aria-label="Epoker">${SJ_FANER.map((f) =>
       `<button type="button" class="dv-fane${f.id === her ? " active" : ""}"${f.id === her ? ' aria-current="page"' : ""} data-sj-fane="${f.id}" data-tekst="${f.navn}">${f.navn}</button>`).join("")}</div>
       <div class="sj-fane-knapper">
         ${opts.onSlektstre ? `<button type="button" class="btn ghost small" data-sj-slektstre>Slektstre <span aria-hidden="true">›</span></button>` : ""}
-        <button type="button" class="btn ghost small" data-sj-historier${visHistorier() ? "" : " hidden"}>Sjangerhistorier <span aria-hidden="true">›</span></button>
+        <button type="button" class="btn ghost small" data-sj-historier${visHistorier() ? "" : " hidden"}>Epokehistorier <span aria-hidden="true">›</span></button>
       </div>`;
     rad.querySelectorAll("[data-sj-fane]").forEach((b) => b.addEventListener("click", () => {
       const f = SJ_FANER.find((x) => x.id === b.dataset.sjFane);

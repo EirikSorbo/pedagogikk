@@ -133,8 +133,8 @@ function aktivtKort() {
 function kortNavn(vis) {
   const m = parseVisVerdi(vis);
   const s = getState();
-  if (m.hva === "artist") return (s.artists || []).find((a) => a.id === m.id)?.name || "Artist";
-  if (m.hva === "tech") return (s.techItems || []).find((t) => t.id === m.id)?.name || "Innovasjon";
+  if (m.hva === "artist") return (s.artists || []).find((a) => a.id === m.id)?.name || "Teoretiker";
+  if (m.hva === "tech") return (s.techItems || []).find((t) => t.id === m.id)?.name || "Reform";
   const n = GENEALOGY.find((x) => x.l === m.id);
   return n?.f || n?.l || m.id;
 }
@@ -195,7 +195,7 @@ function tegn() {
   if (feil) { el.innerHTML = `${hode("", "")}<p class="pn-tom">${escapeHtml(feil)}</p>`; return; }
   const kort = aktivtKort();
   if (!kort) {
-    el.innerHTML = `${hode("", "")}<p class="pn-tom">Åpne et artist-, sjanger- eller innovasjonskort, så står notatet til kortet her.</p>`;
+    el.innerHTML = `${hode("", "")}<p class="pn-tom">Åpne et teoretiker-, epoke- eller reformskort, så står notatet til kortet her.</p>`;
     return;
   }
   if (!lastet) { el.innerHTML = `${hode(kort.navn, "")}<p class="pn-tom">Laster notatene …</p>`; return; }

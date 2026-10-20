@@ -25,7 +25,7 @@ const LASTET = { artistsLoaded: true, genreDescsLoaded: true, techLoaded: true, 
 
 test("artist: navnet når kortet finnes, «finnes ikke lenger» når det er borte, «laster» før dataene", () => {
   medState({ ...LASTET, artists: [muddy] });
-  assert.deepEqual(stoppEtikett({ vis: "artist:muddy" }), { tekst: "Artist: Muddy Waters", navn: "Muddy Waters" });
+  assert.deepEqual(stoppEtikett({ vis: "artist:muddy" }), { tekst: "Teoretiker: Muddy Waters", navn: "Muddy Waters" });
   assert.equal(stoppEtikett({ vis: "artist:borte" }).feil, DOD);
   medState({ artists: [], artistsLoaded: false });
   const venter = stoppEtikett({ vis: "artist:muddy" });
@@ -35,7 +35,7 @@ test("artist: navnet når kortet finnes, «finnes ikke lenger» når det er bort
 
 test("innovasjon: bare aktive kort teller", () => {
   medState({ ...LASTET, techItems: [{ id: "t1", name: "Elektrisk gitar" }, { id: "t2", name: "Ventende", status: "pending" }] });
-  assert.equal(stoppEtikett({ vis: "tech:t1" }).tekst, "Innovasjon: Elektrisk gitar");
+  assert.equal(stoppEtikett({ vis: "tech:t1" }).tekst, "Reform: Elektrisk gitar");
   assert.equal(stoppEtikett({ vis: "tech:t2" }).feil, DOD);
 });
 

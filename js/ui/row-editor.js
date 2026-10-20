@@ -55,7 +55,7 @@ export const MUSIC_SPEC = {
     // Sjangeren står ØVERST og på egen linje (v4.95): den gjelder HELE raden,
     // og bakerst i rekka ble den lett oversett — et lytteeksempel uten sjanger
     // faller ut av spillelistene. breakAfter tvinger linjeskift, se rowInnerHtml.
-    { key: "genre", cls: "me-genre", type: "select", ph: "Sjanger …", label: "Sjanger (for spillelister)", title: "Hvilken tre-sjanger dette lytteeksempelet hører til. Styrer hvilken spilleliste det vises i, viktig for artister med flere sjangre.", options: [] },
+    { key: "genre", cls: "me-genre", type: "select", ph: "Epoke …", label: "Epoke (for spillelister)", title: "Hvilken tre-sjanger dette lytteeksempelet hører til. Styrer hvilken spilleliste det vises i, viktig for teoretikere med flere sjangre.", options: [] },
     // To nivåer (brukervalg 2026-10-15): sentrale lytteeksempler får en fylt prikk
     // i visningen, kontekst-eksemplene (uten merke) står som før. Bare læreren
     // setter det (musicSpecWithGenres skjuler feltet ellers), men feltet står

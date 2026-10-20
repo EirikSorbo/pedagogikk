@@ -88,14 +88,14 @@ export function setupDataButtons() {
   $("#btn-nuke").addEventListener("click", async () => {
     // Backupen under må være komplett FØR slettingen går mot serveren.
     if (!(await kanEksportere())) return;
-    if (!(await bekreft("Dette sletter ALL artistdata permanent. Handlingen kan ikke angres.", { tittel: "Er du HELT sikker?", ja: "Gå videre", farlig: true }))) return;
+    if (!(await bekreft("Dette sletter ALL teoretikerdata permanent. Handlingen kan ikke angres.", { tittel: "Er du HELT sikker?", ja: "Gå videre", farlig: true }))) return;
     // Samme sikkerhetsnett som «Erstatt alle»: full backup lastes ned FØR
     // slettingen, og læreren må aktivt skrive SLETT for å bekrefte.
     downloadJson(buildExportData(), `musikkhistorie-BACKUP-${dateStamp()}.json`);
     const svar = await sporTekst(
       "En sikkerhetskopi skal nå ligge i Nedlastinger (musikkhistorie-BACKUP-…).\n\n" +
-      "Skriv SLETT for å bekrefte at all artistdata skal slettes permanent:",
-      "", { tittel: "Slette all artistdata", ok: "Slett" }
+      "Skriv SLETT for å bekrefte at all teoretikerdata skal slettes permanent:",
+      "", { tittel: "Slette all teoretikerdata", ok: "Slett" }
     );
     if (svar === null) return;
     if (svar.trim().toUpperCase() !== "SLETT") {
@@ -269,7 +269,7 @@ async function kanEksportere() {
     return false;
   }
   if (!state.artists.length || !state.content?.genealogy?.nodes?.length) {
-    return bekreft("Den har ingen artister eller intet sjangertre. Det skjer typisk når nettleseren er uten nett og bare har en tom lokal kopi. Vil du fortsette likevel?", { tittel: "Sikkerhetskopien ser nesten tom ut", ja: "Fortsett likevel" });
+    return bekreft("Den har ingen teoretikere eller intet epoketre. Det skjer typisk når nettleseren er uten nett og bare har en tom lokal kopi. Vil du fortsette likevel?", { tittel: "Sikkerhetskopien ser nesten tom ut", ja: "Fortsett likevel" });
   }
   return true;
 }
@@ -361,7 +361,7 @@ async function handleImportFile(file) {
 
   const data = normalizeImportFile(raw);
   if (!data) {
-    melding("Ugyldig format. Filen må være en artist-liste eller et objekt med innhold (artists, pages, genealogy …)."); return;
+    melding("Ugyldig format. Filen må være en artist-liste eller et objekt med innhold (teoretikers, pages, genealogy …)."); return;
   }
 
   // Valider HELE artistlista før noe kan skrives/slettes. Slår feil her ⇒
@@ -376,9 +376,9 @@ async function handleImportFile(file) {
   const unknownKeys = Array.isArray(raw) ? [] : Object.keys(raw).filter((k) => !KNOWN_IMPORT_KEYS.has(k));
   if (unknownKeys.length) warnings.push(`Ukjente felter i fila (blir IKKE importert): ${unknownKeys.join(", ")}.`);
   const unknownGenres = collectUnknownGenres(data.artists);
-  if (unknownGenres.length) warnings.push(`Sjangre som ikke finnes i slektstreet (vises ikke i tre-visningene): ${unknownGenres.slice(0, 15).join(", ")}${unknownGenres.length > 15 ? " …" : ""}.`);
+  if (unknownGenres.length) warnings.push(`Epoker som ikke finnes i slektstreet (vises ikke i tre-visningene): ${unknownGenres.slice(0, 15).join(", ")}${unknownGenres.length > 15 ? " …" : ""}.`);
   const unknownInstruments = collectUnknownInstruments(data.artists);
-  if (unknownInstruments.length) warnings.push(`Instrumenter utenfor vokabularet (splitter filteret/statistikken): ${unknownInstruments.slice(0, 15).join(", ")}${unknownInstruments.length > 15 ? " …" : ""}.`);
+  if (unknownInstruments.length) warnings.push(`Fagbakgrunner utenfor vokabularet (splitter filteret/statistikken): ${unknownInstruments.slice(0, 15).join(", ")}${unknownInstruments.length > 15 ? " …" : ""}.`);
   if (warnings.length && !(await bekreft(warnings.join("\n\n") + "\n\nSjekk for skrivefeil. Importere likevel?", { tittel: "Advarsler i fila", ja: "Importer likevel" }))) return;
 
   const parts = importParts(data);
@@ -533,8 +533,8 @@ async function importExtras({ pages, referanser, podcasts, teacherChecks, geneal
     const problemer = validateTree(genealogy);
     const feil = problemer.filter((x) => x.nivå === "feil");
     if (feil.length) {
-      console.error("Sjangertre-import avvist:", feil);
-      melding("Sjangertreet i fila ble AVVIST og er ikke importert:\n\n· "
+      console.error("Epoketre-import avvist:", feil);
+      melding("Epoketreet i fila ble AVVIST og er ikke importert:\n\n· "
         + feil.slice(0, 8).map((f) => f.melding).join("\n· ")
         + (feil.length > 8 ? `\n· … og ${feil.length - 8} til` : ""));
       failed.push("sjangertreet");
@@ -546,8 +546,8 @@ async function importExtras({ pages, referanser, podcasts, teacherChecks, geneal
         await saveGenealogyTree(genealogy);
         done.push(`sjangertreet (${genealogy.nodes.length} noder)`);
         problemer.filter((x) => x.nivå === "advarsel")
-          .forEach((a) => console.warn("Sjangertre-advarsel:", a.melding));
-      } catch (e) { console.error("Sjangertre-import feilet:", e); failed.push("sjangertreet"); }
+          .forEach((a) => console.warn("Epoketre-advarsel:", a.melding));
+      } catch (e) { console.error("Epoketre-import feilet:", e); failed.push("sjangertreet"); }
     }
   }
 
@@ -697,17 +697,17 @@ async function handleReplace(data) {
   // erstattet hele basen med nesten tomme kort (v5.51).
   const delposter = toAdd.filter(erDelpost);
   if (delposter.length) {
-    melding(`${delposter.length} av ${toAdd.length} artister i fila mangler både metasjanger og beskrivelse, ` +
-      "så fila er en delfil (bare noen felt per artist).\n\n«Erstatt alle» er avbrutt: det ville slettet resten " +
-      "av feltene på alle artistene. Bruk «Flett» for å legge feltene inn i artistene som finnes.");
+    melding(`${delposter.length} av ${toAdd.length} teoretikere i fila mangler både retning og beskrivelse, ` +
+      "så fila er en delfil (bare noen felt per teoretiker).\n\n«Erstatt alle» er avbrutt: det ville slettet resten " +
+      "av feltene på alle artistene. Bruk «Flett» for å legge feltene inn i teoretikerne som finnes.");
     return false;
   }
   if (!(await bekreft(
-    `Dette sletter alle ${state.artists.length} eksisterende artister ` +
+    `Dette sletter alle ${state.artists.length} eksisterende teoretikere ` +
     `(inkludert stemmer og ventende forslag) og erstatter dem med ${toAdd.length} fra filen.\n\n` +
-    `Åpne endringsforslag på artister overlever ikke. De får nye ID-er.\n` +
+    `Åpne endringsforslag på teoretikere overlever ikke. De får nye ID-er.\n` +
     `En full sikkerhetskopi av dagens data lastes ned først.\n\nFortsette?`,
-    { tittel: "Erstatte alle artister?", ja: "Fortsett", farlig: true }
+    { tittel: "Erstatte alle teoretikere?", ja: "Fortsett", farlig: true }
   ))) return false;
   // Last ned backupen og KREV at læreren bekrefter at fila faktisk kom før vi
   // sletter — en programmatisk nedlasting kan bli blokkert stille, og da skal
@@ -776,7 +776,7 @@ async function handleMergeFile(data) {
   }
 
   if (uteliggere.length) {
-    melding(`${uteliggere.length} navn i fila finnes ikke blant artistene og har for lite innhold til å bli nye artister (en ny artist må ha metasjanger). ` +
+    melding(`${uteliggere.length} navn i fila finnes ikke blant teoretikerne og har for lite innhold til å bli nye teoretikere (en ny teoretiker må ha retning). ` +
       `De hoppes over:\n\n${uteliggere.slice(0, 20).join(", ")}${uteliggere.length > 20 ? " …" : ""}` +
       "\n\nSjekk stavemåten i fila. Resten importeres som vanlig.");
   }
@@ -904,7 +904,7 @@ async function finishMerge() {
       }
     }
     const parts = [];
-    if (added)   parts.push(`${added} nye artister lagt til`);
+    if (added)   parts.push(`${added} nye teoretikere lagt til`);
     if (updated) parts.push(`${updated} artister oppdatert${avsjekket ? ` (sjekk fjernet på ${avsjekket}, siden kortet er endret)` : ""}`);
     if (parts.length) melding(parts.join(", ") + ".");
   } catch (err) {
@@ -913,7 +913,7 @@ async function finishMerge() {
     // fil er trygt: alt-lagte artister matches på navn og dupliseres ikke.
     console.error("Fletting feilet:", err);
     melding("Flettingen feilet: " + err.message +
-      "\n\nNoen endringer kan være delvis lagret. Importer fila på nytt for å fullføre. Allerede lagrede artister dupliseres ikke.");
+      "\n\nNoen endringer kan være delvis lagret. Importer fila på nytt for å fullføre. Allerede lagrede teoretikere dupliseres ikke.");
   } finally {
     mergeState.queue = []; mergeState.newArtists = []; mergeState.index = 0;
     mergeCommitting = false;

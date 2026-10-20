@@ -21,16 +21,16 @@ import { INSTRUMENT_TIMELINE_GROUPS, isVisible } from "../felles/limits.js";
 import { finnSlide, slidesLastet } from "./slides-liste.js";
 
 export const TYPE_NAVN = {
-  artist: "Artist", sjanger: "Sjanger", undersjanger: "Undersjanger",
-  historie: "Historie", tech: "Innovasjon", side: "Side",
-  instrument: "Instrument", kobling: "Kobling", tidslinje: "Tidslinje",
-  sjangerperioder: "Sjangerperioder",
-  himmel: "Sjangerhimmel", referanser: "Referanser",
+  artist: "Teoretiker", sjanger: "Epoke", undersjanger: "Prinsipp",
+  historie: "Historie", tech: "Reform", side: "Side",
+  instrument: "Fagbakgrunn", kobling: "Kobling", tidslinje: "Tidslinje",
+  sjangerperioder: "Epokeperioder",
+  himmel: "Epokehimmel", referanser: "Referanser",
   "store-bildet": "Det store bildet", podkaster: "Podkaster",
   teknologi: "Teknologi", slektstre: "Slektstre", yt: "Lytteeksempel",
   oversikt: "Oversikt", galleri: "Galleri",
   // Lytt heter Spillelister i appen fra v6.31.
-  sjangre: "Sjangre", undersjangre: "Undersjangre", artister: "Artister", lytt: "Spillelister",
+  sjangre: "Epoker", undersjangre: "Prinsipper", artister: "Teoretikere", lytt: "Spillelister",
   slide: "Slide",
 };
 

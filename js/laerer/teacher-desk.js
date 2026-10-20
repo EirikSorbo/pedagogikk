@@ -67,17 +67,17 @@ function buildCategories() {
 
   return [
     {
-      key: "artists", label: "Artistkort",
+      key: "artists", label: "Teoretikerkort",
       items: [...active].sort((a, b) => byNo(a.name, b.name)).map((a) => ({ id: a.id, name: a.name })),
       checkedSet: new Set(active.filter((a) => a.teacherChecked === true).map((a) => a.id)),
     },
     {
-      key: "genres", label: "Sjangre",
+      key: "genres", label: "Epoker",
       items: GENEALOGY_MAIN_GENRES.map((g) => ({ id: g, name: g })),
       checkedSet: set("genres"),
     },
     {
-      key: "subgenres", label: "Undersjangre",
+      key: "subgenres", label: "Prinsipper",
       items: subTags.map((s) => ({ id: s, name: s })),
       checkedSet: set("subgenres"),
     },
@@ -88,17 +88,17 @@ function buildCategories() {
       // metasjangrene som helhet; universet er derfor storyOrder() = de
       // metasjangrene som HAR en historie (Pop/Rock er bevisst skjult og faller
       // ut). Nøkkelen «metaGenres» er beholdt fordi den ER sjekk-feltet.
-      key: "metaGenres", label: "Sjangerhistorier",
+      key: "metaGenres", label: "Epokehistorier",
       items: storyOrder(state.genreDescs).map((g) => ({ id: g, name: g })),
       checkedSet: set("metaGenres"),
     },
     {
-      key: "tech", label: "Innovasjonskort",
+      key: "tech", label: "Reformskort",
       items: activeTech.map((t) => ({ id: t.id, name: t.name || "(uten navn)" })),
       checkedSet: set("tech"),
     },
     {
-      key: "edges", label: "Sjangerkoblinger",
+      key: "edges", label: "Epokekoblinger",
       items: GENEALOGY_EDGES.map((e) => ({
         id: edgeKey(e.from, e.to),
         name: `${genreNodeById(e.from)?.l || e.from} → ${genreNodeById(e.to)?.l || e.to}`,
@@ -281,14 +281,14 @@ export function renderDesk(el) {
 //  selv når den styrer flere flagg (sjangerhistoriene har to innganger, som
 //  MÅ følge hverandre). Avhuket = synlig for studentene.
 const SYNLIGHET_RADER = [
-  { id: "historier", navn: "Sjangerhistoriene", student: ["metasjangerhistorier"], hub: ["sb-historier"] },
-  { id: "koblinger", navn: "Koblingstekstene (i slektstreet og på sjangerkortet)", student: ["koblingsbeskrivelser"] },
-  { id: "horEtter", navn: "«Hør etter» på sjangerkortene", student: ["horEtter"] },
+  { id: "historier", navn: "Epokehistoriene", student: ["metasjangerhistorier"], hub: ["sb-historier"] },
+  { id: "koblinger", navn: "Koblingstekstene (i slektstreet og på epokekortet)", student: ["koblingsbeskrivelser"] },
+  { id: "horEtter", navn: "«Hør etter» på epokekortene", student: ["horEtter"] },
   { id: "viktighet", navn: "Viktighetsgraden", student: ["viktighetsgrad"] },
   { id: "fraTimene", navn: "«Fra timene» (delte timer på forsiden og i Spillelister)", student: ["fraTimene"] },
   { id: "omHistorie", navn: "Om historie", hub: ["sb-om-historie"] },
   { id: "rotter", navn: "Røtter", hub: ["sb-rotter"] },
-  { id: "himmel", navn: "Sjangerhimmelen", hub: ["sb-himmel"] },
+  { id: "himmel", navn: "Epokehimmelen", hub: ["sb-himmel"] },
   { id: "referanser", navn: "Referanser", hub: ["sb-referanser"] },
   { id: "guide", navn: "Slik bruker du appen", hub: ["sb-guide"] },
   { id: "utskrift", navn: "Utskrift", student: ["utskrift"] },
@@ -332,7 +332,7 @@ function sjekketRegelHtml(v) {
     <p class="muted desk-synlighet-hint">${paa
       ? "På: studentene ser bare det du har sjekket, også på lerretet. «Vis innhold som er skjult for studentene» i visningen viser alt for økta."
       : "Av: studentene ser også det du ikke har sjekket."}
-      For sjangrene og undersjangrene er det teksten som skjules, ikke sjangeren.</p>
+      For epokene og prinsippene er det teksten som skjules, ikke epoken.</p>
     <ul class="desk-sjekket-liste">${rader}</ul>
   </div>`;
 }
@@ -439,7 +439,7 @@ function timeforslagHtml() {
       <span class="desk-time-tekst"><b>${escapeHtml(p.artist || "")}</b>${p.student ? ` <span class="muted">· foreslått av ${escapeHtml(p.student)}</span>` : ""}
         <span class="muted desk-time-meta">${[dato(p.laget), p.kontekst].filter(Boolean).map((x) => escapeHtml(x)).join(" · ")}</span></span>
       <span class="desk-time-knapper">
-        <button type="button" class="btn ghost small" data-desk-foreslaa="${escapeHtml(p.artist || "")}" title="Åpne artistskjemaet med navnet fylt inn">Foreslå</button>
+        <button type="button" class="btn ghost small" data-desk-foreslaa="${escapeHtml(p.artist || "")}" title="Åpne teoretikerskjemaet med navnet fylt inn">Foreslå</button>
         <button type="button" class="btn ghost small" data-desk-time-slett="${escapeHtml(p.id)}">Fjern</button>
       </span>
     </li>`).join("")}</ul>

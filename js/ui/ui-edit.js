@@ -12,7 +12,7 @@ import { PROPOSABLE_KEYS } from "../forslag/proposal-fields.js";
 const FIELD_LABELS = {
   artist: ARTIST_LABELS,
   tech: {
-    name: "Navn", type: "Type", category: "Kategori", instrument: "Instrument",
+    name: "Navn", type: "Type", category: "Kategori", instrument: "Fagbakgrunn",
     inventedYear: "Oppfunnet (år)",
     adoptedYear: "Tatt i bruk (år)",
     adoptedLabel: "Tatt i bruk (forklaring)", description: "Beskrivelse",

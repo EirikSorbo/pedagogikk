@@ -77,7 +77,7 @@ function metaRow(m, maxN, maxE) {
   return `<div class="ov-row ov-row-meta${zero}">
     <span class="ov-name">${escapeHtml(m.g)}</span>
     ${bar(m.n, maxN, "ov-bar-n")}
-    <button type="button" class="ov-num" data-ov-meta="${escapeHtml(m.g)}" title="Vis artistene i ${escapeHtml(m.g)}">${m.n}</button>
+    <button type="button" class="ov-num" data-ov-meta="${escapeHtml(m.g)}" title="Vis teoretikerne i ${escapeHtml(m.g)}">${m.n}</button>
     ${bar(m.e, maxE, "ov-bar-ex")}
     <button type="button" class="ov-num${m.e === 0 ? " ov-ex-zero" : ""}" data-ov-meta-ex="${escapeHtml(m.g)}" title="Vis lytteeksemplene i ${escapeHtml(m.g)}">${m.e}</button>
   </div>`;
@@ -313,7 +313,7 @@ export function renderDashboard(el, {
   // Under søyla står startåret («1790», «800 f.Kr.»); hele etiketten og
   // navnet står i title.
   const histCols = tidsrom.map(({ i, t, n }) => {
-    return `<button type="button" class="ov-hist-col" data-ov-tidsrom="${i}" title="${escapeHtml(romNavn(t))}: ${n} artister. Klikk for liste">
+    return `<button type="button" class="ov-hist-col" data-ov-tidsrom="${i}" title="${escapeHtml(romNavn(t))}: ${n} teoretikere. Klikk for liste">
       <span class="ov-hist-val">${n}</span>
       <span class="ov-hist-bar${n <= 1 ? " ov-thin" : ""}" style="height:${Math.max(2, (n / maxTidsrom) * 100)}%"></span>
       <span class="ov-hist-year">${escapeHtml(visAar(t.fra))}</span>
@@ -365,19 +365,19 @@ export function renderDashboard(el, {
     <div class="ov-kpis">
       <div class="ov-kpi">
         <span class="ov-kpi-n">${counts.total}</span>
-        <span class="ov-kpi-l">Artister</span>
+        <span class="ov-kpi-l">Teoretikere</span>
       </div>
       <div class="ov-kpi">
         <span class="ov-kpi-n">${covered}</span>
-        <span class="ov-kpi-l">Sjangre</span>
+        <span class="ov-kpi-l">Epoker</span>
       </div>
       <button type="button" class="ov-kpi ov-click" data-ov-open="tech">
         <span class="ov-kpi-n">${techCount}</span>
-        <span class="ov-kpi-l">Innovasjonskort</span>
+        <span class="ov-kpi-l">Reformskort</span>
       </button>
       <button type="button" class="ov-kpi ov-click" data-ov-open="subgenres">
         <span class="ov-kpi-n">${subTags.length}</span>
-        <span class="ov-kpi-l">Undersjangre</span>
+        <span class="ov-kpi-l">Prinsipper</span>
       </button>
       <div class="ov-kpi">
         <span class="ov-kpi-n">${exampleCount}</span>
@@ -385,7 +385,7 @@ export function renderDashboard(el, {
       </div>
       <button type="button" class="ov-kpi ov-click" data-ov-open="edges" title="Åpner lista over koblingene i Mangler">
         <span class="ov-kpi-n">${GENEALOGY_EDGES.length}</span>
-        <span class="ov-kpi-l">Sjangerkoblinger</span>
+        <span class="ov-kpi-l">Epokekoblinger</span>
       </button>
       ${[3, 2, 1, -1].map((p) => `
       <button type="button" class="ov-kpi ov-kpi-half ov-click prio-${p}" data-ov-prio="${p}"
@@ -394,9 +394,9 @@ export function renderDashboard(el, {
         <span class="ov-prio-i">${PRIO_ICONS[p]}</span>
         <span class="ov-kpi-n">${prioLists[p].length}</span>
       </button>`).join("")}
-      <button type="button" class="ov-kpi ov-click" data-ov-open="historier" title="Skrevne sjangerhistorier. Åpner historiene">
+      <button type="button" class="ov-kpi ov-click" data-ov-open="historier" title="Skrevne epokehistorier. Åpner historiene">
         <span class="ov-kpi-n">${historieListe.length - storiesMissing.length}</span>
-        <span class="ov-kpi-l">Sjangerhistorier</span>
+        <span class="ov-kpi-l">Epokehistorier</span>
       </button>
       <button type="button" class="ov-kpi ov-click" data-ov-open="kilder" title="Åpner Referanser">
         <span class="ov-kpi-n">${explore?.antallKilder?.() ?? 0}</span>
@@ -405,23 +405,23 @@ export function renderDashboard(el, {
     </div>
 
     <div class="stat-card ov-block">
-      <div class="stat-label">Antall artister per tidsrom</div>
+      <div class="stat-label">Antall teoretikere per tidsrom</div>
       <div class="ov-hist">${histCols || `<p class="muted">Treet har ingen tidsrom ennå.</p>`}</div>
     </div>
 
     <div class="stat-card ov-block">
-      <div class="stat-label">Antall artister og (lytteeksempler) per sjanger</div>
+      <div class="stat-label">Antall teoretikere og (lytteeksempler) per epoke</div>
       <div class="ov-genre-cols">${genreCounts.map((g) =>
         distRow(g.l, g.n, maxGenre, `data-ov-genre="${escapeHtml(g.l)}"`, g.e)).join("")}</div>
     </div>
 
     <div class="ov-two">
       <div class="stat-card ov-block" style="margin-top:0">
-        <div class="stat-label">Antall artister og lytteeksempler per metasjanger</div>
+        <div class="stat-label">Antall teoretikere og lytteeksempler per retning</div>
         <div class="ov-rows-meta">
           <div class="ov-row ov-row-meta ov-row-head">
             <span></span>
-            <span class="ov-colh">Artister</span>
+            <span class="ov-colh">Teoretikere</span>
             <span class="ov-colh">Lytteeksempler</span>
           </div>
           ${metaCounts.map((m) => metaRow(m, maxMeta, maxMetaEx)).join("")}
@@ -434,7 +434,7 @@ export function renderDashboard(el, {
     </div>
 
     <div class="stat-card ov-block">
-      <div class="stat-label">Instrumenter</div>
+      <div class="stat-label">Fagbakgrunner</div>
       <div class="ov-chips">${instruments.map((i) => {
         const n = counts.perInstrument[i] || 0;
         return `<button type="button" class="ov-chip" data-ov-instr="${escapeHtml(i)}">${escapeHtml(i)} <strong>${n}</strong></button>`;
@@ -447,7 +447,7 @@ export function renderDashboard(el, {
     <div class="ov-miss">
       <div class="ov-miss-item">
         <button type="button" class="ov-miss-head" ${storiesMissing.length ? `data-ov-toggle="ov-x-stories"` : `data-ov-story="${escapeHtml(historieListe[0])}"`}>
-          <span>Sjangerhistorier</span>
+          <span>Epokehistorier</span>
           <span class="ov-count ${storiesMissing.length ? "ov-warn" : "ov-ok"}">${historieListe.length - storiesMissing.length}/${historieListe.length}</span>
         </button>
         ${storyPanel}
@@ -455,25 +455,25 @@ export function renderDashboard(el, {
       ${pageItem("Røtter før 1910", rotterOk, "rotter")}
       ${pageItem("Om historie", omHistorieOk, "omHistorie")}
       ${pageItem("Skriveveiledning", pageStatus("skriveveiledning"), "skriveveiledning")}
-      ${missItem("Sjangre uten beskrivelse", mainMissing.length,
+      ${missItem("Epoker uten beskrivelse", mainMissing.length,
         mainMissing.map((n) => nameRow(n, `data-ov-desc="${escapeHtml(n)}" data-ov-level="main"`)).join(""))}
-      ${missItem("Undersjangre uten beskrivelse", subMissing.length,
+      ${missItem("Prinsipper uten beskrivelse", subMissing.length,
         subMissing.map((n) => nameRow(n, `data-ov-desc="${escapeHtml(n)}" data-ov-level="sub"`)).join(""))}
       <div class="ov-miss-item">
         <button type="button" class="ov-miss-head" ${edgeX.btn}>
-          <span>Sjangerkoblinger</span>
+          <span>Epokekoblinger</span>
           <span class="ov-count ${gaps.edgeDesc.length ? "ov-warn" : "ov-ok"}">${edgesFilled}/${GENEALOGY_EDGES.length}</span>
         </button>
         ${edgeX.panel}
       </div>
-      ${missItem("Artister uten beskrivelse", noDesc.length, artistRows(noDesc))}
-      ${missItem("Artister uten bilde", noImage.length, artistRows(noImage))}
-      ${missItem("Artister uten musikkeksempler", noMusic.length, artistRows(noMusic))}
-      ${missItem("Lytteeksempler uten sjanger", gaps.noExGenre.length, artistRows(gaps.noExGenre))}
-      ${missItem("Artister uten gyldig instrument", gaps.badInstrument.length,
+      ${missItem("Teoretikere uten beskrivelse", noDesc.length, artistRows(noDesc))}
+      ${missItem("Teoretikere uten bilde", noImage.length, artistRows(noImage))}
+      ${missItem("Teoretikere uten musikkeksempler", noMusic.length, artistRows(noMusic))}
+      ${missItem("Lytteeksempler uten epoke", gaps.noExGenre.length, artistRows(gaps.noExGenre))}
+      ${missItem("Teoretikere uten gyldig fagbakgrunn", gaps.badInstrument.length,
         artistRows(gaps.badInstrument, (a) => instrumenterFor(a).map((i) => `<span class="tag">${escapeHtml(i)}</span>`).join("")))}
-      ${missItem("Artister uten kilder", noSources.length, artistRows(noSources))}
-      ${missItem("Artister uten viktighetsgrad", utenPrio.length, artistRows(utenPrio))}
+      ${missItem("Teoretikere uten kilder", noSources.length, artistRows(noSources))}
+      ${missItem("Teoretikere uten viktighetsgrad", utenPrio.length, artistRows(utenPrio))}
     </div>
 
     <div class="ov-kick">Hull og skjevheter</div>
@@ -486,13 +486,13 @@ export function renderDashboard(el, {
           : `<p class="muted">Ingen. Alle tidsrom har minst to artister.</p>`}
       </div>
       <div class="ov-gap">
-        <div class="ov-gap-t">Artister uten sjanger <span>${artistsNoSjanger.length}</span></div>
+        <div class="ov-gap-t">Teoretikere uten epoke <span>${artistsNoSjanger.length}</span></div>
         ${artistsNoSjanger.length
           ? `<button type="button" class="btn ghost small" ${noSjangerX.btn}>Vis</button>${noSjangerX.panel}`
           : `<p class="muted">Ingen. Alle artister er plassert.</p>`}
       </div>
       <div class="ov-gap">
-        <div class="ov-gap-t">Undersjangre uten artistkort <span>${orphanedSubgenres.length}</span></div>
+        <div class="ov-gap-t">Prinsipper uten teoretikerkort <span>${orphanedSubgenres.length}</span></div>
         ${orphanedSubgenres.length
           ? `<button type="button" class="btn ghost small" ${orphanX.btn}>Vis</button>${orphanX.panel}`
           : `<p class="muted">Ingen.</p>`}
@@ -644,7 +644,7 @@ function renderGenderChart(dist) {
       (k) => `
       <span class="legend-item">
         <span class="dot" style="background:${GENDER_COLORS[k]}"></span>
-        ${GENDER_LABEL[k]}: <button type="button" class="ov-num-inline" data-ov-gender="${k}" title="Vis artistene">${dist[k]}</button>
+        ${GENDER_LABEL[k]}: <button type="button" class="ov-num-inline" data-ov-gender="${k}" title="Vis teoretikerne">${dist[k]}</button>
         (${pct(dist[k], dist.total)}%)
       </span>`
     )

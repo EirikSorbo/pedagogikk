@@ -135,5 +135,5 @@ test("artistGalleriHtml: bilde eller initialer, navn, sjanger og levetid, og dat
   assert.match(html, /<img [^>]*alt="Charlie Parker"/);
   assert.match(html, /Saksofon · 1920–1955/);
   assert.match(html, /<span class="ar-initialer" aria-hidden="true">UB<\/span>/);
-  assert.match(artistGalleriHtml([]), /Ingen artister/);
+  assert.match(artistGalleriHtml([]), /Ingen teoretikere/);
 });

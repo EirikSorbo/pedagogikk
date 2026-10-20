@@ -491,8 +491,8 @@ test("tittel: flere metasjangre listes, høyst tre", () => {
 test("tittel: bare innovasjoner, bare instrumenter, ellers «Pensumutdrag»", () => {
   // Et gammelt tiårsvalg gir ingen tiårstittel lenger (fase 2).
   assert.equal(foreslaaTittel(settSammen(["tiår:1950"], DATA, STUDENT)), "Pensumutdrag");
-  assert.equal(foreslaaTittel(settSammen(["tech:elgitar"], DATA, STUDENT)), "Innovasjoner");
-  assert.equal(foreslaaTittel(settSammen(["instrument:Filosof"], DATA, STUDENT)), "Instrumentene");
+  assert.equal(foreslaaTittel(settSammen(["tech:elgitar"], DATA, STUDENT)), "Reformer");
+  assert.equal(foreslaaTittel(settSammen(["instrument:Filosof"], DATA, STUDENT)), "Fagbakgrunnene");
   assert.equal(foreslaaTittel(settSammen([], DATA, STUDENT)), "Pensumutdrag");
   assert.equal(foreslaaTittel(null), "Pensumutdrag");
 });

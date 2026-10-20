@@ -135,7 +135,7 @@ export function openTidslinje(focus = {}) {
   }
 
   if (!groups.size) {
-    body.innerHTML = `<p class="muted">Ingen artister med startår ennå.</p>`;
+    body.innerHTML = `<p class="muted">Ingen teoretikere med startår ennå.</p>`;
     modalOpen(modal);
     return;
   }
@@ -209,7 +209,7 @@ export function openTidslinje(focus = {}) {
     html += `<div class="tid-group-rows" style="display:${open ? "block" : "none"}">${metaOversiktLenkeHtml(meta)}`;
     for (const key of keys) {
       const isUten = key === UTEN;
-      const label = isUten ? "Uten sjanger i treet" : key;
+      const label = isUten ? "Uten epoke i treet" : key;
       const rowColor = isUten ? FAMILIES.gray?.stroke || "#9bada1" : (MAIN_GENRE_INFO[key]?.color || gColor);
       const secItems = secs.get(key);
       // Banene pakkes i AKSENS enhet (prosent), ikke i år: på tidsromsaksen er
@@ -226,7 +226,7 @@ export function openTidslinje(focus = {}) {
       html += `<button type="button" class="tid-sec-head" aria-expanded="${secOpen}" style="width:100%;display:flex;align-items:center;gap:7px;margin-bottom:4px;padding:1px 8px;border:0;border-left:3px solid ${rowColor};background:none;cursor:pointer;text-align:left">`;
       html += `<span class="tid-sec-caret" style="flex:none;width:12px;font-size:0.7rem;color:var(--muted);transition:transform .15s;transform:rotate(${secOpen ? 90 : 0}deg)">▶</span>`;
       html += `<span style="font-size:0.8rem;color:var(--text)">${escapeHtml(label)}</span>`;
-      html += `<span style="font-size:0.72rem;color:var(--muted)">${secCount} artist${secCount === 1 ? "" : "er"}</span>`;
+      html += `<span style="font-size:0.72rem;color:var(--muted)">${secCount} teoretiker${secCount === 1 ? "" : "er"}</span>`;
       html += `</button>`;
       html += `<div class="tid-sec-rows" style="display:${secOpen ? "block" : "none"}">`;
       html += `<div style="position:relative;height:${lanes.length * 25}px">${gridHtml}`;
@@ -258,7 +258,7 @@ export function openTidslinje(focus = {}) {
   html += `<div style="display:flex;align-items:center;gap:16px;margin-top:14px;font-size:0.78rem;color:var(--muted);flex-wrap:wrap">`;
   html += `<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:26px;height:12px;border-radius:4px;background:var(--line);border:1px solid var(--line-strong)"></span>kjent aktiv-periode</span>`;
   html += `<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:26px;height:12px;border-radius:4px 0 0 4px;background:var(--line);border:1px solid var(--line-strong);border-right:none"></span>› pågår / sluttår ikke satt</span>`;
-  html += `<span>◆ artist i flere sjangre</span>`;
+  html += `<span>◆ teoretiker i flere epoker</span>`;
   html += `</div>`;
 
   body.innerHTML = html;

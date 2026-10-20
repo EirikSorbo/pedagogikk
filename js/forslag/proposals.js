@@ -50,8 +50,8 @@ const FIELD_SPECS = {
     ] },
     // Instrumentgruppen kortet hører til — styrer hvilken tidslinje det havner
     // på i Instrumenter-seksjonen. Tomt = kortet vises kun under Teknologi.
-    { key: "instrument", label: "Instrument", type: "select", options: [
-      { value: "", label: "Ingen / gjelder ikke ett instrument" },
+    { key: "instrument", label: "Fagbakgrunn", type: "select", options: [
+      { value: "", label: "Ingen / gjelder ikke ett fagbakgrunn" },
       ...INSTRUMENT_TIMELINE_GROUPS.map((i) => ({ value: i, label: i })),
     ] },
     // (Tiåret, «decade», styrte tiårsvinduets tidslinje til fase 2.)
@@ -80,7 +80,7 @@ const FIELD_SPECS = {
     { key: "activeFrom", label: "Mest aktiv fra år", type: "number", levels: ["main"], hint: AAR_HJELP },
     { key: "activeTo", label: "Mest aktiv til år (tom = fortsatt aktiv)", type: "number", levels: ["main"] },
     { key: "era", label: "Epoke med ord", type: "text", levels: ["main"], full: true, max: 60,
-      hint: "Vises ordrett på sjangertidslinjen, og på sjangerkortet når årstallene over står tomme. Bruk den for nyansering av årstallene hvis nødvendig." },
+      hint: "Vises ordrett på epoketidslinjen, og på epokekortet når årstallene over står tomme. Bruk den for nyansering av årstallene hvis nødvendig." },
     { key: "samfunn", label: "Samfunn", type: "textarea", levels: ["main"], full: true },
     { key: "skole", label: "Skole og oppdragelse", type: "textarea", levels: ["main"], full: true },
     KILDE_FELT,
@@ -89,7 +89,7 @@ const FIELD_SPECS = {
   // studentarbeid som skal kunne etterprøves, akkurat som instrumentkortene.
   // Læreren skriver i sin egen editor og møter ikke kravet.
   instrument: [
-    { key: "body", label: "Sammendrag av instrumentets utvikling", type: "textarea", full: true, max: SAMMENDRAG_MAKS },
+    { key: "body", label: "Sammendrag av fagbakgrunnens utvikling", type: "textarea", full: true, max: SAMMENDRAG_MAKS },
     { ...KILDE_FELT, label: "Kilder *" },
   ],
 };
@@ -100,11 +100,11 @@ function fieldSpecsFor(entityType) {
 }
 
 const TITLES = {
-  artist: "Foreslå endring på artist",
-  tech: "Foreslå endring på innovasjonskort",
-  subgenre: "Foreslå endring på sjangerbeskrivelse",
-  instrument: "Foreslå endring på instrumentsammendrag",
-  "new-tech": "Foreslå nytt innovasjonskort",
+  artist: "Foreslå endring på teoretiker",
+  tech: "Foreslå endring på reformskort",
+  subgenre: "Foreslå endring på epokebeskrivelse",
+  instrument: "Foreslå endring på fagbakgrunnsammendrag",
+  "new-tech": "Foreslå nytt reformskort",
 };
 
 function inputForField(spec, value) {
@@ -168,7 +168,7 @@ function inputForField(spec, value) {
   if (spec.type === "genres") {
     return `<div class="full genre-picker" id="${id}">` +
       `<span class="field-label">${escapeHtml(spec.label)}</span>` +
-      `<select class="gp-velg" aria-label="Legg til sjanger"></select>` +
+      `<select class="gp-velg" aria-label="Legg til epoke"></select>` +
       `<div class="gp-valgte"></div></div>`;
   }
   return `${labelHtml}<input type="text" id="${id}" value="${escapeHtml(v)}"${maxAttr} />${hint}</label>`;
@@ -581,7 +581,7 @@ export function openNewTechProposal(preset = null, retur = null) {
   document.getElementById("prop-title").textContent = retur
     ? `Lever på nytt: ${retur.name || "(uten navn)"}`
     : (forInstrument
-      ? `Foreslå nytt instrumentkort: ${preset.instrument}`
+      ? `Foreslå nytt fagbakgrunnkort: ${preset.instrument}`
       : TITLES["new-tech"]);
   document.getElementById("prop-msg").textContent = "";
   document.getElementById("prop-by").value = retur?.proposedBy || "";
