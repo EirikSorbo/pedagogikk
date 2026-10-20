@@ -108,9 +108,23 @@ test("Sjangerhistorier og Kilder åpner hver sin visning (Instrumenter-tallet gi
   }
   assert.deepEqual(aapnet, ["historier", "kilder"]);
   // 10 hele nøkkeltall à to spor + 4 halve var 24 spor: tre fulle rader à åtte.
-  // Plateselskap- og Instrumenter-tallene gikk ut i fase 4, så det er 20 spor,
-  // og siste rad er ikke full. Rutenettet må justeres (se PLAN.md, fase 4).
+  // Plateselskap-, Instrumenter- og Lytteeksempler-tallene gikk ut i fase 4;
+  // «Epoker med samfunn og skole» og «Se og les» fyller rutenettet igjen: 24 spor.
   const hele = (el.innerHTML.match(/class="ov-kpi(?: ov-click)?"/g) || []).length;
   const halve = (el.innerHTML.match(/class="ov-kpi ov-kpi-half/g) || []).length;
-  assert.equal(hele * 2 + halve, 20);
+  assert.equal(hele * 2 + halve, 24);
+});
+
+test("Oversikten teller epoker med samfunn eller skole og poster i Se og les (fase 3)", () => {
+  const el = { innerHTML: "", onclick: null };
+  const genreDescs = {
+    Humanismen: { main: { description: "d", samfunn: "Byene vokser." } },
+    Opplysningen: { main: { description: "d", skole: "Allmueskolen." } },
+    Reformasjonen: { main: { description: "d" } },
+    Anskuelse: { sub: { description: "d", seOgLes: [{ tittel: "a" }, { tittel: "b" }] } },
+  };
+  renderDashboard(el, { artists: ARTISTER, genreDescs, manglerEl: { innerHTML: "", onclick: null }, explore: { antallKilder: () => 0 } });
+  const tall = (navn) => Number(el.innerHTML.match(new RegExp(`<span class="ov-kpi-n">(\\d+)</span>\\s*<span class="ov-kpi-l">${navn}<`))[1]);
+  assert.equal(tall("Epoker med samfunn og skole"), 2);
+  assert.equal(tall("Se og les"), 2);
 });

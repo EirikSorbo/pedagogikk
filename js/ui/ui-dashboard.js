@@ -175,9 +175,11 @@ export function renderDashboard(el, {
     ...(a.mainGenre || []).filter((x) => !isMainGenre(x)),
     ...(a.subGenre || []),
   ]))];
-  // Lytteeksempler: alle kuraterte eksempler til sammen (ikke sentrale verk —
-  // samme avgrensning som spillelistene). Parentestallet i sjangerlista under
-  // teller de samme eksemplene, men fordelt per sjanger.
+  // Hovedverk: alle hovedverkene på teoretikerkortene til sammen. «Samfunn og
+  // skole» og «Se og les» teller det som er skrevet på epoke- og prinsippkortene.
+  const beskrivelser = Object.values(genreDescs || {});
+  const samfunnSkoleAntall = beskrivelser.filter((d) => (d?.main?.samfunn || "").trim() || (d?.main?.skole || "").trim()).length;
+  const seOgLesAntall = beskrivelser.reduce((n, d) => n + (Array.isArray(d?.sub?.seOgLes) ? d.sub.seOgLes.length : 0), 0);
   const hovedverkAntall = active.reduce((n, a) => n + (a.keyWorks || []).length, 0);
   // Skjulte artistkort: aktive kort læreren har skjult (erSkjult, v6.86). De er
   // usynlige for studentene og teller derfor ikke i noen annen statistikk her —
@@ -380,6 +382,14 @@ export function renderDashboard(el, {
         <span class="ov-kpi-n">${GENEALOGY_EDGES.length}</span>
         <span class="ov-kpi-l">Epokekoblinger</span>
       </button>
+      <div class="ov-kpi">
+        <span class="ov-kpi-n">${samfunnSkoleAntall}</span>
+        <span class="ov-kpi-l">Epoker med samfunn og skole</span>
+      </div>
+      <div class="ov-kpi">
+        <span class="ov-kpi-n">${seOgLesAntall}</span>
+        <span class="ov-kpi-l">Se og les</span>
+      </div>
       ${[3, 2, 1, -1].map((p) => `
       <button type="button" class="ov-kpi ov-kpi-half ov-click prio-${p}" data-ov-prio="${p}"
         aria-label="${escapeHtml(PRIO_LABELS[p])}: ${prioLists[p].length} teoretikere"
