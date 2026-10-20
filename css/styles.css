@@ -2568,7 +2568,7 @@ body:not(.presentasjon) :is(#modal-artistliste, #modal-spilleliste) > .modal > *
    manifest.json, som nettleseren viser i fanen og i appvinduet (brukerkrav
    2026-09-25). Navnet er nå «Musikkhistorie». */
 a.brand { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px; }
-.brand-icon { height: 40px; width: auto; aspect-ratio: 54.5 / 50.35; flex-shrink: 0; }   /* MUR114-logoen (v6.69); inline <svg><use> fra v6.71, så etiketten følger dagens farge */
+.brand-icon { height: 40px; width: auto; aspect-ratio: 104 / 86; flex-shrink: 0; color: var(--text); }   /* tempellogoen (2026-10-20); inline <svg><use>, én farge: currentColor følger teksten, også i mørk modus */
 
 /* Navigasjon */
 .nav { display: flex; gap: 6px; align-items: center; }

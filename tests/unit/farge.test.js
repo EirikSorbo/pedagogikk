@@ -61,7 +61,8 @@ test("alle sidene laster farge.js før gate.js, og logoen tegnes med <use> så d
   }
   const logo = les("img/logo.svg");
   assert.match(logo, /<g id="logo">/);
-  assert.equal((logo.match(/var\(--accent, #c9361e\)/g) || []).length, 3, "de tre røde delene");
+  assert.match(logo, /stroke="currentColor"/, "tempellogoen er én farge og følger teksten rundt");
+  assert.doesNotMatch(logo, /#[0-9a-f]{6}\b(?![^<]*<\/style>)/i, "ingen faste farger i tegningen (bare i stilen for bilde-bruk)");
   for (const k of logo.match(/<!--[\s\S]*?-->/g) || []) {
     assert.doesNotMatch(k.slice(4, -3), /--/, "«--» i en XML-kommentar gjør SVG-en ugyldig som bilde");
   }
