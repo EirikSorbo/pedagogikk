@@ -14,9 +14,10 @@
 //   - Alle kan hoppe fritt fram og tilbake mellom stegene, også med tomme
 //     felt. De obligatoriske feltene sjekkes ved innsending: feilmeldingen
 //     lister alt som mangler, og skjemaet går til første steg med feil.
-//   - «Sentrale verk» står ikke i noe skjema lenger (fases ut). Verkene på
-//     artistene blir liggende: skjemaet verken leser eller skriver feltet.
-//   - Lærerfeltene står der de hører hjemme: Instrument 2 og plateselskap i
+//   - Hovedverkene (keyWorks) har steg 4 (fase 3). Lytteeksemplene
+//     (musicExamples) blir liggende i dataene: skjemaet verken leser eller
+//     skriver feltet.
+//   - Lærerfeltene står der de hører hjemme: Fagbakgrunn 2 og plateselskap i
 //     steg 2, punktene i steg 3, «Foreslått av» i steg 5.
 //   - Nye artister lagres som utkast i nettleseren. Redigeringer spør før
 //     vinduet lukkes med endringer som ikke er lagret.
@@ -27,7 +28,7 @@
 
 import { GENDERS, INSTRUMENTS } from "../felles/limits.js";
 import { GENEALOGY_META_GENRES, GENEALOGY_MAIN_GENRES } from "../sjangre/genre-model.js";
-import { SOURCE_SPEC, musicSpecWithGenres, addRow, buildRows, collectRows, collectRawRows, normalizeRows } from "./row-editor.js";
+import { SOURCE_SPEC, WORK_SPEC, addRow, buildRows, collectRows, collectRawRows, normalizeRows } from "./row-editor.js";
 import { setupGenrePicker, fillGenrePicker, buildGenrePicker, collectGenrePicker } from "../sjangre/genre-picker.js";
 import { setupFormatBars } from "./format-bar.js";
 import { fyllPunktfelt, lesPunktfelt } from "./ui-helpers.js";
@@ -40,9 +41,6 @@ const STUDENTMODUS = ["ny", "retur", "forslag"];
 const LAERERMODUS = ["laerer", "laerer-ny"];
 
 const sorterteSjangre = () => [...GENEALOGY_MAIN_GENRES].sort((a, b) => a.localeCompare(b, "no"));
-// «Sentralt»-avkrysningen på lytteeksempler vises bare i lærermodus; settes når skjemaet startes.
-let musikkLaerer = false;
-const musicSpecSj = () => musicSpecWithGenres(sorterteSjangre(), { laerer: musikkLaerer });
 
 // Obligatoriske felt per modus. Lærerens skjema krevde aldri instrument eller
 // kilder, og et endringsforslag krever bare navnet på den som foreslår: det
@@ -53,7 +51,10 @@ function paakrevdeFor(modus) {
   return new Set(["name", "gender", "metaGenre", "instrument", "influenceStart", "kilder", "proposedBy"]);
 }
 
-const STEGNAVN = ["Artisten", "Sjanger og periode", "Beskrivelse", "Lytteeksempler", "Kilder og innsending"];
+// Steg 3 var Lytteeksempler til fase 3 (pedagogikkappen): teoretikeren har
+// hovedverk, ikke musikk å lytte til. Lytteeksemplene (musicExamples) blir
+// liggende i dataene, men skjemaet rører dem ikke.
+const STEGNAVN = ["Teoretikeren", "Retning og periode", "Beskrivelse", "Hovedverk", "Kilder og innsending"];
 
 // ----------------------------------------------------------------------------
 //  Markup
@@ -151,12 +152,12 @@ function markup(modus) {
 
     <section class="steg" data-steg="3" hidden>
       <h3 class="steg-tittel" tabindex="-1">${STEGNAVN[3]}</h3>
-      <p class="hint steg-ingress">Hva bør man lytte til? Valgfritt.</p>
+      <p class="hint steg-ingress">Hvilke verk er viktigst? Valgfritt.</p>
       <div class="add-grid">
         <div class="full">
-          <span class="field-label">Musikkeksempler</span>
-          <div data-rader="musicExamples"></div>
-          <button type="button" class="btn ghost small" data-legg-til="musicExamples">+ Legg til musikkeksempel</button>
+          <span class="field-label">Hovedverk</span>
+          <div data-rader="keyWorks"></div>
+          <button type="button" class="btn ghost small" data-legg-til="keyWorks">+ Legg til hovedverk</button>
         </div>
       </div>
     </section>
@@ -283,7 +284,6 @@ export function fraUtkastV1(u) {
 export function lagArtistSkjema(beholder, cfg) {
   const modus = cfg.modus || "ny";
   const laerer = LAERERMODUS.includes(modus);
-  musikkLaerer = laerer;
   const paakrevd = paakrevdeFor(modus);
   beholder.innerHTML = markup(modus);
   beholder.classList.add("artist-skjema");
@@ -301,10 +301,6 @@ export function lagArtistSkjema(beholder, cfg) {
     fyllNedtrekk(felt("instrument"), INSTRUMENTS, { tom: laerer ? "Ingen / ukjent" : "Velg instrument …" });
     if (felt("instrument2")) fyllNedtrekk(felt("instrument2"), INSTRUMENTS, { tom: "Ingen" });
     fillGenrePicker(felt("mainGenre"), sorterteSjangre());
-    // Lytteeksemplenes sjangervalg: bygges på nytt med det nye vokabularet,
-    // men bare når ingen står og skriver i radene.
-    const wrap = rader("musicExamples");
-    if (!wrap.contains(document.activeElement)) buildRows(wrap, musicSpecSj(), collectRawRows(wrap, musicSpecSj()));
   }
 
   // --- Fylle og lese ---------------------------------------------------------
@@ -325,7 +321,7 @@ export function lagArtistSkjema(beholder, cfg) {
     felt("subGenre").value = (a.subGenre || []).join(", ");
     for (const k of ["gender", "metaGenre", "instrument", "instrument2"]) settNedtrekk(k, a[k]);
     buildGenrePicker(felt("mainGenre"), a.mainGenre || []);
-    buildRows(rader("musicExamples"), musicSpecSj(), normalizeRows(musicSpecSj(), a.musicExamples));
+    buildRows(rader("keyWorks"), WORK_SPEC, normalizeRows(WORK_SPEC, a.keyWorks));
     buildRows(rader("kilder"), SOURCE_SPEC, normalizeRows(SOURCE_SPEC, a.kilder));
     if (felt("punkter")) fyllPunktfelt(felt("punkter"), a.punkter);
   }
@@ -346,7 +342,7 @@ export function lagArtistSkjema(beholder, cfg) {
       influenceEnd: tall(felt("influenceEnd").value),
       geography: felt("geography").value.trim(),
       description: felt("description").value.trim(),
-      musicExamples: collectRows(rader("musicExamples"), musicSpecSj()),
+      keyWorks: collectRows(rader("keyWorks"), WORK_SPEC),
       kilder: collectRows(rader("kilder"), SOURCE_SPEC),
       imageUrl: felt("imageUrl").value.trim(),
       imageCredit: felt("imageCredit").value.trim(),
@@ -409,13 +405,13 @@ export function lagArtistSkjema(beholder, cfg) {
     if (v.influenceStart && v.influenceEnd && v.influenceEnd < v.influenceStart) legg(felt("influenceEnd"), "«Innflytelse til»-året kan ikke være før «fra»-året.", 1);
     // Rader med innhold, men uten gyldig lenke eller tekst, ville blitt
     // droppet stille av collectRows.
-    for (const r of rader("musicExamples").querySelectorAll(".me-row")) {
-      const label = r.querySelector(".me-label").value.trim();
-      const urlEl = r.querySelector(".me-url");
-      if (!label && !urlEl.value.trim()) continue;
-      if (!erHttpUrl(urlEl.value)) legg(urlEl, `Musikkeksempelet ${label ? `«${label}»` : "(uten tittel)"} mangler en gyldig lenke (må starte med https://).`, 3);
-      const start = r.querySelector(".me-start");
-      if (start && !start.validity.valid) legg(start, `Starttiden for ${label ? `«${label}»` : "musikkeksempelet"}: ${start.validationMessage}`, 3);
+    for (const r of rader("keyWorks").querySelectorAll(".work-row")) {
+      const tittelEl = r.querySelector(".work-title");
+      const urlEl = r.querySelector(".work-url");
+      const tittel = tittelEl.value.trim();
+      if (!tittel && !urlEl.value.trim() && !r.querySelector(".work-year").value.trim()) continue;
+      if (!tittel) legg(tittelEl, "Et hovedverk mangler tittel.", 3);
+      if (urlEl.value.trim() && !erHttpUrl(urlEl.value)) legg(urlEl, `Lenken til ${tittel ? `«${tittel}»` : "hovedverket"} må starte med https://.`, 3);
     }
     for (const r of rader("kilder").querySelectorAll(".source-row")) {
       const textEl = r.querySelector(".source-text");
@@ -534,7 +530,7 @@ export function lagArtistSkjema(beholder, cfg) {
       ledd(v.name, valgt("gender"), spenn(v.birthYear, v.deathYear, "født", "død"), v.geography),
       ledd(valgt("metaGenre"), valgt("instrument"), v.mainGenre.join(", "), innflytelse && `innflytelse ${innflytelse}`, v.recordLabel),
       ledd(ord ? `${ord} ord` : "", v.punkter?.length ? `${v.punkter.length} punkter` : ""),
-      v.musicExamples.length ? `${v.musicExamples.length} ${v.musicExamples.length === 1 ? "lytteeksempel" : "lytteeksempler"}` : "",
+      v.keyWorks.length ? `${v.keyWorks.length} ${v.keyWorks.length === 1 ? "hovedverk" : "hovedverk"}` : "",
     ];
     const mangler = (i) => [...paakrevd].filter((k) => FELTSTEG[k] === i
       && (k === "kilder" ? !v.kilder.length : !String(v[k] ?? "").trim())).map((k) => FELTNAVN[k]);
@@ -554,7 +550,7 @@ export function lagArtistSkjema(beholder, cfg) {
   const lesUtkast = () => ({
     v: 2,
     verdier: { ...les(), studentComment: felt("studentComment").value },
-    eksempler: collectRawRows(rader("musicExamples"), musicSpecSj()),
+    verk: collectRawRows(rader("keyWorks"), WORK_SPEC),
     kilder: collectRawRows(rader("kilder"), SOURCE_SPEC),
     steg: tilstand.aktivt,
     besokt: [...tilstand.besokt],
@@ -594,7 +590,7 @@ export function lagArtistSkjema(beholder, cfg) {
   function leggInnUtkast(u) {
     fyll(u.verdier);
     felt("studentComment").value = u.verdier.studentComment || "";
-    buildRows(rader("musicExamples"), musicSpecSj(), u.eksempler || []);
+    buildRows(rader("keyWorks"), WORK_SPEC, u.verk || []);
     buildRows(rader("kilder"), SOURCE_SPEC, u.kilder || []);
     tilstand.godkjentNavn = typeof u.godkjentNavn === "string" ? u.godkjentNavn : "";
     tilstand.besokt = new Set(Array.isArray(u.besokt) ? u.besokt : [0]);
@@ -609,11 +605,11 @@ export function lagArtistSkjema(beholder, cfg) {
   // --- Koblingene ------------------------------------------------------------
   setupGenrePicker(felt("mainGenre"));
   setupFormatBars(beholder);
-  buildRows(rader("musicExamples"), musicSpecSj());
+  buildRows(rader("keyWorks"), WORK_SPEC);
   buildRows(rader("kilder"), SOURCE_SPEC);
   beholder.querySelectorAll("[data-legg-til]").forEach((b) => b.addEventListener("click", () => {
     const k = b.dataset.leggTil;
-    addRow(rader(k), k === "kilder" ? SOURCE_SPEC : musicSpecSj(), {});
+    addRow(rader(k), k === "kilder" ? SOURCE_SPEC : WORK_SPEC, {});
   }));
   $("[data-as-stegliste]").addEventListener("click", (e) => {
     const b = e.target.closest("[data-steg-knapp]");

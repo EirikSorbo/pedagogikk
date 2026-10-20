@@ -28,7 +28,6 @@ import {
   genreTags,
   metaRader,
   musicExampleLabel,
-  musicExamplesHtml,
   sentralMerke,
   relatedArtistsHtml, metaMerkeHtml,
   wireRelated,
@@ -157,7 +156,6 @@ function nivaaNotatHtml() {
 
 export function renderArtistDetail(el, artist, lc) {
   const a = artist;
-  const examplesHtml = musicExamplesHtml(a);
   const worksHtml = keyWorksText(a.keyWorks);
 
   // Beslektede artister — oppdagelsessti fra ett kort til nabolaget. Klikk
@@ -178,8 +176,7 @@ export function renderArtistDetail(el, artist, lc) {
     ${sekt("tags", `<div class="meta" style="margin-bottom:12px">${prioMerkeHtml(a)}${metaRader(a)}</div>`)}
     ${sekt("punkter", punkterHtml(a.punkter, medSelv(lc, { artist: a.id })))}
     ${sekt("beskrivelse", a.description ? `<div class="desc rt">${linkDesc(a.description, medSelv(lc, { artist: a.id }))}</div>` : "")}
-    ${sekt("verk", worksHtml ? `<p class="works"><strong>Sentrale verk:</strong> ${worksHtml}</p>` : "")}
-    ${sekt("lytte", examplesHtml ? `<p class="works"><strong>Lytteeksempler:</strong> ${examplesHtml}</p>` : "")}
+    ${sekt("verk", worksHtml ? `<p class="works"><strong>Hovedverk:</strong> ${worksHtml}</p>` : "")}
     ${sekt("kilder", kilderHtml(a.kilder))}
     ${sekt("beslektede", relatedHtml)}
   `;
@@ -217,7 +214,6 @@ export function renderSpotlightCards(el, artists, lc) {
 }
 
 function spotlightCard(a, lc) {
-  const examplesHtml = musicExamplesHtml(a);
   const worksHtml = keyWorksText(a.keyWorks);
   // Viktighetsgraden er MIDLERTIDIG skjult for studenter (feature-flags.js).
   // Spotlight-kortene vises kun på forsiden, altså aldri for læreren.
@@ -240,8 +236,7 @@ function spotlightCard(a, lc) {
         ${artistStripHtml(a)}
       </header>
       ${a.description ? `<div class="desc rt">${linkDesc(a.description, medSelv(lc, { artist: a.id }))}</div>` : ""}
-      ${worksHtml ? `<p class="works"><strong>Sentrale verk:</strong> ${worksHtml}</p>` : ""}
-      ${examplesHtml ? `<p class="works"><strong>Lytteeksempler:</strong> ${examplesHtml}</p>` : ""}
+      ${worksHtml ? `<p class="works"><strong>Hovedverk:</strong> ${worksHtml}</p>` : ""}
       ${kilderHtml(a.kilder)}
       ${relatedArtistsHtml(a, lc)}
       <footer class="card-foot">
@@ -437,7 +432,6 @@ function artistCard(a, { isTeacher, clientId, linkCtx }) {
   const pending = a.status === "pending";
   const returned = a.status === "returnert";
 
-  const examplesHtml = musicExamplesHtml(a);
 
   const checked = a.teacherChecked === true;
 
@@ -552,8 +546,7 @@ function artistCard(a, { isTeacher, clientId, linkCtx }) {
       </header>
 
       ${a.description ? `<div class="desc rt">${linkDesc(a.description, medSelv(linkCtx, { artist: a.id }))}</div>` : ""}
-      ${worksHtml ? `<p class="works"><strong>Sentrale verk:</strong> ${worksHtml}</p>` : ""}
-      ${examplesHtml ? `<p class="works"><strong>Lytteeksempler:</strong> ${examplesHtml}</p>` : ""}
+      ${worksHtml ? `<p class="works"><strong>Hovedverk:</strong> ${worksHtml}</p>` : ""}
       ${kilderHtml(a.kilder)}
       ${relatedArtistsHtml(a, linkCtx)}
       ${returInfo}

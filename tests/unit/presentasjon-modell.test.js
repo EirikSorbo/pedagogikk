@@ -22,7 +22,7 @@ test("kilder vises ALDRI i visning, uansett nivå eller unntak", () => {
   }
 });
 
-test("artistnivåene: bilde + levetid + innflytelseslinje + lytteeksempler, så tags og beslektede", () => {
+test("artistnivåene: bilde + levetid + innflytelseslinje, så tags og beslektede (lytteeksemplene er tatt ut i fase 3)", () => {
   const synlig = (sekt, n) => erSynlig("artist", sekt, n);
   // Nivå 1: bildet i fokus, levetiden og stripa — ikke årstallslinja.
   assert.equal(synlig("bilde", 1), true);
@@ -37,8 +37,7 @@ test("artistnivåene: bilde + levetid + innflytelseslinje + lytteeksempler, så 
     assert.equal(faktaSynlig("artist", "levetid", n), true);
   }
   // Lytteeksemplene står fra nivå 1 (brukerkrav 2026-09-19).
-  assert.equal(synlig("lytte", 1), true);
-  assert.equal(synlig("lytte", 2), true);
+  assert.equal(FLATER.artist.some((f) => f.id === "lytte"), false);
   // Nivå 2: + instrument/sjanger og de beslektede artistene (brukerkrav
   // 2026-09-29; før v5.85 bare på nivå 3).
   assert.equal(synlig("tags", 1), false);

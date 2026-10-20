@@ -26,8 +26,7 @@ export const FLATER = {
     { id: "stripe", navn: "Innflytelseslinje" },
     { id: "punkter", navn: "Oppsummering i punkter" },
     { id: "beskrivelse", navn: "Beskrivelse" },
-    { id: "verk", navn: "Sentrale verk" },
-    { id: "lytte", navn: "Lytteeksempler" },
+    { id: "verk", navn: "Hovedverk" },
     { id: "beslektede", navn: "Beslektede artister" },
   ],
   sjanger: [
@@ -75,8 +74,8 @@ export const NIVAA_SEKT = {
   // Oppsummeringspunktene (v5.50) står på nivå 2 og gjelder bare der; se
   // PUNKT_FLATER under erSynlig for hvordan de erstatter beskrivelsen.
   artist: {
-    1: ["bilde", "fakta", "stripe", "lytte"],
-    2: ["bilde", "fakta", "stripe", "tags", "punkter", "lytte", "beslektede"],
+    1: ["bilde", "fakta", "stripe"],
+    2: ["bilde", "fakta", "stripe", "tags", "punkter", "beslektede"],
   },
   // Artistene i sjangeren (v5.89, brukerønske 2026-09-29) står som navneliste
   // til høyre fra nivå 2, også på nivå 3; punktene blir stående til venstre.

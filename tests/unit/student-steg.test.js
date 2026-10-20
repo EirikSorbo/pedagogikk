@@ -17,6 +17,7 @@ const src = lesJs("artist-skjema.js");
 const markup = src.slice(src.indexOf("function markup(modus)"), src.indexOf("// ----", src.indexOf("function markup(modus)")));
 const seksjoner = markup.split('<section class="steg"').slice(1);
 
+// Steg 4 er Hovedverk (fase 3; før Lytteeksempler): verkene har egne rader, ikke data-felt.
 const STEGENE = [
   ["STEGNAVN[0]", ["name", "gender", "birthYear", "deathYear", "geography"]],
   ["STEGNAVN[1]", ["metaGenre", "instrument", "instrument2", "recordLabel", "influenceStart", "influenceEnd", "mainGenre", "subGenre"]],
@@ -26,21 +27,25 @@ const STEGENE = [
 ];
 
 test("fem steg i avtalt rekkefølge, med feltene i riktig steg", () => {
-  assert.match(src, /const STEGNAVN = \["Artisten", "Sjanger og periode", "Beskrivelse", "Lytteeksempler", "Kilder og innsending"\];/);
+  assert.match(src, /const STEGNAVN = \["Teoretikeren", "Retning og periode", "Beskrivelse", "Hovedverk", "Kilder og innsending"\];/);
   assert.equal(seksjoner.length, STEGENE.length, "antall steg");
   STEGENE.forEach(([tittel, felt], i) => {
     const s = seksjoner[i];
     assert.ok(s.includes(`\${${tittel}}`), `steg ${i + 1} skal ha tittelen ${tittel}`);
     for (const f of felt) assert.ok(s.includes(`data-felt="${f}"`), `${f} skal stå i steg ${i + 1}`);
   });
-  assert.ok(seksjoner[3].includes('data-rader="musicExamples"'), "lytteeksemplene i steg 4");
+  assert.ok(seksjoner[3].includes('data-rader="keyWorks"'), "hovedverkene i steg 4");
+  assert.ok(!src.includes('data-rader="musicExamples"'), "lytteeksemplene er ute av skjemaet (fase 3)");
   assert.ok(seksjoner[4].includes('data-rader="kilder"'), "kildene i steg 5");
   assert.ok(seksjoner[2].indexOf("data-as-skrivehjelp") < seksjoner[2].indexOf('data-felt="description"'),
     "skriveveiledningen rett over beskrivelsen");
 });
 
-test("«Sentrale verk» står ikke i skjemaet (fases ut, brukervalg 2026-10-13)", () => {
-  assert.doesNotMatch(src, /keyWorks|WORK_SPEC|Sentrale verk \//);
+// «Sentrale verk» var fjernet fra skjemaet i v6.96 (brukervalg 2026-10-13).
+// Fase 3 tok dem tilbake som «Hovedverk», i steget lytteeksemplene hadde.
+test("hovedverk står i skjemaet, men ikke den gamle «Sentrale verk»-teksten", () => {
+  assert.match(src, /keyWorks/);
+  assert.doesNotMatch(src, /Sentrale verk/);
 });
 
 test("bare første steg er synlig før skriptet har kjørt, og skjemaet har novalidate", () => {
