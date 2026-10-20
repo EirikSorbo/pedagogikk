@@ -482,7 +482,8 @@ test("funn 43: hver typevakt holder på hver kallplass (map, liste eller streng 
   }
   // pendingEdits: proposedFields per hjelper.
   // ALLE capOk-feltene, hentet fra reglene (kontrollrunden for v5.46).
-  assert.ok(FORSLAG_STRENGER.length >= 17, `fant bare ${FORSLAG_STRENGER.length} capOk-felt i pendingEdits`);
+  // 14 fra fase 2: decade, society og tech gikk ut med tiårene (17 før).
+  assert.ok(FORSLAG_STRENGER.length >= 14, `fant bare ${FORSLAG_STRENGER.length} capOk-felt i pendingEdits`);
   for (const f of FORSLAG_STRENGER) {
     await assertFails(db.collection("pendingEdits").add(klientForslag({ proposedFields: { [f]: { a: stor } } })));
     await assertFails(db.collection("pendingEdits").add(klientForslag({ proposedFields: { [f]: [stor] } })));
