@@ -14,6 +14,8 @@
 //
 //  Reglene bor i sjekkInnholdsfil(), som er ren og testes i
 //  tests/unit/sjekk-innholdsfil.test.js. Ordgrensene er advarsler, ikke feil.
+//  `kjentePrinsipper` er prinsipper med tekst fra tidligere runder: de kan
+//  brukes på teoretikerne uten å stå i fila på nytt.
 // ============================================================================
 import fs from "node:fs";
 import path from "node:path";
@@ -40,7 +42,7 @@ const erHttp = (u) => /^https?:\/\/\S+$/i.test(String(u || ""));
 const KJENTE_NOKLER = new Set(["formatVersion", "artists", "genreDescriptions", "edgeDescriptions", "tech", "pages",
   "teacherChecks", "referanser", "presentasjoner", "notater", "genealogy"]);
 
-export function sjekkInnholdsfil(fil, tre, { ordgrenser = ORDGRENSER } = {}) {
+export function sjekkInnholdsfil(fil, tre, { ordgrenser = ORDGRENSER, kjentePrinsipper = [] } = {}) {
   const feil = [];
   const advarsler = [];
   const F = (m) => feil.push(m);
@@ -162,8 +164,9 @@ export function sjekkInnholdsfil(fil, tre, { ordgrenser = ORDGRENSER } = {}) {
       if (story.body) grense("historie", story.body, `Fortellingen om «${navnet}»`);
     }
   }
+  const kjente = new Set(kjentePrinsipper);
   for (const s of bruktePrinsipper) {
-    if (s && !prinsippMedTekst.has(s)) A(`Prinsippet «${s}» brukes på teoretikere, men har ingen felles tekst i genreDescriptions.sub.`);
+    if (s && !prinsippMedTekst.has(s) && !kjente.has(s)) A(`Prinsippet «${s}» brukes på teoretikere, men har ingen felles tekst i genreDescriptions.sub.`);
   }
 
   // --- Påvirkningene ----------------------------------------------------

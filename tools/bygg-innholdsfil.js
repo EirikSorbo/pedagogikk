@@ -9,6 +9,7 @@
 //  og kjører sjekken i tools/sjekk-innholdsfil.js på resultatet.
 //
 //  Kjør:  node tools/bygg-innholdsfil.js innhold/runde-1 "json files/runde-1.json"
+//         … --lenker   (sjekker i tillegg hver lenke på nettet, med sidetittel)
 //
 //  Hver del eksporterer `default` med noen av nøklene artists,
 //  genreDescriptions ({ meta, main, sub }) og edgeDescriptions. Navn som står i
@@ -68,9 +69,35 @@ export function slaaSammen(deler, { aar = new Date().getFullYear(), foreslaattAv
   return { fil: ut, feil };
 }
 
+// --lenker: henter hver lenke i fila og viser status og sidetittel, så man ser
+// både døde lenker og lenker som svarer 200, men til feil side.
+async function sjekkLenker(fil) {
+  const urler = new Set();
+  const samle = (v) => {
+    if (Array.isArray(v)) v.forEach(samle);
+    else if (v && typeof v === "object") { if (typeof v.url === "string") urler.add(v.url); Object.values(v).forEach(samle); }
+  };
+  samle(fil);
+  let feil = 0;
+  console.log(`\nSjekker ${urler.size} lenker …`);
+  for (const url of [...urler].sort()) {
+    try {
+      const svar = await fetch(url, { redirect: "follow", headers: { "User-Agent": "Mozilla/5.0 (lenkesjekk)" } });
+      const html = await svar.text();
+      const tittel = (html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || "").replace(/\s+/g, " ").trim().slice(0, 80);
+      if (svar.status !== 200) feil++;
+      console.log(`  ${svar.status === 200 ? "ok  " : "FEIL"} ${svar.status} ${url}  «${tittel}»`);
+    } catch (e) {
+      feil++;
+      console.log(`  FEIL --- ${url}  (${e.message})`);
+    }
+  }
+  return feil;
+}
+
 const erHovedfil = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (erHovedfil) {
-  const [mappe, utfil] = process.argv.slice(2);
+  const [mappe, utfil] = process.argv.slice(2).filter((a) => !a.startsWith("--"));
   if (!mappe || !utfil) { console.error('Bruk: node tools/bygg-innholdsfil.js innhold/runde-1 "json files/runde-1.json"'); process.exit(2); }
   const abs = path.resolve(ROT, mappe);
   const filer = fs.readdirSync(abs).filter((f) => f.endsWith(".mjs")).sort();
@@ -79,11 +106,23 @@ if (erHovedfil) {
   const { fil, feil } = slaaSammen(deler, { foreslaattAv: `Fase 6, ${path.basename(abs)}` });
   feil.forEach((m) => console.log(`  [FEIL] ${m}`));
   const tre = JSON.parse(fs.readFileSync(path.join(ROT, "json files/pedagogikk-skjelett.json"), "utf8"));
-  const sjekk = sjekkInnholdsfil(fil, tre.genealogy || tre);
+  // Prinsippene fra de andre rundene i innhold/ er allerede skrevet og kan brukes
+  // på teoretikerne i denne runden uten advarsel.
+  const kjentePrinsipper = [];
+  const innhold = path.dirname(abs);
+  for (const annen of fs.readdirSync(innhold).filter((d) => d !== path.basename(abs) && fs.statSync(path.join(innhold, d)).isDirectory())) {
+    for (const f of fs.readdirSync(path.join(innhold, annen)).filter((x) => x.endsWith(".mjs"))) {
+      const del = (await import(pathToFileURL(path.join(innhold, annen, f)).href)).default;
+      kjentePrinsipper.push(...Object.keys(del.genreDescriptions?.sub || {}));
+    }
+  }
+  const sjekk = sjekkInnholdsfil(fil, tre.genealogy || tre, { kjentePrinsipper });
   sjekk.advarsler.forEach((m) => console.log(`  [advarsel] ${m}`));
   sjekk.feil.forEach((m) => console.log(`  [FEIL] ${m}`));
   fs.writeFileSync(path.resolve(ROT, utfil), JSON.stringify(fil, null, 2) + "\n");
+  let lenkefeil = 0;
+  if (process.argv.includes("--lenker")) lenkefeil = await sjekkLenker(fil);
   const deler2 = Object.entries(sjekk.tall).filter(([, n]) => n).map(([k, n]) => `${n} ${k}`).join(", ");
-  console.log(`\n${filer.length} deler -> ${utfil}: ${deler2}. ${feil.length + sjekk.feil.length} feil, ${sjekk.advarsler.length} advarsler.`);
-  process.exit(feil.length + sjekk.feil.length ? 1 : 0);
+  console.log(`\n${filer.length} deler -> ${utfil}: ${deler2}. ${feil.length + sjekk.feil.length} feil, ${sjekk.advarsler.length} advarsler${lenkefeil ? `, ${lenkefeil} lenkefeil` : ""}.`);
+  process.exit(feil.length + sjekk.feil.length + lenkefeil ? 1 : 0);
 }

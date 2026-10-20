@@ -132,3 +132,12 @@ test("advarsler: prinsipp uten tekst, manglende samfunn/skole, ordgrenser og ukj
   assert.ok(advarsler.some((m) => /under \d+/.test(m)));
   assert.ok(advarsler.some((m) => /Ukjent toppnøkkel «podcasts»/.test(m)));
 });
+
+test("prinsipper fra tidligere runder gir ikke advarsel", () => {
+  const g = gyldig();
+  delete g.genreDescriptions.sub;
+  const uten = sjekkInnholdsfil(g, tre).advarsler.filter((m) => /ingen felles tekst/.test(m));
+  const med = sjekkInnholdsfil(g, tre, { kjentePrinsipper: ["Læring gjennom erfaring"] }).advarsler.filter((m) => /ingen felles tekst/.test(m));
+  assert.equal(uten.length, 1);
+  assert.equal(med.length, 0);
+});
