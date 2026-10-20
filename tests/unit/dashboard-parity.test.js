@@ -23,7 +23,7 @@ function dashTitles(fil) {
 test("student- og lærer-dashbordet har samme kort i samme rekkefølge", () => {
   const student = dashTitles("index.html");
   const laerer = dashTitles("teacher.html");
-  assert.ok(student.length >= 5, "student-dashbordet ser tomt/feilparset ut");
+  assert.ok(student.length >= 4, "student-dashbordet ser tomt/feilparset ut");
   assert.deepEqual(
     laerer, student,
     "Kortene i teacher.html må stå i samme rekkefølge som i index.html — endrer du den ene, endre den andre.",

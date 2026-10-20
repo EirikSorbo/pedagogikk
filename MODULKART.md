@@ -5,12 +5,12 @@ Kartet lages av `tools/modulkart.js` og skal ikke redigeres for hånd: endre inn
 i fila og kjør `./bump.sh` (eller `node tools/modulkart.js`). Pre-push-kroken og GitHub
 stopper et kart som ikke stemmer med filene.
 
-111 filer i 11 mapper.
+110 filer i 11 mapper.
 
 | Mappe | Innhold | Filer |
 |---|---|---|
 | `js/` | Sidene og oppsettet | 11 |
-| `js/utforsk/` | Utforsk | 17 |
+| `js/utforsk/` | Utforsk | 16 |
 | `js/sjangre/` | Sjangrene og slektstreet | 13 |
 | `js/visning/` | Visning | 15 |
 | `js/laerer/` | Lærersiden | 8 |
@@ -59,7 +59,6 @@ Det store bildet, sjangrene, sjangerperiodene, tidslinja, Lytt, Instrumenter, re
 | `explore-context.js` | DELT KJERNE FOR UTFORSK-MODULENE |
 | `explore-innhold.js` | INNHOLDSSIDER, SJANGERHISTORIER, HUB & SJANGERHIMMEL |
 | `explore-instrument.js` | INSTRUMENTER — utvikling per instrumentgruppe |
-| `explore-lytt.js` | LYTT — spillelistene samlet (v6.07, strukturgjennomgangen U7) |
 | `explore-metaoversikt.js` | METASJANGER-OVERSIKTEN (v5.94) — én side per aktiv metasjanger i visningen |
 | `explore-modals.js` | MODAL-MARKUP FOR UTFORSK-SIDENE |
 | `explore-referanser.js` | REFERANSER: alle kildene appen bygger på, samlet |

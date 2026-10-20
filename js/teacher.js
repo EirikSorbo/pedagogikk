@@ -225,7 +225,6 @@ function startAppInner() {
   initUtskriftValg({ hentData: () => state });
 
   // Lytt (U7) åpner spillelistene.
-  $("#btn-t-lytt")?.addEventListener("click", () => ctx.explore.openLytt());
   // Tidslinje-inngang fra artistlistas filterrad (samme delte modal som fra
   // Sjangre-modalen — én implementasjon i explore-tidslinje.js).
   const btnTid = document.getElementById("btn-tidslinje-artister");
@@ -233,8 +232,8 @@ function startAppInner() {
   $("#btn-t-genres")?.addEventListener("click", ctx.explore.openSubgenreList);
   const btnStoreBildet = document.getElementById("btn-t-store-bildet");
   if (btnStoreBildet) btnStoreBildet.addEventListener("click", ctx.explore.openStoreBildet);
-  const btnTInstr = document.getElementById("btn-t-instrumenter");
-  if (btnTInstr) btnTInstr.addEventListener("click", ctx.explore.openInstrumenter);
+  const btnTReformer = document.getElementById("btn-t-reformer");
+  if (btnTReformer) btnTReformer.addEventListener("click", () => ctx.explore.openTeknologi());
   setupPodkastAdmin();
   const btnArtister = document.getElementById("btn-t-artister");
   if (btnArtister) btnArtister.addEventListener("click", () => {

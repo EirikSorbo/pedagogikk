@@ -126,18 +126,6 @@ export const MODAL_HTML = `
   </div>
 </div>
 
-<!-- Lytt (v6.07, strukturgjennomgangen U7): spillelister per metasjanger,
-     og senere per time («Fra timene», U1). Tegnes av explore-lytt.js. -->
-<div class="modal-backdrop" id="modal-lytt" data-vis="lytt">
-  <div class="modal modal-innhold">
-    <div class="modal-head">
-      <h2>Spillelister</h2>
-      <button class="modal-close btn ghost small">✕</button>
-    </div>
-    <div id="lytt-body"></div>
-  </div>
-</div>
-
 <!-- Sjangre-fanene (v6.12, brukervalg 2026-10-03): Sjangre, Sjangerperioder,
      Artisttidslinje og Undersjangre er fire egne kort med samme
      overskrift og samme fanerad (.sj-faner, tegnes i explore.js). Et fane-

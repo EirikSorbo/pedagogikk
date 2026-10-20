@@ -190,15 +190,14 @@ function setupExplore() {
   });
 
   // Lytt (U7) åpner spillelistene.
-  document.getElementById("btn-lytt")?.addEventListener("click", () => explore.openLytt());
   document.getElementById("fra-timene-liste")?.addEventListener("click", (e) => {
     const rad = e.target.closest("[data-time-id]");
     if (rad) explore.openTime(rad.dataset.timeId);
   });
   const btnGenres = document.getElementById("btn-genres");
   if (btnGenres) btnGenres.addEventListener("click", explore.openSubgenreList);
-  const btnInstrumenter = document.getElementById("btn-instrumenter");
-  if (btnInstrumenter) btnInstrumenter.addEventListener("click", explore.openInstrumenter);
+  const btnReformer = document.getElementById("btn-reformer");
+  if (btnReformer) btnReformer.addEventListener("click", () => explore.openTeknologi());
   // MIDLERTIDIG (feature-flags.js, storeBildet): hubkortet kan skjules for
   // studentene. Det står åpent siden 2026-09-10; hvilke kort de ser inne i
   // huben, styres av SKJUL_I_HUBEN.

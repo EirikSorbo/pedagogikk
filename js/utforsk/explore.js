@@ -20,7 +20,6 @@ import { registrerNavigasjon, sjangerOpts, onMainGenreClick, buildLinkCtx, showA
 import { openSjangerperioder, renderSjangerperioderBody } from "./explore-sjangerperioder.js";
 import { openTidslinje, hideTidTip, tidslinjeHarSjanger } from "./explore-tidslinje.js";
 import { openTechDetail, refreshTechDetail, openTeknologi, renderTeknologiList, refreshTeknologi } from "./explore-tech.js";
-import { openLytt } from "./explore-lytt.js";
 import { openTime } from "./explore-timer.js";
 import { openReferanser, renderReferanser, antallKilder } from "./explore-referanser.js";
 import { openSubgenreList, openUndersjangre, openSubgenreInfo, tegnSjangre } from "./explore-sjanger.js";
@@ -121,7 +120,7 @@ function wireModals() {
    "modal-artistliste", "modal-spilleliste", "modal-sjanger", "modal-tech-detail",
    "modal-store-bildet", "modal-app-guide", "modal-om-historie", "modal-rotter", "modal-historier",
    "modal-meta-oversikt", "modal-visningssider", "modal-galleri",
-   "modal-instr-tech", "modal-podkaster", "modal-sok", "modal-lytt", "modal-time", "modal-slide"].forEach((id) => setupModal(id));
+   "modal-instr-tech", "modal-podkaster", "modal-sok", "modal-time", "modal-slide"].forEach((id) => setupModal(id));
 
   // Søkefeltet i Utforsk-kortet står i sidenes egen markup med faste ID-er, så
   // forsiden og lærersiden får søket av samme kode uten å wire noe selv.
@@ -327,7 +326,6 @@ export function initExplore(options) {
   // seksjonen er lukket, så sidene kan kalle den trygt fra ethvert snapshot.
   return {
     openSok,
-    openLytt,
     openTime,
     openSubgenreList,
     openTidslinje,

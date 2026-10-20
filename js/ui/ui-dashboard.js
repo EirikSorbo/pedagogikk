@@ -402,10 +402,6 @@ export function renderDashboard(el, {
         <span class="ov-kpi-n">${explore?.antallKilder?.() ?? 0}</span>
         <span class="ov-kpi-l">Kilder</span>
       </button>
-      <button type="button" class="ov-kpi ov-click" data-ov-open="instrumenter" title="Instrumenter i bruk. Åpner Instrumenter">
-        <span class="ov-kpi-n">${instruments.length}</span>
-        <span class="ov-kpi-l">Instrumenter</span>
-      </button>
     </div>
 
     <div class="stat-card ov-block">
@@ -605,7 +601,6 @@ export function renderDashboard(el, {
         case "subgenres": return explore?.openSubgenreList();
         case "historier": return explore?.openHistorier?.();
         case "kilder": return explore?.openReferanser?.();
-        case "instrumenter": return explore?.openInstrumenter?.();
         // Koblingene har ingen egen visning: nøkkeltallet åpner Mangler (der
         // lista står), folder den ut og ruller ned til den.
         case "edges": {

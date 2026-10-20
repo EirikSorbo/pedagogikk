@@ -27,7 +27,6 @@ import { ytWatchUrl, lytteeksempelNavn, normaliserPlaner } from "../visning/pres
 import { apneYtSpiller } from "../ui/yt-spiller.js";
 import { openMetaOversikt } from "./explore-metaoversikt.js";
 import { openArtistGalleri } from "./explore-visningssider.js";
-import { openLytt } from "./explore-lytt.js";
 import { openTime, timeTilgjengelig } from "./explore-timer.js";
 import { openSlide } from "../visning/slide-kort.js";
 import { finnSlide, slidesLastet, onSlidesEndret } from "../visning/slides-liste.js";
@@ -94,7 +93,6 @@ export function apneMaal(apne) {
     // Slektstreet er en egen side; siden vi står på gir handleren (forsiden
     // og lærersiden navigerer, tre-siden gir ingen — vi ER der).
     case "slektstre": return void opts.onSlektstre?.();
-    case "lytt": return openLytt();
     case "sjangre": return openSubgenreList();
     case "undersjangre": return openUndersjangre();
     // Artister-vinduet bor på forsiden (landing.js), som gir åpneren.

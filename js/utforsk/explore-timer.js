@@ -26,7 +26,6 @@ import { opts, getState } from "../data/app-state.js";
 // Ruteren (explore-apne.js) nås gjennom nav: den importerer denne fila
 // (openTime, timeTilgjengelig), så en import tilbake ville gitt en importring.
 import { nav } from "./explore-context.js";
-import { leggTilLyttBolk } from "./explore-lytt.js";
 
 // Læreren (lærersiden) ser alltid timene; studentene når bryteren er på.
 export function fraTimeneSynlig() {
@@ -109,7 +108,7 @@ export function openTime(planId) {
 // oversikten hopper over dem (planOversikt), og tallet skal stemme med den.
 const antallKort = (plan) => (plan.stopp || []).filter((st) => !erSlideVis(st.vis)).length;
 
-// Radene for forsiden og Lytt: nyeste time først.
+// Radene for forsiden: nyeste time først.
 export function fraTimeneRaderHtml(timer) {
   return timer.map((t) => `<button type="button" class="sj-rad" data-time-id="${escapeHtml(t.id)}">
     <span class="sj-rad-navn">${escapeHtml(t.tittel)}${t.dato ? `<span class="sj-rad-aar">${escapeHtml(datoTekst(t.dato))}</span>` : ""}</span>
@@ -117,16 +116,3 @@ export function fraTimeneRaderHtml(timer) {
   </button>`).join("");
 }
 
-// Lytt får en bolk «Fra timene» (spillelista fra hver time) når de er synlige.
-leggTilLyttBolk((s) => {
-  if (!fraTimeneSynlig()) return null;
-  const timer = delteTimerNaa();
-  if (!timer.length) return null;
-  return {
-    tittel: "Fra timene",
-    rader: timer.map((t) => {
-      const par = timeEksempler(t, s.artists);
-      return { navn: t.tittel, antall: par.length, aapne: () => openEksemplerSpilleliste(`Spilleliste: ${t.tittel}`, par) };
-    }).filter((r) => r.antall),
-  };
-});

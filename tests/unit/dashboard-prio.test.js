@@ -86,14 +86,13 @@ test("skjulte kort teller ikke som «uten viktighetsgrad»", () => {
 // Pensumets form, og «Hull og skjevheter» står nederst i Mangler-vinduet.
 // (Plateselskapene, nøkkeltallet og kortene, ble tatt ut i fase 4.)
 
-test("Sjangerhistorier, Kilder og Instrumenter fyller tredje rad og åpner hver sin visning", () => {
+test("Sjangerhistorier og Kilder åpner hver sin visning (Instrumenter-tallet gikk ut i fase 4)", () => {
   const el = { innerHTML: "", onclick: null };
   const aapnet = [];
   const explore = {
     antallKilder: () => 42,
     openHistorier: () => aapnet.push("historier"),
     openReferanser: () => aapnet.push("kilder"),
-    openInstrumenter: () => aapnet.push("instrumenter"),
   };
   renderDashboard(el, { artists: ARTISTER, manglerEl: { innerHTML: "", onclick: null }, explore });
   const tall = (navn) => {
@@ -102,17 +101,16 @@ test("Sjangerhistorier, Kilder og Instrumenter fyller tredje rad og åpner hver 
     return Number(m[1]);
   };
   assert.equal(tall("Kilder"), 42);
-  assert.equal(tall("Instrumenter"), 1, "alle testartistene spiller trompet");
   assert.equal(tall("Sjangerhistorier"), 0);
-  for (const hva of ["historier", "kilder", "instrumenter"]) {
+  for (const hva of ["historier", "kilder"]) {
     const knapp = { dataset: { ovOpen: hva } };
     el.onclick({ target: { closest: (sel) => (sel === "[data-ov-open]" ? knapp : null) }, currentTarget: el });
   }
-  assert.deepEqual(aapnet, ["historier", "kilder", "instrumenter"]);
+  assert.deepEqual(aapnet, ["historier", "kilder"]);
   // 10 hele nøkkeltall à to spor + 4 halve var 24 spor: tre fulle rader à åtte.
-  // Plateselskap-tallet gikk ut i fase 4, så det er 22 spor, og siste rad er
-  // ikke full. Rutenettet må justeres (se PLAN.md, fase 4).
+  // Plateselskap- og Instrumenter-tallene gikk ut i fase 4, så det er 20 spor,
+  // og siste rad er ikke full. Rutenettet må justeres (se PLAN.md, fase 4).
   const hele = (el.innerHTML.match(/class="ov-kpi(?: ov-click)?"/g) || []).length;
   const halve = (el.innerHTML.match(/class="ov-kpi ov-kpi-half/g) || []).length;
-  assert.equal(hele * 2 + halve, 22);
+  assert.equal(hele * 2 + halve, 20);
 });
