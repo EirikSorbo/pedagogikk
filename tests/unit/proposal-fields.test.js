@@ -270,7 +270,7 @@ test("SKJUL_I_HUBEN stemmer med kortene i «Det store bildet»", async () => {
   const fra = markup.indexOf('id="modal-store-bildet"');
   const til = markup.indexOf("modal-backdrop", fra + 40);
   const ider = [...markup.slice(fra, til).matchAll(/id="(sb-[a-z-]+)"/g)].map((m) => m[1]);
-  assert.ok(ider.length >= 10, `fant bare ${ider.length} hub-kort`);
+  assert.ok(ider.length >= 9, `fant bare ${ider.length} hub-kort`);
 
   assert.deepEqual([...Object.keys(SKJUL_I_HUBEN)].sort(), [...ider].sort(),
     "hvert kort skal ha nøyaktig ett flagg, og hvert flagg peke på et kort");
@@ -295,7 +295,7 @@ test("SKJUL_I_HUBEN stemmer med kortene i «Det store bildet»", async () => {
 // Skriveveiledningen og kommentarfeltet (v5.18). To feller låses her:
 //  1. [hidden] på et element med display i CSS ble ignorert, så returbanneret
 //     (med kommentarfeltet) sto synlig for alle studenter fra v5.13.
-//  2. Oversiktens sideklikk sendte alt som ikke var «rotter» til Om historie,
+//  2. Oversiktens sideklikk sendte alt som ikke var «rotter» (en side som er tatt ut) til Om historie,
 //     så en ny innholdsside ville åpnet feil side i stedet for editoren.
 // Kildesjekk: markup, CSS og lærerens dashbord kan ikke lastes i Node.
 test("skriveveiledning: skjult til den finnes, kommentarfeltet nederst, redigerbar", async () => {

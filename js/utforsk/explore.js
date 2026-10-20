@@ -23,7 +23,7 @@ import { openTechDetail, refreshTechDetail, openTeknologi, renderTeknologiList, 
 import { openTime } from "./explore-timer.js";
 import { openReferanser, renderReferanser, antallKilder } from "./explore-referanser.js";
 import { openSubgenreList, openUndersjangre, openSubgenreInfo, tegnSjangre } from "./explore-sjanger.js";
-import { openStoreBildet, openAppGuide, openOmHistorie, openRotter, openHistorier, openSjangerhimmel, renderPage, renderRotterChips, refreshHistorie } from "./explore-innhold.js";
+import { openStoreBildet, openAppGuide, openOmHistorie, openHistorier, openSjangerhimmel, renderPage, refreshHistorie } from "./explore-innhold.js";
 import { openVisningssider, openArtistGalleri } from "./explore-visningssider.js";
 import { openMetaOversikt } from "./explore-metaoversikt.js";
 import { openSok, wireSok } from "./explore-search.js";
@@ -53,7 +53,6 @@ function tomtUnderRegel(id) {
   const s = getState();
   switch (id) {
     case "sb-historier": return !storyOrderSynlig(s.genreDescs).length;
-    case "sb-rotter": return !pageFor("rotter", s.content)?.body?.trim();
     case "sb-om-historie": return !pageFor("omHistorie", s.content)?.body?.trim();
     default: return false;
   }
@@ -86,13 +85,6 @@ export function contentChanged() {
   refreshSjangerInfo(sjangerOpts());
   const isOpen = (id) => document.getElementById(id)?.classList.contains("open");
   if (isOpen("modal-om-historie")) renderPage("omHistorie", "om-historie-body", "omh-extra");
-  if (isOpen("modal-rotter")) {
-    renderPage("rotter", "rotter-body", "rotter-extra");
-    // Rot-boblene bygges av sjangertreet, som lander ASYNKRONT. Sto kortet
-    // åpent da snapshotet kom, ble de stående tomme til det ble lukket og
-    // åpnet igjen.
-    renderRotterChips();
-  }
   if (isOpen("modal-app-guide")) renderPage("appGuide", "app-guide-body", "app-guide-extra");
   if (isOpen("modal-historier")) refreshHistorie();
   // Sjangerperioder: treet kommer via content, og en figur som sto og ventet på
@@ -117,7 +109,7 @@ function wireModals() {
    "modal-subgenre-list", "modal-undersjangre", "modal-subgenre-info",
    "modal-sjangerperioder", "modal-tidslinje", "modal-referanser", "modal-sjangerhimmel",
    "modal-artistliste", "modal-spilleliste", "modal-sjanger", "modal-tech-detail",
-   "modal-store-bildet", "modal-app-guide", "modal-om-historie", "modal-rotter", "modal-historier",
+   "modal-store-bildet", "modal-app-guide", "modal-om-historie", "modal-historier",
    "modal-meta-oversikt", "modal-visningssider", "modal-galleri",
    "modal-sok", "modal-time", "modal-slide"].forEach((id) => setupModal(id));
 
@@ -148,14 +140,6 @@ function wireModals() {
   if (tlModal && "MutationObserver" in window) {
     new MutationObserver(() => { if (!tlModal.classList.contains("open")) hideTidTip(); })
       .observe(tlModal, { attributes: true, attributeFilter: ["class"] });
-  }
-
-  // Røtter-sidens ene navigasjonsknapp (statisk markup — innholdet bor i
-  // Firestore). Står over teksten, ikke under den, og fyller bredden.
-  const rotterTre = document.getElementById("rotter-tre");
-  if (rotterTre) {
-    if (opts.onSlektstre) rotterTre.addEventListener("click", () => opts.onSlektstre());
-    else rotterTre.style.display = "none";
   }
 
   // Sjangre-fanene (v6.12, brukervalg 2026-10-03): de fire kortene om sjangrene
@@ -217,7 +201,6 @@ function wireModals() {
     const paaKort = (id, fn) => sbModal.querySelector("#" + id)?.addEventListener("click", fn);
     paaKort("sb-visning", openVisningssider);
     paaKort("sb-om-historie", openOmHistorie);
-    paaKort("sb-rotter", openRotter);
     paaKort("sb-historier", () => openHistorier());
     paaKort("sb-tidslinje", () => openTidslinje());
     const sbTre = sbModal.querySelector("#sb-slektstre");
@@ -325,7 +308,6 @@ export function initExplore(options) {
     openStoreBildet,
     openAppGuide,
     openOmHistorie,
-    openRotter,
     openHistorier,
     // Nøkkeltallet «Kilder» i lærerens Oversikt (v6.88) åpner Referanser.
     openReferanser,

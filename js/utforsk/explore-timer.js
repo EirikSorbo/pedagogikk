@@ -95,7 +95,7 @@ export function openTime(planId) {
   const par = timeEksempler(plan, s.artists);
   const body = document.getElementById("tm-body");
   body.innerHTML = `<p class="mo-tall">${escapeHtml([datoTekst(plan.dato), `${antallKort(plan)} kort`].filter(Boolean).join(" · "))}</p>`
-    + (par.length ? `<p><button type="button" class="btn ghost small" data-tm-spill>Spill lytteeksemplene fra timen (${par.length})</button></p>` : "")
+    + (par.length ? `<p><button type="button" class="btn ghost small" data-tm-spill>Spill videoene fra timen (${par.length})</button></p>` : "")
     + `<div class="sj-familier">${grupper.map((g) => `<section class="sj-familie"><div class="sj-fam-hode"><h3 class="sj-fam-navn">${escapeHtml(g.navn)}</h3><span class="sj-fam-tall">${g.punkter.length}</span></div>
         ${g.punkter.map((p) => `<button type="button" class="sj-rad" data-tm-vis="${escapeHtml(plan.stopp[p.stopp]?.vis || "")}"><span class="sj-rad-navn">${escapeHtml(p.tekst)}${p.detalj ? `<span class="sj-rad-aar">${escapeHtml(p.detalj)}</span>` : ""}</span></button>`).join("")}
       </section>`).join("")}</div>`;

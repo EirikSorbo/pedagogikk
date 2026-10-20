@@ -61,11 +61,11 @@ const FIELD_SPECS = {
     // altså til året kortet plasseres etter på teknologitidslinjen, og
     // lærerens diff-tabell kalte endringen «Oppfunnet». Etikettene her er nå
     // ordrett de samme som i lærerens editor (teacher.html).
-    { key: "inventedYear", label: "Oppfunnet (år)", type: "number",
-      hint: `Året teknologien ble oppfunnet eller patentert. ${AAR_HJELP}` },
-    { key: "adoptedYear", label: "Tatt i bruk (år)", type: "number",
+    { key: "inventedYear", label: "Vedtatt eller innført (år)", type: "number",
+      hint: `Året reformen ble vedtatt eller innført, eller milepælen inntraff. ${AAR_HJELP}` },
+    { key: "adoptedYear", label: "Gjennomslag (år)", type: "number",
       hint: "Året det ble tatt i bruk i nevneverdig skala." },
-    { key: "adoptedLabel", label: "Tatt i bruk (kort forklaring)", type: "text", max: 150 },
+    { key: "adoptedLabel", label: "Gjennomslag (kort forklaring)", type: "text", max: 150 },
     { key: "description", label: "Beskrivelse", type: "textarea", full: true },
     KILDE_FELT,
     { key: "imageUrl", label: "Bilde-URL", type: "text", full: true },

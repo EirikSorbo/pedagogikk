@@ -39,11 +39,11 @@ test("contentGaps: sider telles kun når innhold er lastet", () => {
   assert.equal(contentGaps({ artists: [], content: {}, contentLoaded: false }).pages.length, 0);
   assert.deepEqual(
     contentGaps({ artists: [], content: {}, contentLoaded: true }).pages.sort(),
-    ["omHistorie", "rotter"],
+    ["omHistorie"],
   );
   assert.deepEqual(
-    contentGaps({ artists: [], content: { rotter: { body: "x" } }, contentLoaded: true }).pages,
-    ["omHistorie"],
+    contentGaps({ artists: [], content: { omHistorie: { body: "x" } }, contentLoaded: true }).pages,
+    [],
   );
 });
 
@@ -102,7 +102,7 @@ test("contentGaps: total er summen av alle bøtter", () => {
 // Oversikten skal telle tekstløse sider som hull, ikke grønnmerke dem.
 test("side med kilder men uten tekst teller som hull", async () => {
   const { contentGaps } = await import("../../js/ui/ui-dashboard.js");
-  const content = { rotter: { body: "", kilder: [{ text: "SNL" }] }, omHistorie: { body: "Tekst." } };
+  const content = { omHistorie: { body: "", kilder: [{ text: "SNL" }] } };
   const g = contentGaps({ artists: [], genreDescs: {}, content, contentLoaded: true });
-  assert.deepEqual(g.pages, ["rotter"], "kilder alene er ikke innhold");
+  assert.deepEqual(g.pages, ["omHistorie"], "kilder alene er ikke innhold");
 });

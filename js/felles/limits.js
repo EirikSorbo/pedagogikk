@@ -131,7 +131,7 @@ export function instrumentsInUse(artists, behold = "") {
 // navnet direkte, og artistkortet beholder det presise instrumentet.)
 
 // Dokument-ID for instrumentgruppens sammendrag i `content`-samlingen — samme
-// sted som Om historie og Røtter. Utledet, men rensket: Firestore-ID-er tåler
+// sted som Om historie. Utledet, men rensket: Firestore-ID-er tåler
 // ikke skråstrek («Trommer/perkusjon» er en artistverdi, ikke et gruppenavn, så
 // gruppene er trygge i dag — men rensingen står her så en fremtidig gruppe med
 // skråstrek eller æøå ikke kan lage et ulovlig dokumentnavn i stillhet).

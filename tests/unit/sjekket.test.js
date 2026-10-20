@@ -81,7 +81,7 @@ test("koblinger og innovasjonskort følger hver sin sjekk", () => {
 
 test("innholdssidene: pensumsidene følger sjekken, resten av content står", () => {
   const content = {
-    rotter: { body: "r" }, omHistorie: { body: "o" }, appGuide: { body: "g" },
+    omHistorie: { body: "o" }, appGuide: { body: "g" },
     "instrument-gitar": { body: "i" },
     skriveveiledning: { body: "s" }, varmekart: { heat: {} }, genealogy: { nodes: [] }, synlighet: {}, referanser: { kilder: [] },
   };
@@ -115,21 +115,21 @@ test("import: sjekken faller når teksten endres, ikke når den er lik eller tom
     decadeDescs: { 1950: { society: "gammel", tech: "t" } },
     genreDescs: { "Europeisk folkemusikk": { main: { description: "a" } }, Blues: { story: { body: "h" } } },
     edgeDescs: { a__b: { description: "x" } },
-    content: { rotter: { body: "r" } },
+    content: { omHistorie: { body: "r" } },
     techItems: [{ id: "t1", name: "Mikrofon", description: "d" }],
   };
   const fjern = sjekkerEndretAvImport({
     decades: { 1950: { society: "ny", tech: "" } },
     genreDescriptions: { "Europeisk folkemusikk": { main: { description: "b" } }, Blues: { story: { body: "h" } } },
     edgeDescriptions: { a__b: { description: "x" } },
-    pages: { rotter: { body: "ny" }, skriveveiledning: { body: "s" } },
+    pages: { omHistorie: { body: "ny" }, skriveveiledning: { body: "s" } },
     tech: [{ name: "Mikrofon", description: "ny" }, { name: "Ny ting", description: "z" }],
   }, naa);
   assert.equal(fjern.decades, undefined, "tiårene i en eldre fil importeres ikke lenger (fase 2)");
   assert.deepEqual([...fjern.genres].sort(), ["Europeisk", "Europeisk folkemusikk"]);
   assert.equal(fjern.metaGenres, undefined, "lik historie beholder sjekken");
   assert.equal(fjern.edges, undefined);
-  assert.deepEqual([...fjern.pages], ["rotter"]);
+  assert.deepEqual([...fjern.pages], ["omHistorie"]);
   assert.deepEqual([...fjern.tech], ["t1"]);
 
   const { data, antall } = sjekkerUten(

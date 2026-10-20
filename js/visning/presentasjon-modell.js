@@ -413,7 +413,7 @@ export function finnLytteeksempel(videoId, artister) {
     const eks = (a?.musicExamples || []).find((x) => ytMaal(x?.url || "")?.video === videoId);
     if (eks) {
       return {
-        artist: a.name || "(uten navn)", artistId: a.id ?? null, label: eks.label || "Lytteeksempel", url: String(eks.url),
+        artist: a.name || "(uten navn)", artistId: a.id ?? null, label: eks.label || "Video", url: String(eks.url),
         year: eks.year ?? null, performanceYear: eks.performanceYear ?? null,
       };
     }
@@ -465,7 +465,7 @@ const VISNING_NAVN = {
   // Vinduene med egen adresse fra v6.08 (S7).
   sjangre: "Epokene", undersjangre: "Prinsippene", artister: "Teoretikerne",
 };
-const SIDE_NAVN = { omHistorie: "Om historie", rotter: "Røtter før 1910" };
+const SIDE_NAVN = { omHistorie: "Om historie" };
 
 // Ett stopp som punkt på oversikten: kategori, tekst, og eventuelt en detalj
 // (tidspunkt, samfunn/teknologi) og en egen sorteringsnøkkel. null = utelat:
@@ -482,7 +482,7 @@ function oversiktPunkt(m, oppslag) {
       const fra = formatTid(Number(m.ekstra) || 0);
       return {
         kat: "lytteeksempler",
-        tekst: lytteeksempelNavn(m.id, oppslag.artister) || "Lytteeksempel",
+        tekst: lytteeksempelNavn(m.id, oppslag.artister) || "Video",
         detalj: fra ? `fra ${fra}` : "",
       };
     }

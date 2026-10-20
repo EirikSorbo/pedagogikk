@@ -69,7 +69,7 @@ export const TYPE_ORDER = [
   "historie", "galleri", "side", "instrument", "kobling", "slide",
 ];
 
-const SIDE_TITTEL = { rotter: "Røtter før 1910", omHistorie: "Om historie", appGuide: "Slik bruker du appen" };
+const SIDE_TITTEL = { omHistorie: "Om historie", appGuide: "Slik bruker du appen" };
 
 // Søket skal ikke bry seg om store bokstaver eller aksenter: «beyonce» skal
 // finne «Beyoncé», og «rock’n’roll» skal finne «Rock'n'roll». Norske æ/ø/å er
@@ -246,12 +246,12 @@ export function byggIndeks(state = {}, { erLærer = false, skjul = {}, skjulHub 
   // (Tiårstekstene, samfunn og teknologi per tiår, ble tatt ut i fase 2.)
 
   // --- Innholdssidene -------------------------------------------------------
-  // Røtter, Om historie og «Slik bruker du appen» nås KUN fra hvert sitt kort i
-  // «Det store bildet». Huben er åpen for studentene igjen (v5.17), men de tre
+  // Om historie og «Slik bruker du appen» nås KUN fra hvert sitt kort i
+  // «Det store bildet». Huben er åpen for studentene igjen (v5.17), men de to
   // kortene er fortsatt skjult, og da skal søket heller ikke føre dit
   // (brukervalg 2026-09-10). Nøklene er kort-id-ene i SKJUL_I_HUBEN.
-  const HUB_KORT = { rotter: "sb-rotter", omHistorie: "sb-om-historie", appGuide: "sb-guide" };
-  for (const id of ["rotter", "omHistorie", "appGuide"]) {
+  const HUB_KORT = { omHistorie: "sb-om-historie", appGuide: "sb-guide" };
+  for (const id of ["omHistorie", "appGuide"]) {
     if (!erLærer && skjulHub[HUB_KORT[id]]) continue;
     const side = pageFor(id, content);
     if (!side) continue;

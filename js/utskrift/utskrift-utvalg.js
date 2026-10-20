@@ -213,7 +213,7 @@ export const UTSKRIFT_HAKE_SVG = '<svg width="16" height="16" viewBox="0 0 24 24
 
 const TITTEL_MED = "Tatt med i utskriften. Klikk for å ta den ut.";
 const TITTEL_UTEN = "Ta med i utskriften";
-const TITTEL_IKKE = "Kan ikke stå i heftet. Bare kort, sider og lytteeksempler kan skrives ut.";
+const TITTEL_IKKE = "Kan ikke stå i heftet. Bare kort, sider og videoer kan skrives ut.";
 
 function knappTilstand(b, k) {
   const med = harMed(k);

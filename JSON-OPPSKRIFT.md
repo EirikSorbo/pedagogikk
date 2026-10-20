@@ -30,7 +30,7 @@ Appen er kopiert fra musikkhistorie-appen, og kode, filnavn og databasenøkler b
   "genreDescriptions": { "meta": { "Erfaring og demokrati": { ... } }, "main": { "Progressivismen": { ... } }, "sub": { "Læring gjennom erfaring": { ... } } },
   "edgeDescriptions":  { "pragmatisme__progressivisme": { "description": "...", "kilder": [ ... ] } },
   "tech":              [ /* reformer og milepæler */ ],
-  "pages":             { "omHistorie": { "body": "..." }, "rotter": { ... }, "appGuide": { ... } },
+  "pages":             { "omHistorie": { "body": "..." }, "appGuide": { ... } },
   "teacherChecks":     { /* lærerens sjekk-fremdrift */ },
   "referanser":        { "kilder": [ ... ] },
   "presentasjoner":    { "planer": { ... } },
@@ -48,7 +48,7 @@ Alle nøkler er valgfrie, men fila må ha teoretikere eller minst én innholdsde
 | `genreDescriptions` | objekt | Beskrivelser for retninger, epoker og prinsipper, nestet i tre bolker (`meta`/`main`/`sub`). `story` på retningen er fortellingen om retningen. Se seksjon 2. |
 | `edgeDescriptions` | objekt | Beskrivelsene av påvirkningene (strekene i treet). Nøkkel = dokument-ID `fra__til`, to epoke-id-er (`id` i `genealogy.nodes`) skilt av to understreker. |
 | `tech` | array | Reformer og milepæler (alle statuser, også pending). Sortert etter `adoptedYear`. |
-| `pages` | objekt | Innholdssidene: `omHistorie`, `rotter`, `appGuide`, `skriveveiledning` (hjelp øverst i skjemaet) og `laererHandbok`. |
+| `pages` | objekt | Innholdssidene: `omHistorie`, `appGuide`, `skriveveiledning` (hjelp øverst i skjemaet) og `laererHandbok`. |
 | `teacherChecks` | objekt | Lærerens sjekk-fremdrift per kategori: `{ kategori: [id, ...] }`. |
 | `referanser` | objekt | Frittstående referanser (erstattes i sin helhet ved import). |
 | `presentasjoner` | objekt | Kjøreplanene til Visning-vinduet. Importen legger til eller erstatter planen med samme id, og læreren får se lista først. |

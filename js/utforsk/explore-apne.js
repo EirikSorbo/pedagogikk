@@ -16,7 +16,7 @@ import { opts, getState } from "../data/app-state.js";
 import { showSubsjangerInfo } from "../ui/ui.js";
 import { showEdgeInfo } from "../sjangre/genealogy.js";
 import { openTechDetail, openTeknologi } from "./explore-tech.js";
-import { openRotter, openOmHistorie, openHistorier, openAppGuide, openStoreBildet, openSjangerhimmel } from "./explore-innhold.js";
+import { openOmHistorie, openHistorier, openAppGuide, openStoreBildet, openSjangerhimmel } from "./explore-innhold.js";
 import { openSjangerperioder } from "./explore-sjangerperioder.js";
 import { openTidslinje } from "./explore-tidslinje.js";
 import { openReferanser } from "./explore-referanser.js";
@@ -36,7 +36,7 @@ import { artistSjekketOk } from "../felles/sjekket.js";
 // spilleren kan vise «Hotel California (Eagles)» i stedet for «Avspilling».
 // Oppslaget er delt med kjøreplan-editoren og oversiktskortet.
 function ytTittel(videoId, s) {
-  return lytteeksempelNavn(videoId, s.artists) || "Lytteeksempel";
+  return lytteeksempelNavn(videoId, s.artists) || "Video";
 }
 
 // Åpner ett mål: { hva, id?, modus? }. Kortene åpnes OPPÅ det som alt står
@@ -73,9 +73,10 @@ export function apneMaal(apne) {
       return;
     }
     case "side":
-      if (apne.id === "rotter") return openRotter();
       if (apne.id === "omHistorie") return openOmHistorie();
-      return openAppGuide();
+      // Ukjente side-id-er (en gammel lenke til Røtter-siden) åpner ingenting.
+      if (apne.id === "guide" || apne.id === "appGuide") return openAppGuide();
+      return;
     case "kobling": {
       const [fra, til] = String(apne.id).split("__");
       showEdgeInfo(fra, til, sjangerOpts());

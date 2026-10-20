@@ -225,10 +225,10 @@ export function planGenreRename(state, fra, til) {
     const alt = ops.find((o) => o.coll === "artists" && o.id === a.id);
     if (alt) alt.data = { ...alt.data, musicExamples: nyeEks };
     else ops.push(op("doc.merge", "artists", a.id, { musicExamples: nyeEks },
-      `Lytteeksempel hos ${a.name}`));
+      `Video hos ${a.name}`));
   }
   if (ref.eksempler.length) {
-    advarsler.push(`${ref.eksempler.length} teoretiker(er) har lytteeksempler merket med sjangeren. De følger med.`);
+    advarsler.push(`${ref.eksempler.length} teoretiker(er) har videoer merket med epoken. De følger med.`);
   }
 
   // 3c) Frie undersjangre med samme navn røres IKKE. De er et annet vokabular,
@@ -277,7 +277,7 @@ export function planGenreRename(state, fra, til) {
   }
   const friSub = forslagMedFriSub(state, fra);
   if (friSub.length) {
-    advarsler.push(`${friSub.length} teoretikerforslag i køen har «${fra}» som fritt prinsipp-merke. Den står igjen med vilje, som på artistene.`);
+    advarsler.push(`${friSub.length} teoretikerforslag i køen har «${fra}» som fritt prinsipp-merke. Den står igjen med vilje, som på teoretikerne.`);
   }
 
   return { ops, feil, advarsler };
@@ -551,8 +551,8 @@ export function planGenreDelete(state, label) {
   // taggene levde videre i skjemaene. Samme prinsipp som artist-taggene.
   if (ref.eksempler.length) {
     blokkeringer.push({
-      hva: `${ref.eksempler.length} teoretiker(er) har lytteeksempler merket «${label}»`,
-      losning: "Endre epoken på lytteeksemplene først.",
+      hva: `${ref.eksempler.length} teoretiker(er) har videoer merket «${label}»`,
+      losning: "Endre epoken på videoene først.",
       detaljer: ref.eksempler.slice(0, 12).map((a) => a.name),
     });
   }
@@ -602,7 +602,7 @@ export function planGenreDelete(state, label) {
   }
   const friSubSlett = forslagMedFriSub(state, label);
   if (friSubSlett.length) {
-    advarsler.push(`${friSubSlett.length} teoretikerforslag i køen har «${label}» som fritt prinsipp-merke. Den står igjen med vilje, som på artistene.`);
+    advarsler.push(`${friSubSlett.length} teoretikerforslag i køen har «${label}» som fritt prinsipp-merke. Den står igjen med vilje, som på teoretikerne.`);
   }
 
   return { ops, feil, advarsler, blokkeringer: [] };

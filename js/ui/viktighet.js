@@ -110,7 +110,7 @@ export function oppdaterMerke() {
   if (!n) return;
   el.className = `viktighet-merke prio-${n}`;
   el.innerHTML = PRIO_ICONS[n];
-  const tekst = `Viktighetsnivå: ${NIVAA_TEKST[n].toLowerCase()}. Gjelder teoretikerlista og spillelistene. Klikk for å slå av.`;
+  const tekst = `Viktighetsnivå: ${NIVAA_TEKST[n].toLowerCase()}. Gjelder teoretikerlistene. Klikk for å slå av.`;
   el.title = tekst;
   el.setAttribute("aria-label", tekst);
 }

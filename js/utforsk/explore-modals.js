@@ -185,11 +185,6 @@ ${TECH_DETAIL_MODAL_HTML}
         <span class="dash-title">Om historie</span>
         <span class="dash-desc">Hvorfor pedagogikkhistorie</span>
       </button>
-      <button class="dash-card" id="sb-rotter">
-        <svg class="dash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="--ikon:var(--icon-rotter)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v8"/><path d="M12 11c0 3-2.5 4.5-4 7"/><path d="M12 11c0 3 2.5 4.5 4 7"/><path d="M12 11v7"/><circle cx="12" cy="19.5" r="1.3"/><circle cx="7.5" cy="18.5" r="1.3"/><circle cx="16.5" cy="18.5" r="1.3"/></svg>
-        <span class="dash-title">Røtter</span>
-        <span class="dash-desc">Opphavet før 1910</span>
-      </button>
       <button class="dash-card" id="sb-historier">
         <svg class="dash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="--ikon:var(--icon-historier)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
         <span class="dash-title">Epokehistorier</span>
@@ -245,7 +240,7 @@ ${TECH_DETAIL_MODAL_HTML}
 
 <!-- Slik bruker du appen: en kort bruksveiledning for studentene. Teksten bor i
      Firestore (content/appGuide, markdown-light) og redigeres via samme
-     Rediger-knapp som Om historie/Røtter — ingen hardkodet tekst i koden.
+     Rediger-knapp som Om historie — ingen hardkodet tekst i koden.
      Åpnes som siste kort i «Det store bildet». -->
 <div class="modal-backdrop" id="modal-app-guide" data-vis="side:guide">
   <div class="modal modal-innhold">
@@ -258,8 +253,8 @@ ${TECH_DETAIL_MODAL_HTML}
   </div>
 </div>
 
-<!-- Innholdssidene «Om historie» og «Røtter før 1910»: teksten bor i
-     Firestore (content/omHistorie og content/rotter, markdown-light) og
+<!-- Innholdssiden «Om historie»: teksten bor i
+     Firestore (content/omHistorie, markdown-light) og
      rendres ved hver åpning — ingen hardkodet tekst i koden. Foten er
      navigasjon (kode), ikke innhold. -->
 <div class="modal-backdrop" id="modal-om-historie" data-vis="side:omHistorie">
@@ -284,23 +279,6 @@ ${TECH_DETAIL_MODAL_HTML}
     </div>
     <hr class="slide-strek">
     <div class="slide-kropp rt"></div>
-  </div>
-</div>
-
-<div class="modal-backdrop" id="modal-rotter" data-vis="side:rotter">
-  <div class="modal modal-innhold">
-    <div class="modal-head">
-      <h2>Røtter før 1910</h2>
-      <div id="rotter-extra" class="head-actions"></div>
-      <button class="modal-close btn ghost small">✕</button>
-    </div>
-    <div class="rotter-links">
-      <button class="btn primary" id="rotter-tre">Se slektstreet</button>
-    </div>
-    <!-- Røttene som klikkbare bobler, rett under inngangen til treet: hvilke
-         de er, før teksten om dem. Fylles av openRotter (explore-innhold.js). -->
-    <div class="rotter-chips" id="rotter-chips"></div>
-    <div id="rotter-body" class="story-body"></div>
   </div>
 </div>
 

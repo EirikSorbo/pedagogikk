@@ -62,7 +62,7 @@ export function filtrerTech(items, sjekker = {}) {
 // referanselista, skriveveiledningen) er utenfor regelen. Bruksveiledningen
 // (appGuide) er unntatt fra v6.95 (brukervalg 2026-10-13): avhukingen av
 // delene styrer den alene (js/felles/guide-deler.js).
-const SIDER = ["rotter", "omHistorie"];
+const SIDER = ["omHistorie"];
 export function sideSjekk(id) {
   const s = String(id || "");
   if (SIDER.includes(s) || s.startsWith("instrument-")) return { kategori: "pages", id: s };

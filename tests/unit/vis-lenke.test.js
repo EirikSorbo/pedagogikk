@@ -12,7 +12,6 @@ test("vis-verdi: rundtur for alle måltypene", () => {
     { hva: "historie", id: "Hip-hop" },
     { hva: "historie" },
     { hva: "tech", id: "t42" },
-    { hva: "side", id: "rotter" },
     { hva: "side", id: "omHistorie" },
     { hva: "side", id: "guide" },
     { hva: "instrument", id: "Gitar" },

@@ -384,10 +384,10 @@ test("planOversikt: slettede mål og ugyldige stopp utelates, tom plan gir ingen
 
 test("planOversikt: kobling med nodenavn, historie og visninger får lesbare navn", () => {
   const nodeNavn = (id) => ({ blues: "Blues", rnb: "R&B" })[id];
-  const g = planOversikt(vis("kobling:blues__rnb", "historie:Rock", "historie", "side:rotter", "teknologi", "himmel"), { nodeNavn });
+  const g = planOversikt(vis("kobling:blues__rnb", "historie:Rock", "historie", "side:omHistorie", "teknologi", "himmel"), { nodeNavn });
   const tekster = (id) => g.find((k) => k.id === id).punkter.map((p) => p.tekst);
   assert.deepEqual(tekster("sjangre"), ["Blues → R&B", "Historien om Rock"]);
-  assert.deepEqual(tekster("oversikter"), ["Epokehimmelen", "Epokehistoriene", "Røtter før 1910"]);
+  assert.deepEqual(tekster("oversikter"), ["Epokehimmelen", "Epokehistoriene", "Om historie"]);
   assert.deepEqual(tekster("teknologi"), ["Reformoversikten"]);
 });
 
@@ -859,7 +859,7 @@ test("finnLytteeksempel gir artist, etikett og lenke; lytteeksempelNavn bygger p
   ];
   assert.deepEqual(finnLytteeksempel("-SBmury81Ws", artister),
     { artist: "Muddy Waters", artistId: "a", label: "Got My Mojo Working", url: "https://www.youtube.com/watch?v=-SBmury81Ws", year: 1957, performanceYear: null });
-  assert.equal(finnLytteeksempel("GtDlZdhHRCI", artister).label, "Lytteeksempel");
+  assert.equal(finnLytteeksempel("GtDlZdhHRCI", artister).label, "Video");
   assert.equal(finnLytteeksempel("finnesikke1", artister), null);
   assert.equal(finnLytteeksempel(null, artister), null);
   assert.equal(lytteeksempelNavn("-SBmury81Ws", artister), "Got My Mojo Working (Muddy Waters)");
@@ -880,7 +880,7 @@ test("spilleren fanger YouTube-lenkene i hele appen, med reserve for sperrede vi
   // spilleren (reservene) fanges ikke.
   assert.match(spiller, /if \(!a \|\| a\.closest\("#modal-yt"\)\) return;\n\s*if \(e\.metaKey \|\| e\.ctrlKey \|\| e\.shiftKey \|\| e\.altKey\) return;/);
   // «Spill alle» (watch_videos) spilles som kø i stedet for ny fane.
-  assert.match(spiller, /const ider = ytSpillelisteIder\(a\.href\);\n\s*if \(ider\) \{\n\s*if \(apneYtSpiller\(ytWatchUrl\(ider\[0\], null, null\), `Spilleliste · \$\{ider\.length\} videoer`, \{ kø: ider\.slice\(1\) \}\)\) e\.preventDefault\(\);/);
+  assert.match(spiller, /const ider = ytSpillelisteIder\(a\.href\);\n\s*if \(ider\) \{\n\s*if \(apneYtSpiller\(ytWatchUrl\(ider\[0\], null, null\), `\$\{ider\.length\} videoer`, \{ kø: ider\.slice\(1\) \}\)\) e\.preventDefault\(\);/);
   // Sperret video: tydelig melding med reserven som knapp, og reserven åpner
   // hele køen når det er en.
   assert.match(spiller, /const FEIL_TEKST = \{\n\s*100: /);

@@ -29,7 +29,7 @@ const INNHOLDSKORT = {
     "modal-sjangerperioder", "modal-sjangerhimmel",
     "modal-tidslinje", "modal-subgenre-list", "modal-undersjangre", "modal-subgenre-info",
     "modal-store-bildet", "modal-referanser", "modal-app-guide", "modal-om-historie",
-    "modal-rotter", "modal-historier",
+    "modal-historier",
   ],
   "js/ui/ui-modal-fragments.js": ["modal-sjanger", "modal-artistliste", "modal-spilleliste", "modal-tech-detail"],
 };

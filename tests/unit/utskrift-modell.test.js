@@ -61,7 +61,6 @@ const DATA = {
   // Varmekartet og tiårsbeskrivelsene ble tatt ut i fase 2; heftet leser dem
   // ikke lenger.
   content: {
-    rotter: { body: "Røttene.", kilder: [] },
     omHistorie: { body: "Om historie." },
     "instrument-filosof": { body: "Gitarens historie.", kilder: [{ text: "Store norske leksikon.", url: "https://snl.no/gitar" }] },
   },
@@ -74,7 +73,7 @@ const DATA = {
   ],
 };
 
-const STUDENT = { naa: NAA, skjul: { metasjangerhistorier: true, horEtter: true, koblingsbeskrivelser: true, viktighetsgrad: true }, skjulHub: { "sb-rotter": true, "sb-om-historie": true }, punkterSkjult: true };
+const STUDENT = { naa: NAA, skjul: { metasjangerhistorier: true, horEtter: true, koblingsbeskrivelser: true, viktighetsgrad: true }, skjulHub: { "sb-om-historie": true }, punkterSkjult: true };
 const LAERER = { naa: NAA, erLaerer: true, skjul: STUDENT.skjul, skjulHub: STUDENT.skjulHub, punkterSkjult: false };
 
 // ---------------------------------------------------------------------------
@@ -86,7 +85,8 @@ test("kanoniskVis: bare hefte-typer, guiden holdes utenfor, tiårene er tatt ut"
   // Tiårskortene ble tatt ut i fase 2: et tiår i et lagret utvalg faller bort.
   assert.equal(kanoniskVis("tiår:1950:tech"), null);
   assert.equal(kanoniskVis("tiår:1950"), null);
-  assert.equal(kanoniskVis("side:rotter"), "side:rotter");
+  assert.equal(kanoniskVis("side:omHistorie"), "side:omHistorie");
+  assert.equal(kanoniskVis("side:rotter"), null, "Røtter-siden er tatt ut (fase 4)");
   assert.equal(kanoniskVis("side:guide"), null);
   assert.equal(kanoniskVis("side:appGuide"), null);
   // Metasjangeren er heftets egen type (v5.58), ikke en ?vis=-type.
@@ -193,15 +193,15 @@ test("sjangerkortet: epoke, slektskap og kilder fra data", () => {
   assert.deepEqual(blues.punkter, [], "punktene er skjult utenfor presentasjonen");
 });
 
-test("læreren får punktene og historien, men heller ikke «Hør etter»; studenten får «skjult» i mangler", () => {
-  const l = settSammen(["sjanger:Electric blues", "sjanger:Blues", "historie:Blues", "side:rotter"], DATA, LAERER);
+test("læreren får punktene og historien; studenten får «skjult» i mangler", () => {
+  const l = settSammen(["sjanger:Electric blues", "sjanger:Blues", "historie:Blues", "side:omHistorie"], DATA, LAERER);
   assert.equal("lytt" in l.familier[0].sjangre[0], false);
   assert.deepEqual(l.familier[0].hodeKort.punkter, ["Blåtoner", "AAB-strofe", "Tolv takter"]);
   assert.equal(l.familier[0].historie.body, "Historien om bluesen.", "løype-linja strippes som i appen");
   assert.equal(l.sider.length, 1);
   assert.deepEqual(l.mangler, []);
-  const s = settSammen(["historie:Blues", "side:rotter", "side:omHistorie"], DATA, STUDENT);
-  assert.deepEqual(s.mangler.map((x) => x.grunn), ["skjult", "skjult", "skjult"]);
+  const s = settSammen(["historie:Blues", "side:omHistorie"], DATA, STUDENT);
+  assert.deepEqual(s.mangler.map((x) => x.grunn), ["skjult", "skjult"]);
   assert.equal(s.familier.length, 0);
 });
 
@@ -249,12 +249,12 @@ test("fase 2: heftet har ikke lenger tiår, og artistene drar ingen tiår med se
 });
 
 test("innovasjonene etter år, instrumentene i seksjonens rekkefølge, sidene i fast rekkefølge", () => {
-  const m = settSammen(["tech:elgitar", "tech:ror", "instrument:Filosof", "instrument:Psykolog", "side:omHistorie", "side:rotter", "tech:pending", "instrument:Tuba"], DATA, LAERER);
+  const m = settSammen(["tech:elgitar", "tech:ror", "instrument:Filosof", "instrument:Psykolog", "side:omHistorie", "tech:pending", "instrument:Tuba"], DATA, LAERER);
   assert.deepEqual(m.innovasjoner.map((t) => [t.navn, t.aar]), [["Elektrisk gitar", 1938], ["Rørforsterkeren", 1945]]);
   // Rekkefølgen er Instrumenter-kortets (INSTRUMENT_TIMELINE_GROUPS), ikke utvalgets.
   assert.deepEqual(m.instrumenter.map((i) => i.tittel), ["Filosofene", "Psykologene"]);
   assert.equal(m.instrumenter[1].body, "", "sammendrag uten side er tomt, ikke borte");
-  assert.deepEqual(m.sider.map((s) => s.id), ["rotter", "omHistorie"]);
+  assert.deepEqual(m.sider.map((s) => s.id), ["omHistorie"]);
   assert.deepEqual(m.mangler.map((x) => x.vis), ["tech:pending", "instrument:Tuba"]);
 });
 

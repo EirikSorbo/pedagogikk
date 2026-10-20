@@ -81,14 +81,16 @@ test("spillAlleHtml: én del, duplikater spilles én gang, og under to videoer i
 // ---------------------------------------------------------------------------
 //  Sjangre-spaltene (v6.12)
 // ---------------------------------------------------------------------------
-test("iSpalter: faste spalter med Pop under Gospel, og en ukjent metasjanger i den korteste", () => {
+test("iSpalter: faste spalter med to retninger i hver, og en ukjent retning i den korteste", () => {
   const g = (meta, n) => ({ meta, n });
-  const grupper = ["Blues", "Jazz", "R&B", "Hip-hop", "Klubbmusikk", "Gospel", "Country", "Pop", "Rock"]
-    .map((m) => g(m, { Jazz: 11, Country: 9 }[m] || 3)).concat(g("Ny", 2));
+  const grupper = ["Klassisk dannelse", "Kristen oppdragelse", "Empiri og metode", "Skolen for alle", "Barnet i sentrum",
+    "Erfaring og demokrati", "Læring og utvikling", "Kritikk og frigjøring"]
+    .map((m) => g(m, { "Klassisk dannelse": 11, "Skolen for alle": 9 }[m] || 3)).concat(g("Ny", 2));
   const sp = iSpalter(grupper, (x) => x.n).map((s) => s.map((x) => x.meta));
-  assert.deepEqual(sp, [["Blues", "Jazz"], ["R&B", "Hip-hop", "Ny"], ["Klubbmusikk", "Gospel", "Pop"], ["Country", "Rock"]],
-    "R&B + Hip-hop er den korteste spalten, så den nye havner der");
-  assert.deepEqual(iSpalter([g("Jazz", 4)], (x) => x.n).map((s) => s.map((x) => x.meta)), [["Jazz"], [], [], []],
+  assert.deepEqual(sp, [["Klassisk dannelse", "Kristen oppdragelse"], ["Empiri og metode", "Skolen for alle"],
+    ["Barnet i sentrum", "Erfaring og demokrati", "Ny"], ["Læring og utvikling", "Kritikk og frigjøring"]],
+    "den korteste spalten tar imot den nye");
+  assert.deepEqual(iSpalter([g("Klassisk dannelse", 4)], (x) => x.n).map((s) => s.map((x) => x.meta)), [["Klassisk dannelse"], [], [], []],
     "metasjangre uten noder står ikke med, og spaltene beholder plassen");
 });
 

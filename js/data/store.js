@@ -87,7 +87,7 @@ const notaterCol = collection(db, "notater");
 const timeforslagCol = collection(db, "timeforslag");
 const techCol = collection(db, "tech");
 const pendingEditsCol = collection(db, "pendingEdits");
-// Innholdssider (Om historie, Røtter), sjangertreet og kjøreplanene — se
+// Innholdssider (Om historie), sjangertreet og kjøreplanene — se
 // INNHOLD-seksjonen.
 const contentCol = collection(db, "content");
 
@@ -549,8 +549,8 @@ export async function clearStory(genreId) {
 }
 
 // ----------------------------------------------------------------------------
-//  INNHOLD (content-samlingen): innholdssidene «Om historie» (omHistorie) og
-//  «Røtter før 1910» (rotter) som markdown-light-body, sjangertreet med
+//  INNHOLD (content-samlingen): innholdssiden «Om historie» (omHistorie) som
+//  markdown-light-body, sjangertreet med
 //  tidsrommene (genealogy) og kjøreplanene. Alt pensuminnhold bor i
 //  Firestore — ingen fallback-tekster i koden. (Varmekartet, content/varmekart,
 //  ble tatt ut i fase 2.)

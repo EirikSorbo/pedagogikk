@@ -1,7 +1,7 @@
 // ============================================================================
 //  INNHOLDSSIDER, SJANGERHISTORIER, HUB & SJANGERHIMMEL
 // ----------------------------------------------------------------------------
-//  «Det store bildet»-huben og innholdssidene (Om historie, Røtter, app-guide,
+//  «Det store bildet»-huben og innholdssidene (Om historie, app-guide,
 //  sjangerhistorier). Sjangerhimmelen (konstellasjonsvisningen) bor her fordi
 //  huben er inngangen til den. Flyttet ut av explore.js (v3.55, runde 2).
 //  currentStoryGenre er modul-tilstand her.
@@ -9,7 +9,7 @@
 import { modalOpen, kobleFanePiler, visValgtFane } from "../ui/ui-modal.js";
 import { escapeHtml } from "../felles/util.js";
 import { isVisible } from "../felles/limits.js";
-import { META_GENRE_COLOR, FAMILIES, GENEALOGY_ROOT_GENRES, MAIN_GENRE_INFO } from "../sjangre/genre-model.js";
+import { META_GENRE_COLOR, FAMILIES, MAIN_GENRE_INFO } from "../sjangre/genre-model.js";
 import { pageFor, storyFor, stripGenrePath, storyOrderSynlig } from "../felles/story-format.js";
 import { sjekketRegelAktiv } from "../felles/sjekket.js";
 import { renderRichText } from "../felles/rich-text.js";
@@ -29,7 +29,7 @@ export function openStoreBildet() {
 }
 
 // Bruksveiledningen: teksten bor i Firestore (content/appGuide) og rendres ved
-// hver åpning — samme mønster som Om historie/Røtter, med Rediger-knapp for
+// hver åpning — samme mønster som Om historie, med Rediger-knapp for
 // lærer. Åpnes OPPÅ huben som de andre kortene, så ← går tilbake dit.
 export function openAppGuide() {
   const modal = document.getElementById("modal-app-guide");
@@ -41,7 +41,7 @@ export function openAppGuide() {
 // Sidene uten Sjekk-knapp: bruksveiledningen og lærerhåndboken.
 const USJEKKEDE_SIDER = ["appGuide", "laererHandbok"];
 
-// Innholdssidene «Om historie» (omHistorie) og «Røtter før 1910» (rotter):
+// Innholdssiden «Om historie» (omHistorie):
 // teksten bor i Firestore (content/<id>.body, markdown-light) og rendres ved
 // hver åpning, så import/redigering slår gjennom umiddelbart. INGEN fallback-
 // tekst i koden (brukervalg) — mangler teksten, sies det tydelig ifra i
@@ -92,29 +92,6 @@ export function openOmHistorie() {
   if (!modal) return;
   renderPage("omHistorie", "om-historie-body", "omh-extra");
   modalOpen(modal);
-}
-
-export function openRotter() {
-  const modal = document.getElementById("modal-rotter");
-  if (!modal) return;
-  renderRotterChips();
-  renderPage("rotter", "rotter-body", "rotter-extra");
-  modalOpen(modal);
-}
-
-// Røttene som grå bobler øverst i kortet — samme form som sjangerboblene i
-// Sjangre-kortet, men i røttenes egen gråtone (treets «Røtter»-familie).
-// Boblen viser nodens korte navn og bærer det fulle i title, som i kartet.
-// Klikk går gjennom onMainGenreClick, SAMME dør som sjangerbobler, tre-noder
-// og navn i løpende tekst — ett navn skal ikke åpne to ulike kort.
-export function renderRotterChips() {
-  const el = document.getElementById("rotter-chips");
-  if (!el) return;
-  el.innerHTML = GENEALOGY_ROOT_GENRES.map((n) =>
-    `<button class="tag tag-rot" data-rot="${escapeHtml(n.l)}" title="${escapeHtml(n.f || n.l)}">${escapeHtml(n.l)}</button>`
-  ).join("");
-  el.querySelectorAll("[data-rot]").forEach((b) =>
-    b.addEventListener("click", () => onMainGenreClick(b.dataset.rot)));
 }
 
 // Sjangerhistoriene: teksten bor i Firestore (genreDescriptions/<sjanger>

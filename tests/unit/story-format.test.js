@@ -37,9 +37,9 @@ test("pageFor: kilder følger med, og er alltid en liste", () => {
   assert.deepEqual(pageFor("x", { x: { body: "T.", kilder: "ikke en liste" } }).kilder, []);
 });
 
-test("STORY_ORDER er appens ene metasjanger-rekkefølge, med Pop og Rock", () => {
-  // Brukervalg 2026-10-03 (S4): samme rekkefølge overalt, og Pop og Rock vises.
-  assert.deepEqual(STORY_ORDER, ["Blues", "Jazz", "R&B", "Hip-hop", "Klubbmusikk", "Gospel", "Country", "Pop", "Rock"]);
+test("STORY_ORDER er appens ene retnings-rekkefølge (reserven før treet er lastet)", () => {
+  // Samme rekkefølge som retningene i skjelettet (tools/pedagogikk-skjelett.js).
+  assert.deepEqual(STORY_ORDER, ["Klassisk dannelse", "Kristen oppdragelse", "Empiri og metode", "Skolen for alle", "Barnet i sentrum", "Erfaring og demokrati", "Læring og utvikling", "Kritikk og frigjøring"]);
   assert.deepEqual(STORY_SKJULT, []);
 });
 

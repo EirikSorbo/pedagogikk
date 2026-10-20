@@ -606,7 +606,7 @@ export function initYtSpiller() {
     // «Spill alle N på YouTube» (watch_videos): første video nå, resten i kø.
     const ider = ytSpillelisteIder(a.href);
     if (ider) {
-      if (apneYtSpiller(ytWatchUrl(ider[0], null, null), `Spilleliste · ${ider.length} videoer`, { kø: ider.slice(1) })) e.preventDefault();
+      if (apneYtSpiller(ytWatchUrl(ider[0], null, null), `${ider.length} videoer`, { kø: ider.slice(1) })) e.preventDefault();
       return;
     }
     if (apneYtSpiller(a.href, tittel)) e.preventDefault();

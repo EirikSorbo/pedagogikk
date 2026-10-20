@@ -13,9 +13,9 @@ const FIELD_LABELS = {
   artist: ARTIST_LABELS,
   tech: {
     name: "Navn", type: "Type", category: "Kategori", instrument: "Fagbakgrunn",
-    inventedYear: "Oppfunnet (år)",
-    adoptedYear: "Tatt i bruk (år)",
-    adoptedLabel: "Tatt i bruk (forklaring)", description: "Beskrivelse",
+    inventedYear: "Vedtatt eller innført (år)",
+    adoptedYear: "Gjennomslag (år)",
+    adoptedLabel: "Gjennomslag (forklaring)", description: "Beskrivelse",
     imageUrl: "Bilde-URL", imageCredit: "Bildekreditering", kilder: "Kilder",
   },
   subgenre: {

@@ -107,7 +107,7 @@ function buildCategories() {
     },
     {
       // Sidene som følger «Bare sjekket innhold» (v6.89, js/data/sjekket-filter.js):
-      // Røtter, Om historie og instrumenttekstene (bruksveiledningen er unntatt
+      // Om historie og instrumenttekstene (bruksveiledningen er unntatt
       // fra v6.95, se guide-deler.js). Bare de med tekst; en tom side har
       // ingenting å sjekke.
       key: "pages", label: "Sider",
@@ -120,7 +120,6 @@ function buildCategories() {
 
 // Sidene i kategorien «Sider», i rekkefølge: [content-id, navn].
 const SIDER = [
-  ["rotter", "Røtter"],
   ["omHistorie", "Om historie"],
 ];
 
@@ -285,7 +284,6 @@ const SYNLIGHET_RADER = [
   { id: "viktighet", navn: "Viktighetsgraden", student: ["viktighetsgrad"] },
   { id: "fraTimene", navn: "«Fra timene» (delte timer på forsiden)", student: ["fraTimene"] },
   { id: "omHistorie", navn: "Om historie", hub: ["sb-om-historie"] },
-  { id: "rotter", navn: "Røtter", hub: ["sb-rotter"] },
   { id: "himmel", navn: "Epokehimmelen", hub: ["sb-himmel"] },
   { id: "referanser", navn: "Referanser", hub: ["sb-referanser"] },
   { id: "guide", navn: "Slik bruker du appen", hub: ["sb-guide"] },
@@ -492,8 +490,7 @@ function openItem(key, id) {
     }
     // Sidene åpnes slik studentene ser dem, med Sjekk-knappen.
     case "pages": {
-      if (id === "rotter") ctx.explore?.openRotter();
-      else if (id === "omHistorie") ctx.explore?.openOmHistorie();
+      if (id === "omHistorie") ctx.explore?.openOmHistorie();
       break;
     }
   }

@@ -27,10 +27,10 @@ import { metaOversiktKnappHtml } from "../ui/ui-metagruppe.js";
 // sjangerkortet (samme rute som sjangerboblene på kortene).
 
 // Familiene i fire faste spalter, lest nedover og så bortover. Nettleserens
-// egen fordeling la Pop og Rock under Country; brukeren ville ha Pop under
-// Gospel. En metasjanger som ikke står her (en ny i treet), legges i den
+// egen fordeling ga ujevne spalter; tidsrekkefølgen i treet gir de to og to.
+// En retning som ikke står her (en ny i treet), legges i den
 // spalten som har færrest rader, så den aldri forsvinner.
-const SPALTER = [["Blues", "Jazz"], ["R&B", "Hip-hop"], ["Klubbmusikk", "Gospel", "Pop"], ["Country", "Rock"]];
+const SPALTER = [["Klassisk dannelse", "Kristen oppdragelse"], ["Empiri og metode", "Skolen for alle"], ["Barnet i sentrum", "Erfaring og demokrati"], ["Læring og utvikling", "Kritikk og frigjøring"]];
 
 export function iSpalter(grupper, antallRader) {
   const spalter = SPALTER.map((navn) => navn.map((m) => grupper.find((g) => g.meta === m)).filter(Boolean));

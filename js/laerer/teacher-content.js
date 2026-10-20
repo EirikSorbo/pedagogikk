@@ -345,7 +345,7 @@ function renderTechAdmin() {
   if (!el) return;
   const filtered = techAdminCat ? state.techItems.filter(t => t.category === techAdminCat) : state.techItems;
   if (!filtered.length) {
-    el.innerHTML = `<p class="muted empty">Ingen teknologier i denne kategorien ennå.</p>`;
+    el.innerHTML = `<p class="muted empty">Ingen reformer eller milepæler i denne kategorien ennå.</p>`;
     return;
   }
   el.className = "tech-grid";
@@ -579,7 +579,7 @@ export function setupReferanseEditor() {
 //  ifra om at tekst mangler. Forhåndsvisningen bruker samme renderRichText
 //  som studentvisningen — det du ser er det studentene får.
 
-const PAGE_TITLES = { omHistorie: "Om historie", rotter: "Røtter før 1910", appGuide: "Slik bruker du appen", laererHandbok: "Lærerhåndbok", skriveveiledning: "Slik skriver du beskrivelsen" };
+const PAGE_TITLES = { omHistorie: "Om historie", appGuide: "Slik bruker du appen", laererHandbok: "Lærerhåndbok", skriveveiledning: "Slik skriver du beskrivelsen" };
 
 // { type: "story", id: <sjanger> } eller { type: "page", id: <sideId> }
 let editorTarget = null;
@@ -596,7 +596,7 @@ function renderStoryPreview() {
 }
 
 // Instrumentsammendragene (content/instrument-<slug>) er de eneste
-// innholdssidene med kildeliste. De andre (Om historie, Røtter, Slik bruker du
+// innholdssidene med kildeliste. De andre (Om historie, Slik bruker du
 // appen) er lærerens egen prosa uten kildeapparat, og skal ikke få feltet.
 // (Plateselskapene hadde det også, med faktafelt, til fase 4.)
 const erInstrumentside = (t) => t?.type === "page" && String(t.id || "").startsWith("instrument-");
@@ -684,7 +684,6 @@ export function setupStoryEditor() {
     if (!ctx.explore || !editorTarget) return;
     if (editorTarget.type === "story") ctx.explore.openHistorier(editorTarget.id);
     else if (editorTarget.id === "omHistorie") ctx.explore.openOmHistorie();
-    else if (editorTarget.id === "rotter") ctx.explore.openRotter();
     else if (editorTarget.id === "appGuide") ctx.explore.openAppGuide();
     else if (editorTarget.id === "laererHandbok") ctx.openLaererHandbok?.();
   };

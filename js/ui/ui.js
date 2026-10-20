@@ -811,7 +811,7 @@ function playlistRows(list, sj = null) {
       par.push({ a, m });
     }
   }
-  return eksempelRader(par, "Ingen musikkeksempler registrert for denne epoken ennå.");
+  return eksempelRader(par, "Ingen videoer registrert for denne epoken ennå.");
 }
 
 // Sjangerboblen(e) i en spillelisterad: et tagget eksempel viser sin EGEN
@@ -849,7 +849,7 @@ function eksempelRader(par, tomTekst) {
 // øverst. Delte timer sender ikke flagget: de er timens egne. (Tiårenes
 // spillelister, som brukte flagget, ble tatt ut i fase 2.)
 export function openEksemplerSpilleliste(title, par, { nivaa = false } = {}) {
-  const { total, html, ider } = eksempelRader(par || [], "Ingen lytteeksempler ennå.");
+  const { total, html, ider } = eksempelRader(par || [], "Ingen videoer ennå.");
   document.getElementById("pl-title").textContent = `${title} (${total})`;
   document.getElementById("pl-body").innerHTML = (nivaa ? nivaaNotatHtml() : "") + spillAlleHtml(ider) + html;
   kobleSpillelisteRader();

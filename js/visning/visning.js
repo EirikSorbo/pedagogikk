@@ -475,7 +475,7 @@ function byggModal() {
     <div id="pres-adm-rediger" hidden>
       <div class="add-grid" style="grid-template-columns:1fr">
         <label>Tittel *
-          <input type="text" id="pres-adm-tittel" maxlength="80" placeholder="F.eks. Uke 39: Blues og gospel" />
+          <input type="text" id="pres-adm-tittel" maxlength="80" placeholder="F.eks. Uke 39: Pestalozzi og anskuelse" />
         </label>
       </div>
       <div id="pres-adm-stopp" style="margin-top:10px"></div>

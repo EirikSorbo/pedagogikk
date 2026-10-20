@@ -44,7 +44,6 @@ const STATE = {
   },
   edgeDescs: { "blues__rnb": { description: "Bluesen ledet til rhythm and blues." } },
   content: {
-    rotter: { body: "Røttene ligger i møtet mellom Vest-Afrika og Europa." },
     omHistorie: { body: "Historiebevissthet handler om å se sammenhenger." },
   },
 };
@@ -78,7 +77,7 @@ test("indeksen dekker alt innholdet, én post per ting", () => {
   assert.equal(t.undersjanger, 1, "kun sub-navn som ikke alt er en tre-node");
   assert.equal(t.historie, 1);
   assert.equal(t.kobling, 1);
-  assert.equal(t.side, 2);
+  assert.equal(t.side, 1);
   assert.ok(t.sjanger > 30, "treets sjangre er med");
   assert.ok(t.rot >= 8, "og røttene");
 });
@@ -87,7 +86,7 @@ test("studenten søker bare i det studenten kan åpne", () => {
   const skjul = { metasjangerhistorier: true, koblingsbeskrivelser: true };
   // Innholdssidene henger på hvert sitt kort i huben, ikke på huben som helhet
   // (v5.17): huben er åpen for studentene, men kortene er skjult hver for seg.
-  const skjulHub = { "sb-rotter": true, "sb-om-historie": true, "sb-guide": true };
+  const skjulHub = { "sb-om-historie": true, "sb-guide": true };
   const t = typer(byggIndeks(STATE, { erLærer: false, skjul, skjulHub }));
   assert.equal(t.artist, 2, "skjulte kort og forslag som venter, er ute");
   assert.equal(t.historie, undefined, "sjangerhistoriene er skjult");
@@ -97,7 +96,7 @@ test("studenten søker bare i det studenten kan åpne", () => {
   const tl = typer(byggIndeks(STATE, { erLærer: true, skjul, skjulHub }));
   assert.equal(tl.artist, 4);
   assert.equal(tl.historie, 1);
-  assert.equal(tl.side, 2);
+  assert.equal(tl.side, 1);
   assert.equal(tl.kobling, 1);
 });
 
@@ -106,9 +105,9 @@ test("studenten søker bare i det studenten kan åpne", () => {
 // hen aldri finner.
 test("et synlig hub-kort gjør siden søkbar igjen", () => {
   const skjul = { metasjangerhistorier: true, koblingsbeskrivelser: true };
-  const bareRotter = { "sb-om-historie": true, "sb-guide": true };
-  const t = typer(byggIndeks(STATE, { erLærer: false, skjul, skjulHub: bareRotter }));
-  assert.equal(t.side, 1, "Røtter er åpen og skal finnes i søket");
+  const bareGuide = { "sb-guide": true };
+  const t = typer(byggIndeks(STATE, { erLærer: false, skjul, skjulHub: bareGuide }));
+  assert.equal(t.side, 1, "Om historie er åpen og skal finnes i søket");
 });
 
 // v6.15 (brukervalg 2026-10-03): metasjanger-oversiktene er søkbare for alle,
@@ -171,7 +170,7 @@ test("hvert treff vet hvordan det åpnes", () => {
   assert.deepEqual(finn(indeks, "undersjanger", "Delta blues").apne, { hva: "undersjanger", id: "Delta blues" });
   assert.deepEqual(finn(indeks, "historie", "Historien om Blues").apne, { hva: "historie", id: "Blues" });
   assert.deepEqual(finn(indeks, "kobling", "Blues → R&B").apne, { hva: "kobling", id: "blues__rnb" });
-  assert.deepEqual(finn(indeks, "side", "Røtter før 1910").apne, { hva: "side", id: "rotter" });
+  assert.deepEqual(finn(indeks, "side", "Om historie").apne, { hva: "side", id: "omHistorie" });
   assert.deepEqual(finn(indeks, "sjanger", "Bebop").apne, { hva: "sjanger", id: "Bebop" });
 });
 

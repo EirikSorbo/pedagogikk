@@ -446,7 +446,7 @@ function bildeHtml(bilde, hoyde = "", bredde = 500) {
 function lyttHtml(liste, medNr) {
   if (!liste.length) return "";
   const eks = liste.map((l) => `«${h(l.label)}»${h(musicExampleLabel(l))}${medNr && l.nr ? `<span class="h-nr">${l.nr}</span>` : ""}`);
-  return `<div class="h-lytt">${NOTE_SVG}<span><strong>Lytt</strong> ${eks.join(" · ")}</span></div>`;
+  return `<div class="h-lytt">${NOTE_SVG}<span><strong>Videoer</strong> ${eks.join(" · ")}</span></div>`;
 }
 
 // Tidslinja for virketid (v5.60): appens egen innflytelseslinje
@@ -482,7 +482,7 @@ function artistKortHtml(k, d, kompakt, medNr) {
     ? (k.beskrivelse ? rt(k.beskrivelse) : mangler("Beskrivelsen er ikke skrevet ennå."))
     : "";
   const verk = d["artist.verk"] && k.verk.length
-    ? `<p class="h-verk"><strong>Sentrale verk</strong> ${k.verk.map((w) => `«${h(w.tittel)}»${w.aar ? ` (${h(visAar(w.aar))})` : ""}`).join(" · ")}</p>`
+    ? `<p class="h-verk"><strong>Hovedverk</strong> ${k.verk.map((w) => `«${h(w.tittel)}»${w.aar ? ` (${h(visAar(w.aar))})` : ""}`).join(" · ")}</p>`
     : "";
   return `<article class="h-kort h-artist">
     <h3 class="h-kort-navn">${h(k.navn)}${k.levetid ? ` <span class="h-aar">${h(k.levetid)}</span>` : ""}</h3>
@@ -669,7 +669,7 @@ function seksjonHode(hva, tittel) {
 }
 
 function techKortHtml(t, d, kompakt) {
-  const aar = [t.oppfunnet ? `oppfunnet ${visAar(t.oppfunnet)}` : "", t.iBruk ? `i bruk fra ${visAar(t.iBruk)}` : ""].filter(Boolean).join(" · ");
+  const aar = [t.oppfunnet ? `innført ${visAar(t.oppfunnet)}` : "", t.iBruk ? `gjennomslag ${visAar(t.iBruk)}` : ""].filter(Boolean).join(" · ");
   const fakta = [];
   if (t.hendelse) fakta.push("<b>Viktig hendelse</b>");
   else if (t.kategori) fakta.push(`<b>${h(t.kategori)}</b>`);

@@ -10,7 +10,7 @@
 //    sjangerbeskrivelser   teacherChecks.genres (treets sjangre) og .subgenres
 //    sjangerhistoriene     teacherChecks.metaGenres
 //    koblingstekstene      teacherChecks.edges
-//    sidene                teacherChecks.pages: Røtter, Om historie og
+//    sidene                teacherChecks.pages: Om historie og
 //                          instrumenttekstene
 //    plateselskapene       teacherChecks.plateselskaper
 //  Utenfor regelen med vilje: «Fra timene» (læreren publiserer

@@ -271,7 +271,7 @@ function openNodeEditor(nodeId) {
       </label>
     </div>
     ${n ? `<p class="muted" style="margin:10px 0 4px">ID: <code>${escapeHtml(n.id)}</code> kan ikke endres. Koblingsbeskrivelsene henger i den.</p>` : ""}
-    <p class="muted" style="margin:4px 0">Epoke og lytteforslag redigeres sammen med beskrivelsen, ikke her: treet holder strukturen, beskrivelsen holder innholdet.</p>
+    <p class="muted" style="margin:4px 0">Årstall, samfunn og skole redigeres sammen med beskrivelsen, ikke her: treet holder strukturen, beskrivelsen holder innholdet.</p>
     <details style="margin-top:10px"${n ? "" : " open"}>
       <summary>Vokste ut av (foreldre)</summary>
       <div class="gen-kryss-liste">${kryss("p", n?.p)}</div>

@@ -1,7 +1,7 @@
 // ============================================================================
 //  SJANGERHISTORIER OG INNHOLDSSIDER — oppslag
 // ----------------------------------------------------------------------------
-//  Historiene og innholdssidene (Om historie, Røtter) skrives i samme
+//  Historiene og innholdssidene (Om historie) skrives i samme
 //  markdown-light som resten av appens tekster. Selve formateringen bor i
 //  js/felles/rich-text.js (renderRichText) — den er delt med beskrivelsene, så
 //  historier og beskrivelser aldri får hver sin syntaks. Denne modulen holder
@@ -27,7 +27,7 @@ import { sjekketRegelAktiv } from "./sjekket.js";
 //
 // En knapp står også når historien MANGLER: appen viser hull i innholdet i
 // stedet for å skjule dem, og lærer-oversikten teller dem som manglende.
-export const STORY_ORDER = ["Blues", "Jazz", "R&B", "Hip-hop", "Klubbmusikk", "Gospel", "Country", "Pop", "Rock"];
+export const STORY_ORDER = ["Klassisk dannelse", "Kristen oppdragelse", "Empiri og metode", "Skolen for alle", "Barnet i sentrum", "Erfaring og demokrati", "Læring og utvikling", "Kritikk og frigjøring"];
 
 // Metasjangre som skal ha en historie liggende uten å vises. TOM fra v6.05:
 // Pop og Rock var holdt utenfor (brukervalg 2026-08-22), men skal nå vises

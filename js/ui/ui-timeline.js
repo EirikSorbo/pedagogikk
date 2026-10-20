@@ -207,7 +207,7 @@ export function buildInstrumentTimeline(techItems, group) {
   // forklarer den et skille som ikke finnes.
   const harBegge = items.some(isHendelse) && items.some((t) => !isHendelse(t));
   return html + (harBegge
-    ? `<p class="tl-legend"><span class="tl-legend-dot"></span>teknologisk reform` +
+    ? `<p class="tl-legend"><span class="tl-legend-dot"></span>reform eller milepæl` +
       `<span class="tl-legend-dot tl-legend-hendelse"></span>viktig hendelse</p>`
     : "");
 }

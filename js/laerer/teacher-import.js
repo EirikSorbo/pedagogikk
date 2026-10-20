@@ -166,7 +166,7 @@ function buildExportData() {
     return rest;
   });
 
-  // Innholdssidene (Om historie, Røtter) — fra content-samlingen, så
+  // Innholdssidene (Om historie) — fra content-samlingen, så
   // backupen inneholder ALT pensuminnhold (koden har ingen
   // fallback-tekster). (Config er borte, v3.68:
   // instrument-vokabularet bor i koden — INSTRUMENTS i limits.js.)
@@ -326,7 +326,7 @@ function importParts(data) {
   if (subCount) parts.push(`${subCount} sjangerbeskrivelser`);
   const edgeCount = Object.keys(data.edgeDescriptions || {}).length;
   if (edgeCount) parts.push(`${edgeCount} koblingsbeskrivelser`);
-  if ((data.tech || []).length) parts.push(`${data.tech.length} teknologier`);
+  if ((data.tech || []).length) parts.push(`${data.tech.length} reformer og milepæler`);
   const pageCount = Object.keys(data.pages || {}).length;
   if (pageCount) parts.push(`${pageCount} innholdsside(r)`);
   if (Array.isArray(data.referanser?.kilder) && data.referanser.kilder.length) parts.push(`${data.referanser.kilder.length} frittstående referanser`);
@@ -645,7 +645,7 @@ async function importTechItems(techArray) {
   if (fail) melding(`${fail} reformkort kunne ikke lagres (se konsollen).`);
   if (added || updated) {
     const n = updated ? await fjernSjekker(fjern) : 0;
-    melding(`Teknologi: ${added} nye, ${updated} oppdaterte.${n ? ` Sjekk er fjernet på ${n}, siden teksten er endret.` : ""}`);
+    melding(`Reformer og milepæler: ${added} nye, ${updated} oppdaterte.${n ? ` Sjekk er fjernet på ${n}, siden teksten er endret.` : ""}`);
   }
 }
 

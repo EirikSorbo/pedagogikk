@@ -73,7 +73,7 @@ function tegnMetaOversikt(meta, modal) {
           return `<li class="mo-eks">${tittel}<span class="mo-aar">${escapeHtml(musicExampleLabel(e))}</span>`
             + `<span class="mo-eks-artist">${escapeHtml(e.artist)}</span></li>`;
         }).join("")}</ul>`).join("")
-    : `<p class="gx-missing">Ingen lytteeksempler i ${escapeHtml(meta)} ennå.</p>`;
+    : `<p class="gx-missing">Ingen videoer i ${escapeHtml(meta)} ennå.</p>`;
 
   const body = document.getElementById("mo-body");
   body.style.setProperty("--mo-farge", META_GENRE_COLOR[meta] || FAMILIES.gray?.stroke || "#9bada1");
@@ -88,8 +88,8 @@ function tegnMetaOversikt(meta, modal) {
       <h3 class="mo-head">Teoretikere <span class="mo-antall">${antallArt}</span></h3>
       ${artisterHtml}
     </section>
-    ${eks.antall ? `<section class="mo-kol mo-eksempler" aria-label="Lytteeksempler">
-      <h3 class="mo-head">Lytteeksempler <span class="mo-antall">${eks.antall}</span></h3>
+    ${eks.antall ? `<section class="mo-kol mo-eksempler" aria-label="Videoer">
+      <h3 class="mo-head">Videoer <span class="mo-antall">${eks.antall}</span></h3>
       ${spillAlleHtml(eks.rader)}
       ${eksemplerHtml}
     </section>` : ""}`;

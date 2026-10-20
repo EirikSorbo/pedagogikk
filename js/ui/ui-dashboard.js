@@ -98,7 +98,7 @@ function artistRows(list, extraTag = () => "") {
 // lister hvert punkt) og Skrivebordet (som bare bruker `.total`). Returnerer
 // rålistene så oppringeren kan vise navn; `total` er summen på tvers av bøtter
 // (en artist som mangler både bilde og kilder teller som to punkter å fylle).
-// Sider (rotter/omHistorie) teller først når innholdet faktisk er lastet.
+// Sider (omHistorie) teller først når innholdet faktisk er lastet.
 export function contentGaps({ artists = [], genreDescs = {}, edgeDescs = {}, content = {}, contentLoaded = false }) {
   const active = activeArtists(artists);
   const subTags = [...new Set(active.flatMap((a) => [
@@ -107,7 +107,7 @@ export function contentGaps({ artists = [], genreDescs = {}, edgeDescs = {}, con
   ]))];
   const stories = storyOrder(genreDescs).filter((g) => !storyFor(g, genreDescs));
   // Tekstløse dokumenter teller som hull (v5.32, audit-funn 7).
-  const pages = contentLoaded ? ["rotter", "omHistorie"].filter((id) => !pageFor(id, content)?.body?.trim()) : [];
+  const pages = contentLoaded ? ["omHistorie"].filter((id) => !pageFor(id, content)?.body?.trim()) : [];
   const mainDesc = GENEALOGY
     .filter((n) => !resolveDescAny(genreDescs, [n.l, n.f], "main").description)
     .map((n) => n.l).sort(byNo);
@@ -263,7 +263,6 @@ export function renderDashboard(el, {
   const historieListe = storyOrder(genreDescs);
   // Grønt lys krever TEKST, ikke bare et dokument (v5.32, audit-funn 7).
   const pageStatus = (id) => (contentLoaded ? !!pageFor(id, content)?.body?.trim() : null);
-  const rotterOk = pageStatus("rotter");
   const omHistorieOk = pageStatus("omHistorie");
   const mainMissing = gaps.mainDesc;
   const subMissing = gaps.subDesc;
@@ -297,7 +296,7 @@ export function renderDashboard(el, {
     </div>`;
   };
 
-  // Binært innholdskort (Røtter / Om historie): klikk åpner siden.
+  // Binært innholdskort (Om historie, skriveveiledning): klikk åpner siden.
   const pageItem = (label, ok, pageId) => `<div class="ov-miss-item">
     <button type="button" class="ov-miss-head" data-ov-page="${pageId}">
       <span>${escapeHtml(label)}</span>
@@ -454,7 +453,6 @@ export function renderDashboard(el, {
         </button>
         ${storyPanel}
       </div>
-      ${pageItem("Røtter før 1910", rotterOk, "rotter")}
       ${pageItem("Om historie", omHistorieOk, "omHistorie")}
       ${pageItem("Skriveveiledning", pageStatus("skriveveiledning"), "skriveveiledning")}
       ${missItem("Epoker uten beskrivelse", mainMissing.length,
@@ -560,13 +558,11 @@ export function renderDashboard(el, {
     if (story) return explore?.openHistorier(story.dataset.ovStory);
 
     const page = hit("[data-ov-page]");
-    // Røtter og Om historie har egne visninger (med Rediger-knapp). Resten,
-    // som skriveveiledningen, vises bare for studentene, og klikket går rett
-    // til editoren. Ternæren som sto her sendte ALT som ikke var «rotter» til
-    // Om historie.
+    // Om historie har egen visning (med Rediger-knapp). Resten, som
+    // skriveveiledningen, vises bare for studentene, og klikket går rett
+    // til editoren.
     if (page) {
       const id = page.dataset.ovPage;
-      if (id === "rotter") return explore?.openRotter();
       if (id === "omHistorie") return explore?.openOmHistorie();
       return onEditPage?.(id);
     }

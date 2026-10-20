@@ -260,7 +260,6 @@
   --icon-store-bildet: var(--icon-mono, var(--violet-600));
   --icon-visning: var(--icon-mono, var(--teal-700));
   --icon-om-historie: var(--icon-mono, var(--lime-700));
-  --icon-rotter: var(--icon-mono, var(--amber-700));
   --icon-historier: var(--icon-mono, var(--iris-600));
   --icon-tidslinje: var(--icon-mono, var(--blue-700));
   --icon-slektstre: var(--icon-mono, var(--pine-700));
@@ -815,10 +814,6 @@ button.ov-kpi:hover .ov-kpi-l { color: var(--accent-2); }
 .ov-genre-cols .ov-row { break-inside: avoid; margin-bottom: 8px; grid-template-columns: minmax(96px, auto) 1fr 54px; }
 .ov-genre-cols .ov-count { white-space: nowrap; }
 
-/* Røtter-kortets boblerad, rett under «Se slektstreet». Knapperaden over har
-   allerede 18 px under seg, så raden trenger bare luft nedover mot teksten. */
-.rotter-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; }
-.rotter-chips:empty { display: none; }
 
 /* Chips (instrument, tomme greiner, tynne tiår, historier) */
 .ov-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
@@ -1345,10 +1340,6 @@ button.tag.tag-sjanger:hover { border-color: var(--tag-genre-line-hover); color:
 .tag.tag-sjanger.is-empty { color: var(--tag-empty-text); background: var(--tag-empty-bg); border-color: var(--tag-empty-line); border-style: dashed; }
 button.tag.tag-sjanger.is-empty:hover { color: var(--tag-genre-text); background: var(--tag-sub-bg); border-color: var(--tag-genre-line); }
 button.tag.tag-under:hover { border-color: var(--accent-2); color: var(--accent-2); background: var(--tag-sub-bg-hover); }
-/* Røtter-boblene i «Røtter før 1910»: samme form som sjangerboblene, men i
-   gråtonen treets fargeforklaring gir «Røtter» — de er ikke sjangre ennå. */
-.tag.tag-rot { color: var(--tag-root-text); background: var(--surface-2); border-color: var(--line-strong); }
-button.tag.tag-rot:hover { color: var(--text); background: var(--tag-root-bg-hover); border-color: var(--tag-root-line-hover); }
 .tag.tag-instrument { color: var(--tag-instr-text); background: var(--tag-instr-bg); border-color: var(--tag-instr-line); }
 button.tag.tag-instrument:hover { border-color: var(--tag-instr-line-hover); color: var(--tag-instr-text); background: var(--tag-instr-bg-hover); }
 .tag.tag-prio { padding: 2px 8px; display: inline-flex; align-items: center; }
@@ -1390,11 +1381,6 @@ button.tag.tag-instrument:hover { border-color: var(--tag-instr-line-hover); col
 }
 .related-chip:hover { border-color: var(--accent); color: var(--accent-2); }
 
-/* Røtter før 1910 — forfattet fortelling (#9) */
-/* Navigasjonsknappen på Røtter-siden — står OVER teksten (.story-body), som
-   rendres fra Firestore-innholdet, og fyller hele bredden (flex: 1). */
-.rotter-links { display: flex; gap: 10px; margin-bottom: 18px; }
-.rotter-links .btn { flex: 1; }
 
 /* Sjangerhistorier i Det store bildet + lærer-editor. Metasjangrene som
    faner fra v6.34 (brukervalg 2026-10-04), samme fanerad som Tiår, Sjangre og
@@ -1870,7 +1856,7 @@ body:not(.presentasjon) .modal.modal-innhold :is(p, .rt, .info-text) { max-width
 /* «Finn artister» har mange hode-elementer — la dem bryte pent på smale skjermer. */
 #modal-artister .modal-head { flex-wrap: wrap; gap: 8px; }
 
-/* Lærerens Sjekk/Rediger-ikoner i selve modal-hodet (Om historie, Røtter,
+/* Lærerens Sjekk/Rediger-ikoner i selve modal-hodet (Om historie,
    Sjangerhistorier, Slik bruker du appen): midtstilt i rommet mellom tittelen
    og ←/✕-knappene. Raden får all ledig plass (flex:1) og sentrerer innholdet
    sitt — men da må tittelens egen `flex: 1` vike, ellers spiser h2 plassen og

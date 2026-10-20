@@ -3,7 +3,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { genreFamilyNodes } from "../../js/ui/ui-timeline.js";
 import { GENEALOGY } from "../../js/sjangre/genre-model.js";
-import { STORY_ORDER } from "../../js/felles/story-format.js";
+
+// Retningene i musikkfrøet testene kjører mot (modellen leses ved kall-tid).
+const seedMeta = () => [...new Set(GENEALOGY.map((n) => n.g).filter(Boolean))];
 
 // Sjangerfamilien over hver historie utledes av treet. Poenget med å generere
 // den er at nye noder dukker opp av seg selv — testene under låser nettopp det.
@@ -16,7 +18,7 @@ import { STORY_ORDER } from "../../js/felles/story-format.js";
 // rekkefølgen deres.
 
 test("hver historie får med NØYAKTIG tre-nodene i metasjangeren sin", () => {
-  for (const meta of STORY_ORDER) {
+  for (const meta of seedMeta()) {
     const fasit = GENEALOGY.filter((n) => n.g === meta).map((n) => n.l).sort();
     const med = genreFamilyNodes(meta, SEED_GENRE_DESCS).map((x) => x.n.l).sort();
     assert.deepEqual(med, fasit, meta);
@@ -27,7 +29,7 @@ test("rot-noder holdes utenfor — kun ekte sjangre på løypen", () => {
   // Rot-nodene (g === null: Work songs, Spirituals, Euro-folk, Vestafrikansk)
   // ble tatt med til og med v3.76. De ga lite, og fordi de ligger et århundre
   // foran resten krevde de et eget aksebrudd som gjorde løypen rotete.
-  for (const meta of STORY_ORDER) {
+  for (const meta of seedMeta()) {
     assert.ok(genreFamilyNodes(meta, SEED_GENRE_DESCS).every((x) => x.n.g === meta),
       `${meta} skal kun inneholde noder fra sin egen metasjanger`);
   }
@@ -53,7 +55,7 @@ test("avstamning låser rekkefølgen selv når era er upresis", () => {
   };
   assert.ok(i("Electric blues") < i("Blues rock"));
   // Generelt: ingen node kan komme før en forelder i samme familie.
-  for (const meta of STORY_ORDER) {
+  for (const meta of seedMeta()) {
     const fam = genreFamilyNodes(meta, SEED_GENRE_DESCS);
     const pos = new Map(fam.map((x, idx) => [x.n.id, idx]));
     for (const { n } of fam) {
@@ -77,7 +79,7 @@ test("de nye v3.73-nodene er med i løypene sine", () => {
 // varmekartet, som sorterer etter første tiår med varme. Rekkefølgen kommer
 // rett fra genreFamilyNodes, så den låses her.
 test("familien kommer kronologisk, med metasjangeren selv først", () => {
-  for (const meta of STORY_ORDER) {
+  for (const meta of seedMeta()) {
     const nodes = genreFamilyNodes(meta, SEED_GENRE_DESCS);
     const ar = nodes.map((x) => x.year);
     assert.deepEqual(ar, [...ar].sort((a, b) => a - b),

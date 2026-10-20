@@ -36,7 +36,7 @@ if (fil) pakke = JSON.parse(readFileSync(fil, "utf8"));
 const skip = pakke ? false : "ingen innholdseksport til stede (gitignored innhold)";
 
 test("innholdspakke: sidene finnes og rendrer med mellomtitler og lenker", { skip }, () => {
-  for (const id of ["omHistorie", "rotter"]) {
+  for (const id of ["omHistorie"]) {
     const body = pakke.pages?.[id]?.body;
     assert.ok(body && body.length > 1000, `${id} mangler/for kort`);
     const html = renderRichText(body);

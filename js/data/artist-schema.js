@@ -8,7 +8,7 @@
 //   - feltlista ved innsending (store.js addArtist)
 //  Skjemaet er det felles femstegs-skjemaet (js/ui/artist-skjema.js, v6.96),
 //  brukt av studentskjemaet, lærerens redigering og «Foreslå endring». Det
-//  bruker de samme nøklene. keyWorks («Sentrale verk») står ikke i skjemaet
+//  bruker de samme nøklene. keyWorks («Hovedverk») står ikke i skjemaet
 //  lenger (fases ut), men følger med i data, eksport og import.
 //
 //  Typer: text | number | csv (kommaseparert liste) | textarea | gender |
@@ -27,11 +27,11 @@ export const ARTIST_FIELDS = [
   { key: "subGenre",       label: "Prinsipper",     type: "csv" },
   { key: "influenceStart", label: "Innflytelse fra",  type: "number" },
   { key: "influenceEnd",   label: "Innflytelse til",  type: "number" },
-  { key: "recordLabel",    label: "Plateselskap",     type: "text" },
+  { key: "recordLabel",    label: "Plateselskap (gammelt felt)", type: "text" },
   { key: "geography",      label: "Virkested",        type: "text" },
   { key: "description",    label: "Beskrivelse",      type: "textarea", full: true },
-  { key: "keyWorks",       label: "Sentrale verk",    type: "complex" },
-  { key: "musicExamples",  label: "Musikkeksempler",  type: "complex" },
+  { key: "keyWorks",       label: "Hovedverk",         type: "complex" },
+  { key: "musicExamples",  label: "Videoer (gammelt felt)", type: "complex" },
   { key: "kilder",         label: "Kilder",           type: "complex" },
   { key: "imageUrl",       label: "Bilde-URL",        type: "text", full: true },
   { key: "imageCredit",    label: "Bildekreditering", type: "text", full: true },

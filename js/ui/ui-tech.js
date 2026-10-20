@@ -64,7 +64,7 @@ export function renderTechList(el, items, activeCategory, lc) {
   // De vises på instrumenttidslinjen i stedet.
   const innovasjoner = items.filter((t) => !isHendelse(t));
   const filtered = activeCategory ? innovasjoner.filter(t => t.category === activeCategory) : innovasjoner;
-  renderTechCards(el, filtered, lc, "Ingen teknologier i denne kategorien ennå.");
+  renderTechCards(el, filtered, lc, "Ingen reformer eller milepæler i denne kategorien ennå.");
 }
 
 // Selve kortlisten, uten filtrering. Skilt ut (v5.03) da Instrumenter-kortet

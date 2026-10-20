@@ -289,7 +289,7 @@ export function musicExampleLabel(m) {
 }
 
 // Delt musikkeksempel-liste (brukt av detalj-, spotlight- og artistkort).
-// Samme inline-format som «Sentrale verk»: understreket lenke + årstall i
+// Samme inline-format som «Hovedverk»: understreket lenke + årstall i
 // parentes utenfor lenka, komma-separert. Callerne setter «Lytteeksempler:»
 // i fet skrift foran (jf. keyWorksText / .works-avsnittet).
 // Seksjonsmerke for presentasjonsvisningen (v5.24): wrapper med
@@ -302,7 +302,7 @@ export function musicExamplesHtml(a) {
   const items = (a.musicExamples || []).filter((m) => safeUrl(m.url));
   if (!items.length) return "";
   return items.map((m) => {
-    const label = escapeHtml(m.label || "Lytt");
+    const label = escapeHtml(m.label || "Video");
     const url = escapeHtml(safeUrl(m.url));
     return `<a class="lytt-lenke" href="${url}" target="_blank" rel="noopener">${sentralMerke(m)}${label}</a>${musicExampleLabel(m)}`;
   }).join(", ");
@@ -456,7 +456,7 @@ export function pct(n, max) {
 }
 
 // Faktalinjer under tittel: levetid, innflytelse, kjønn (kun lærer), virkested.
-// Vises som tekst (samme format som «Sentrale verk»), ikke som bobler.
+// Vises som tekst (samme format som «Hovedverk»), ikke som bobler.
 //
 // Innflytelsesperioden som tidslinje (artistStripHtml) sto her i v4.84, men
 // hører hjemme rett under sjanger-/instrumentboblene, altså like over
@@ -505,7 +505,7 @@ export function factsHtml(rows) {
 }
 
 // Faktalinjer på innovasjonskortet. Erstattet fargede bobler (v3.81), så
-// kortene leser likt som artistkortenes levetid/innflytelse. «Tatt i bruk»
+// kortene leser likt som teoretikerkortenes levetid/innflytelse. «Gjennomslag»
 // bærer adoptedLabel, som ofte er en hel setning og aldri fikk plass i en
 // boble (het «Årstall» fram til v4.82).
 export function techFactsLines(t) {
@@ -519,7 +519,7 @@ export function techFactsLines(t) {
     // funksjonalitet, ikke gjenoppretting.)
     ["Kategori", t.category, { attr: "data-tech-cat" }],
     ["Fagbakgrunn", t.instrument],
-    ["Oppfunnet", visAar(t.inventedYear)],
-    ["Tatt i bruk", t.adoptedLabel],
+    ["Vedtatt eller innført", visAar(t.inventedYear)],
+    ["Gjennomslag", t.adoptedLabel],
   ]);
 }

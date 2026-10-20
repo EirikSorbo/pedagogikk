@@ -27,7 +27,7 @@ export const TYPE_NAVN = {
   sjangerperioder: "Epokeperioder",
   himmel: "Epokehimmel", referanser: "Referanser",
   "store-bildet": "Det store bildet",
-  teknologi: "Teknologi", slektstre: "Slektstre", yt: "Video",
+  teknologi: "Reformer og milepæler", slektstre: "Slektstre", yt: "Video",
   oversikt: "Oversikt", galleri: "Galleri",
   sjangre: "Epoker", undersjangre: "Prinsipper", artister: "Teoretikere",
   slide: "Slide",

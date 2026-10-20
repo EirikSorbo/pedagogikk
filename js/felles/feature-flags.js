@@ -78,14 +78,13 @@ export const SKJUL_I_STUDENTVISNING = {
 //
 // NB: skjulingen må henge sammen med de ANDRE inngangene til det samme.
 // Sjangerhistoriene nås også fra «Metasjangre» i sjangermodalen, som allerede
-// er skjult av metasjangerhistorier-flagget over, og Røtter/Om historie/
+// er skjult av metasjangerhistorier-flagget over, og Om historie/
 // bruksveiledningen holdes ute av søket (js/felles/search.js) med de samme flaggene.
 export const SKJUL_I_HUBEN = {
   // Spesialsidene for visningsmodus (v5.96): aldri for studentene. Kortet
   // finnes bare på lerretet, der lærerøkta viser det (presentasjon.js).
   "sb-visning":     true,
   "sb-om-historie": true,
-  "sb-rotter":      true,
   "sb-historier":   true,
   "sb-tidslinje":   false,
   "sb-slektstre":   false,

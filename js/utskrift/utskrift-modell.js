@@ -61,8 +61,8 @@ export const UTSKRIFT_TYPER = new Set(["artist", "sjanger", "undersjanger", "tec
 
 // Innholdssidene som kan stå i et hefte. Bruksveiledningen («guide»/
 // «appGuide») er en manual for appen, ikke pensum, og holdes utenfor.
-export const SIDER_I_HEFTET = { rotter: "Røtter før 1910", omHistorie: "Om historie" };
-const HUB_KORT_FOR_SIDE = { rotter: "sb-rotter", omHistorie: "sb-om-historie" };
+export const SIDER_I_HEFTET = { omHistorie: "Om historie" };
+const HUB_KORT_FOR_SIDE = { omHistorie: "sb-om-historie" };
 
 export const TITTEL_MAKS = 60;
 export const ROTTER = "Røtter";
@@ -168,7 +168,7 @@ export const DELER = [
     { id: "artist.virketid", navn: "Tidslinje for virketid" },
     { id: "artist.punkter", navn: "Oppsummering i punkter", punkter: true },
     { id: "artist.beskrivelse", navn: "Beskrivelse" },
-    { id: "artist.verk", navn: "Sentrale verk" },
+    { id: "artist.verk", navn: "Hovedverk" },
   ] },
   { gruppe: "Epokekort", valg: [
     { id: "sjanger.era", navn: "Epoke" },
