@@ -382,8 +382,8 @@ export function renderDashboard(el, {
       </button>
       ${[3, 2, 1, -1].map((p) => `
       <button type="button" class="ov-kpi ov-kpi-half ov-click prio-${p}" data-ov-prio="${p}"
-        aria-label="${escapeHtml(PRIO_LABELS[p])}: ${prioLists[p].length} artister"
-        title="${escapeHtml(PRIO_LABELS[p])}: vis artistene">
+        aria-label="${escapeHtml(PRIO_LABELS[p])}: ${prioLists[p].length} teoretikere"
+        title="${escapeHtml(PRIO_LABELS[p])}: vis teoretikerne">
         <span class="ov-prio-i">${PRIO_ICONS[p]}</span>
         <span class="ov-kpi-n">${prioLists[p].length}</span>
       </button>`).join("")}
@@ -474,13 +474,13 @@ export function renderDashboard(el, {
         ${tynneTidsrom.length
           ? `<div class="ov-chips">${tynneTidsrom.map(({ i, t, n }) =>
               `<button type="button" class="ov-chip ov-zero" data-ov-tidsrom="${i}">${escapeHtml(t.navn || t.etikett)} <strong>${n}</strong></button>`).join("")}</div>`
-          : `<p class="muted">Ingen. Alle tidsrom har minst to artister.</p>`}
+          : `<p class="muted">Ingen. Alle tidsrom har minst to teoretikere.</p>`}
       </div>
       <div class="ov-gap">
         <div class="ov-gap-t">Teoretikere uten epoke <span>${artistsNoSjanger.length}</span></div>
         ${artistsNoSjanger.length
           ? `<button type="button" class="btn ghost small" ${noSjangerX.btn}>Vis</button>${noSjangerX.panel}`
-          : `<p class="muted">Ingen. Alle artister er plassert.</p>`}
+          : `<p class="muted">Ingen. Alle teoretikere er plassert.</p>`}
       </div>
       <div class="ov-gap">
         <div class="ov-gap-t">Prinsipper uten teoretikerkort <span>${orphanedSubgenres.length}</span></div>

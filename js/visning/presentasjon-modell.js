@@ -454,7 +454,7 @@ export const OVERSIKT_KATEGORIER = [
   { id: "artister", navn: "Teoretikere" },
   { id: "lytteeksempler", navn: "Lytteeksempler" },
   { id: "sjangre", navn: "Epoker" },
-  { id: "teknologi", navn: "Teknologi" },
+  { id: "teknologi", navn: "Reformer og milepæler" },
   { id: "instrumenter", navn: "Fagbakgrunner" },
   { id: "oversikter", navn: "Oversikter" },
 ];
@@ -507,7 +507,7 @@ function oversiktPunkt(m, oppslag) {
       return t ? { kat: "teknologi", tekst: t.name } : null;
     }
     case "teknologi":
-      return { kat: "teknologi", tekst: m.id ? `Teknologi: ${m.id}` : "Teknologioversikten" };
+      return { kat: "teknologi", tekst: m.id ? `Reform: ${m.id}` : "Reformoversikten" };
     case "instrument":
       return { kat: "instrumenter", tekst: m.id || "Fagbakgrunnene" };
     case "side":

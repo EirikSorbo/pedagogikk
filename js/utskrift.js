@@ -96,7 +96,7 @@ function tegn() {
 // så alt annet. Alt utvalget drar med seg står her, også det som er huket
 // bort (gjennomstreket), så det kan hukes på igjen. Opphavet står i grått:
 // «fra metasjangeren», «fra sjangeren».
-const OPPHAV = { metasjanger: "fra metasjangeren", sjanger: "fra sjangeren" };
+const OPPHAV = { metasjanger: "fra retningen", sjanger: "fra epoken" };
 
 // Sammenleggbare sjangergrupper (v5.74): én metasjanger gir 40 til 90 rader,
 // så artistene under en sjanger kan legges sammen. Brukerens egne valg

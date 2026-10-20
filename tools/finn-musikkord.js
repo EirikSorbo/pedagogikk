@@ -43,7 +43,23 @@ function erKommentar(l) {
 function synlig(l) {
   if (erKommentar(l)) return false;
   const utenKommentar = l.replace(/\/\/.*$/, "");
-  return /["'`][^"'`]*["'`]/.test(utenKommentar) || />[^<]+</.test(utenKommentar);
+  // Kandidater: tekster i strenger og HTML mellom tagger. En kandidat teller
+  // når den har mellomrom eller starter med stor bokstav (setning eller
+  // etikett), ingen kodetegn, og ordet ikke står inntil - _ . : / = # (klasse,
+  // nøkkel, filnavn). ${…} fjernes først.
+  const tekster = [...utenKommentar.matchAll(/(["'`])((?:\\.|(?!\1)[^\\])*)\1/g)].map((m) => m[2])
+    .concat([...utenKommentar.matchAll(/>([^<>]+)</g)].map((m) => m[1]));
+  return tekster.some((t0) => {
+    const t = t0.replace(/\$\{[^}]*\}/g, " ");
+    if (/[={}#\[\]_<>]/.test(t) || !(/\s/.test(t.trim()) || /^\p{Lu}/u.test(t))) return false;
+    const re = new RegExp(RE.source, "giu");
+    for (const m of t.matchAll(re)) {
+      const start = m.index + m[0].search(/\p{L}/u), slutt = m.index + m[0].length;
+      const rundt = (t[start - 1] || "") + (t[slutt] || "");
+      if (!/[-_.:/=]/.test(rundt)) return true;
+    }
+    return false;
+  });
 }
 
 const filer = [];

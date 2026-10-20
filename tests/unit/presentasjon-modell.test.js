@@ -388,7 +388,7 @@ test("planOversikt: kobling med nodenavn, historie og visninger får lesbare nav
   const tekster = (id) => g.find((k) => k.id === id).punkter.map((p) => p.tekst);
   assert.deepEqual(tekster("sjangre"), ["Blues → R&B", "Historien om Rock"]);
   assert.deepEqual(tekster("oversikter"), ["Epokehimmelen", "Epokehistoriene", "Røtter før 1910"]);
-  assert.deepEqual(tekster("teknologi"), ["Teknologioversikten"]);
+  assert.deepEqual(tekster("teknologi"), ["Reformoversikten"]);
 });
 
 // Avspilleren og lerretet bor i DOM/CSS: lås kildeformen.

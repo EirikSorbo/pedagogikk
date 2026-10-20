@@ -539,7 +539,7 @@ test("planGenreRename: fri undersjanger-tagg i forslag gir advarsel, ingen skriv
   };
   const plan = planGenreRename(state, "Disco", "Disco & boogie");
   assert.deepEqual(plan.feil, []);
-  assert.ok(plan.advarsler.some((a) => /fri undersjanger-tagg/.test(a)),
+  assert.ok(plan.advarsler.some((a) => /fritt prinsipp-merke/.test(a)),
     "planen skal si fra om den frie taggen i køen");
   assert.equal(plan.ops.filter((o) => o.coll === "pendingEdits").length, 0,
     "den frie taggen skal ikke skrives om");

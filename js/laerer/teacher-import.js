@@ -91,9 +91,9 @@ export function setupDataButtons() {
     if (!(await bekreft("Dette sletter ALL teoretikerdata permanent. Handlingen kan ikke angres.", { tittel: "Er du HELT sikker?", ja: "Gå videre", farlig: true }))) return;
     // Samme sikkerhetsnett som «Erstatt alle»: full backup lastes ned FØR
     // slettingen, og læreren må aktivt skrive SLETT for å bekrefte.
-    downloadJson(buildExportData(), `musikkhistorie-BACKUP-${dateStamp()}.json`);
+    downloadJson(buildExportData(), `pedagogikkhistorie-BACKUP-${dateStamp()}.json`);
     const svar = await sporTekst(
-      "En sikkerhetskopi skal nå ligge i Nedlastinger (musikkhistorie-BACKUP-…).\n\n" +
+      "En sikkerhetskopi skal nå ligge i Nedlastinger (pedagogikkhistorie-BACKUP-…).\n\n" +
       "Skriv SLETT for å bekrefte at all teoretikerdata skal slettes permanent:",
       "", { tittel: "Slette all teoretikerdata", ok: "Slett" }
     );
@@ -276,7 +276,7 @@ async function kanEksportere() {
 
 async function handleExport() {
   if (!(await kanEksportere())) return;
-  downloadJson(buildExportData(), `musikkhistorie-${dateStamp()}.json`);
+  downloadJson(buildExportData(), `pedagogikkhistorie-${dateStamp()}.json`);
 }
 
 let pendingImportData = null;
@@ -345,7 +345,7 @@ function importParts(data) {
   if (notatAntall) parts.push(`${notatAntall} private notater (erstatter notatet til samme kort)`);
   if (Array.isArray(data.genealogy?.nodes) && data.genealogy.nodes.length) {
     const rom = Array.isArray(data.genealogy.tidsrom) ? data.genealogy.tidsrom.length : 0;
-    parts.push(`sjangertreet (${data.genealogy.nodes.length} sjangre${rom ? `, ${rom} tidsrom` : ""})`);
+    parts.push(`epoketreet (${data.genealogy.nodes.length} sjangre${rom ? `, ${rom} tidsrom` : ""})`);
   }
   // Sjekk-fremdriften ble skrevet uten å stå i «Filen inneholder …».
   if (data.teacherChecks && typeof data.teacherChecks === "object") {
@@ -442,7 +442,7 @@ export function setupImportChoice() {
       if (mergeCommitting) return;
       if (mergeHasUnsaved()) {
         mergeState.queue = []; mergeState.newArtists = []; mergeState.index = 0;
-        melding("Flettingen ble avbrutt. Ingenting er lagret, heller ikke beskrivelser, teknologikort eller annet innhold i fila. Importer fila på nytt for å prøve igjen.");
+        melding("Flettingen ble avbrutt. Ingenting er lagret, heller ikke beskrivelser, reformkort eller annet innhold i fila. Importer fila på nytt for å prøve igjen.");
       }
       meldMergeFerdig(false);
     }).observe(mergeModal, { attributes: true, attributeFilter: ["class"] });
@@ -544,7 +544,7 @@ async function importExtras({ pages, referanser, podcasts, teacherChecks, geneal
         // Firestore dyp-fletter map-felter ved merge, så en fjernet/omdøpt
         // familie i families-mapen ville blitt liggende igjen usett.
         await saveGenealogyTree(genealogy);
-        done.push(`sjangertreet (${genealogy.nodes.length} noder)`);
+        done.push(`epoketreet (${genealogy.nodes.length} noder)`);
         problemer.filter((x) => x.nivå === "advarsel")
           .forEach((a) => console.warn("Epoketre-advarsel:", a.melding));
       } catch (e) { console.error("Epoketre-import feilet:", e); failed.push("sjangertreet"); }
@@ -669,7 +669,7 @@ async function importTechItems(techArray) {
       console.error("Tech-import feilet for", jobs[i].name, r.reason);
     }
   });
-  if (fail) melding(`${fail} teknologikort kunne ikke lagres (se konsollen).`);
+  if (fail) melding(`${fail} reformkort kunne ikke lagres (se konsollen).`);
   if (added || updated) {
     const n = updated ? await fjernSjekker(fjern) : 0;
     melding(`Teknologi: ${added} nye, ${updated} oppdaterte.${n ? ` Sjekk er fjernet på ${n}, siden teksten er endret.` : ""}`);
@@ -690,7 +690,7 @@ async function handleReplace(data) {
     .map((a) => ({ proposedBy: "Eirik Sørbø", status: "active", ...a }));
   // Ikke la en tom eller feil fil tømme hele basen ved et uhell.
   if (!toAdd.length) {
-    melding("Filen inneholder ingen gyldige artister. «Erstatt alle» er avbrutt for å unngå å tømme databasen.");
+    melding("Filen inneholder ingen gyldige teoretikere. «Erstatt alle» er avbrutt for å unngå å tømme databasen.");
     return false;
   }
   // En delfil (bare noen felt per artist, f.eks. oppsummeringspunkter) ville
@@ -712,9 +712,9 @@ async function handleReplace(data) {
   // Last ned backupen og KREV at læreren bekrefter at fila faktisk kom før vi
   // sletter — en programmatisk nedlasting kan bli blokkert stille, og da skal
   // vi ikke slette noe.
-  downloadJson(buildExportData(), `musikkhistorie-BACKUP-${dateStamp()}.json`);
+  downloadJson(buildExportData(), `pedagogikkhistorie-BACKUP-${dateStamp()}.json`);
   if (!(await bekreft(
-    "En sikkerhetskopi skal nå ligge i Nedlastinger (musikkhistorie-BACKUP-…).\n\n" +
+    "En sikkerhetskopi skal nå ligge i Nedlastinger (pedagogikkhistorie-BACKUP-…).\n\n" +
     "Bekreft at du finner filen der FØR vi sletter. Trykk Avbryt hvis den mangler.",
     { tittel: "Finner du sikkerhetskopien?", ja: "Ja, slett og importer", farlig: true }
   ))) return false;

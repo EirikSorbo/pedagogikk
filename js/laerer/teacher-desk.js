@@ -181,7 +181,7 @@ export function renderDesk(el) {
 
   const inbox = [
     pendingArtists
-      ? item(ICON.artist, pendingArtists, pendingArtists === 1 ? "nytt artistforslag" : "nye artistforslag", "review-artists", state.filters.showPending)
+      ? item(ICON.artist, pendingArtists, pendingArtists === 1 ? "nytt teoretikerforslag" : "nye teoretikerforslag", "review-artists", state.filters.showPending)
       : "",
     pendingEdits ? item(ICON.edit, pendingEdits, "endringsforslag", "review-edits") : "",
   ].filter(Boolean).join("");

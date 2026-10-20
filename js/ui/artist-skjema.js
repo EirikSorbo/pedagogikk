@@ -121,21 +121,21 @@ function markup(modus) {
           <div class="gp-valgte"></div>
         </div>
         <label class="full">Prinsipper / tags (frie, kommaseparert)
-          <input type="text" data-felt="subGenre" placeholder="f.eks. Delta blues, Akustisk blues" />
+          <input type="text" data-felt="subGenre" placeholder="f.eks. Anskuelse, Læring gjennom erfaring" />
         </label>
       </div>
     </section>
 
     <section class="steg" data-steg="2" hidden>
       <h3 class="steg-tittel" tabindex="-1">${STEGNAVN[2]}</h3>
-      <p class="hint steg-ingress">Fortell kort hvorfor teoretikeren er viktig i musikkhistorien.</p>
+      <p class="hint steg-ingress">Fortell kort hvorfor teoretikeren er viktig i pedagogikkens historie.</p>
       <details class="instr-guide skrivehjelp" data-as-skrivehjelp hidden>
         <summary>Slik skriver du beskrivelsen</summary>
         <div class="rt" data-as-skrivehjelp-tekst></div>
       </details>
       <div class="add-grid">
         <label class="full">Begrunnelse / hvorfor relevant
-          <textarea data-felt="description" rows="8" data-format placeholder="Kort om musikkhistorisk betydning …"></textarea>
+          <textarea data-felt="description" rows="8" data-format placeholder="Kort om pedagogisk betydning …"></textarea>
         </label>
         ${laerer ? `<div class="full punktfelt">
           <label>Oppsummering i punkter
@@ -165,7 +165,7 @@ function markup(modus) {
       <div class="add-grid">
         <div class="full">
           <span class="field-label">Kilder${stj("kilder")}</span>
-          ${student ? `<p class="hint">Bøker, artikler, nettsider eller andre referanser brukt om denne artisten.</p>` : ""}
+          ${student ? `<p class="hint">Bøker, artikler, nettsider eller andre referanser brukt om denne teoretikeren.</p>` : ""}
           <div data-rader="kilder"></div>
           <button type="button" class="btn ghost small" data-legg-til="kilder">+ Legg til kilde</button>
         </div>

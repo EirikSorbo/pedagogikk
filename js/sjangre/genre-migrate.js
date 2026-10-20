@@ -277,7 +277,7 @@ export function planGenreRename(state, fra, til) {
   }
   const friSub = forslagMedFriSub(state, fra);
   if (friSub.length) {
-    advarsler.push(`${friSub.length} teoretikerforslag i køen har «${fra}» som fri undersjanger-tagg. Den står igjen med vilje, som på artistene.`);
+    advarsler.push(`${friSub.length} teoretikerforslag i køen har «${fra}» som fritt prinsipp-merke. Den står igjen med vilje, som på artistene.`);
   }
 
   return { ops, feil, advarsler };
@@ -574,13 +574,13 @@ export function planGenreDelete(state, label) {
     } else {
       ops.push(op("doc.delete", "genreDescriptions", label, null, "Epokebeskrivelsen slettes"));
     }
-    advarsler.push("Epokebeskrivelsen slettes sammen med sjangeren.");
+    advarsler.push("Epokebeskrivelsen slettes sammen med epoken.");
   }
   for (const k of ref.koblinger) {
     ops.push(op("doc.delete", "edgeDescriptions", k, null, `Koblingsbeskrivelse «${k}» slettes`));
   }
   if (ref.koblinger.length) {
-    advarsler.push(`${ref.koblinger.length} koblingsbeskrivelse(r) slettes. De gjaldt streker til eller fra denne sjangeren.`);
+    advarsler.push(`${ref.koblinger.length} koblingsbeskrivelse(r) slettes. De gjaldt streker til eller fra denne epoken.`);
   }
   if (ref.sjekket) {
     ops.push(op("doc.merge", "config", "teacherChecks",
@@ -602,7 +602,7 @@ export function planGenreDelete(state, label) {
   }
   const friSubSlett = forslagMedFriSub(state, label);
   if (friSubSlett.length) {
-    advarsler.push(`${friSubSlett.length} teoretikerforslag i køen har «${label}» som fri undersjanger-tagg. Den står igjen med vilje, som på artistene.`);
+    advarsler.push(`${friSubSlett.length} teoretikerforslag i køen har «${label}» som fritt prinsipp-merke. Den står igjen med vilje, som på artistene.`);
   }
 
   return { ops, feil, advarsler, blokkeringer: [] };
