@@ -4,7 +4,9 @@
 // ----------------------------------------------------------------------------
 //  Setter sammen tekstene i tools/runde-1/ (tre retninger, prinsippene og
 //  påvirkningene) til én importfil i formatet i JSON-OPPSKRIFT.md, sjekker den
-//  med tools/sjekk-innholdsfil.js og skriver «json files/runde-1.json».
+//  med tools/sjekk-innholdsfil.js og skriver «json files/runde-1-alternativ.json».
+//  (Versjon B: en annen Opus-økt skrev runde 1 først, i innhold/runde-1/, og
+//  den bygges til «json files/runde-1.json» med tools/bygg-innholdsfil.js.)
 //  Skriptet skriver aldri til Firestore: læreren importerer fila selv.
 //
 //  Kjør:  node tools/lag-runde-1.js            (bygg, sjekk og skriv)
@@ -22,7 +24,7 @@ import { prinsipper } from "./runde-1/prinsipper.js";
 import { pavirkninger } from "./runde-1/pavirkninger.js";
 
 const ROT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const UT = path.join(ROT, "json files", "runde-1.json");
+const UT = path.join(ROT, "json files", "runde-1-alternativ.json");
 const tre = JSON.parse(fs.readFileSync(path.join(ROT, "json files", "pedagogikk-skjelett.json"), "utf8")).genealogy;
 
 const STANDARD = { status: "active", teacherChecked: false, proposedBy: "Claude (utkast)", addedYear: 2026, votedUpBy: [] };
