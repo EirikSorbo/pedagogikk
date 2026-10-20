@@ -135,9 +135,9 @@ test("genderDistribution: ukjente kategorier telles som ukjent, ikke som ikke-bi
 });
 
 test("vokabularet bor i koden: INSTRUMENTS-konstanten", () => {
-  assert.ok(INSTRUMENTS.includes("Gitar"));
-  assert.ok(INSTRUMENTS.includes("Tangenter"));
-  assert.ok(INSTRUMENTS.includes("Saksofon"));
+  assert.ok(INSTRUMENTS.includes("Filosof"));
+  assert.ok(INSTRUMENTS.includes("Psykolog"));
+  assert.ok(INSTRUMENTS.includes("Politiker og reformator"));
   assert.equal(new Set(INSTRUMENTS).size, INSTRUMENTS.length, "ingen duplikater");
 });
 

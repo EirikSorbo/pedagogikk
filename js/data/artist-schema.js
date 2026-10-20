@@ -22,7 +22,7 @@ export const ARTIST_FIELDS = [
   { key: "deathYear",      label: "Dødsår",           type: "number" },
   { key: "gender",         label: "Kjønn",            type: "gender" },
   { key: "metaGenre",      label: "Metasjanger",       type: "text" },
-  { key: "instrument",     label: "Instrument",       type: "text" },
+  { key: "instrument",     label: "Fagbakgrunn",      type: "text" },
   { key: "mainGenre",      label: "Sjangre",          type: "csv" },
   { key: "subGenre",       label: "Undersjangre",     type: "csv" },
   { key: "influenceStart", label: "Innflytelse fra",  type: "number" },
@@ -49,7 +49,7 @@ export const ARTIST_FIELDS = [
 //            Les alltid begge via instrumenterFor (limits.js).
 export const ARTIST_LAERERFELT = [
   { key: "punkter", label: "Oppsummering i punkter", type: "complex" },
-  { key: "instrument2", label: "Instrument 2", type: "text" },
+  { key: "instrument2", label: "Fagbakgrunn 2", type: "text" },
 ];
 
 // { key: label } — brukt av diff-tabell og merge-dialog.

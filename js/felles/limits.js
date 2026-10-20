@@ -37,39 +37,33 @@ export const BATCH_MAX = 500;
 //  Nøklene her er gruppenavnene, verdiene er det som kan stå på en artist.
 //  Grupper med bare seg selv (Vokal, Bass …) er helt vanlige — de har bare
 //  ingen underinndeling.
+// FAGBAKGRUNN (pedagogikkappens fase 3): hva teoretikeren kom fra. Feltet og
+// konstantene heter fortsatt instrument (databasenøkler og kode beholdes, så
+// forbedringer kan hentes fra musikkappen), men verdiene er fagbakgrunnene
+// Eirik vedtok 2026-10-20. Hver gruppe har bare seg selv: Instrumenter-siden
+// og instrumentsammendragene går ut i fase 4. En teoretiker kan ha to
+// (instrument2): Dewey er både filosof og pedagogisk praktiker.
 export const INSTRUMENT_GROUPS = {
-  "Vokal": ["Vokal"],
-  // Mandolin flyttet hit fra Soloinstrument i v6.90 (brukervalg 2026-10-13):
-  // strengeinstrument med bånd, som banjoen, og de hører sammen i bluegrass.
-  "Gitar": ["Gitar", "Banjo", "Mandolin"],
-  "Tangenter": ["Tangenter"],
-  "Bass": ["Bass"],
-  "Trommer": ["Trommer/perkusjon"],
-  "Soloinstrument": [
-    "Saksofon", "Trompet", "Strykeinstrumenter",
-    "Klarinett", "Trombone", "Munnspill",
-  ],
-  "Produksjon": ["Produksjon"],
-  "Låtskriving": ["Låtskriving"],
-  // Ensembler, bandledere og produsenter uten ett bestemt instrument. Har
-  // bevisst INGEN nyvinnings-tidslinje — det finnes ikke instrumentnyvinninger
-  // for «et band». «Gruppe» (v6.39, brukervalg 2026-10-05) er band og grupper;
-  // tydelige vokalgrupper (The Supremes) har Vokal.
-  "Annet": ["Gruppe", "Annet"],
+  "Filosof": ["Filosof"],
+  "Teolog": ["Teolog"],
+  "Psykolog": ["Psykolog"],
+  "Sosiolog": ["Sosiolog"],
+  "Praktiker": ["Praktiker"],
+  "Politiker og reformator": ["Politiker og reformator"],
+  "Forsker": ["Forsker"],
 };
 
 // Overskriften over hvert instrumentsammendrag. Skrives ut i sin helhet fordi
 // norsk genitiv ikke lar seg utlede mekanisk — «Vokalens», «Tangentenes» og
 // «Trommenes» følger tre ulike mønstre.
 export const INSTRUMENT_TITLE = {
-  "Vokal": "Vokalens utvikling",
-  "Gitar": "Gitarens utvikling",
-  "Tangenter": "Tangentenes utvikling",
-  "Bass": "Bassens utvikling",
-  "Trommer": "Trommenes utvikling",
-  "Soloinstrument": "Soloinstrumentenes utvikling",
-  "Produksjon": "Produksjonens utvikling",
-  "Låtskriving": "Låtskrivingens utvikling",
+  "Filosof": "Filosofene",
+  "Teolog": "Teologene",
+  "Psykolog": "Psykologene",
+  "Sosiolog": "Sosiologene",
+  "Praktiker": "Praktikerne",
+  "Politiker og reformator": "Politikerne og reformatorene",
+  "Forsker": "Forskerne",
 };
 
 // Rekkefølgen gruppene VISES i (brukervalg 2026-09-01): rytmeseksjonen først,
@@ -83,8 +77,7 @@ export const INSTRUMENT_TITLE = {
 // En gruppe som IKKE står her havner sist i stedet for å forsvinne — lista er
 // en prioritering, ikke en hviteliste.
 const INSTRUMENT_REKKEFOLGE = [
-  "Trommer", "Bass", "Tangenter", "Gitar", "Vokal",
-  "Soloinstrument", "Låtskriving", "Produksjon",
+  "Filosof", "Teolog", "Psykolog", "Sosiolog", "Praktiker", "Politiker og reformator", "Forsker",
 ];
 
 // Gruppene som får egen nyvinnings-tidslinje i Instrumenter-seksjonen.

@@ -73,7 +73,7 @@ test("obligatoriske felt per modus", () => {
 });
 
 test("lærerfeltene bare for læreren, plateselskapet også i «Foreslå endring»", () => {
-  assert.match(markup, /\$\{laerer \? `<label>Instrument 2/);
+  assert.match(markup, /\$\{laerer \? `<label>Fagbakgrunn 2/);
   assert.match(markup, /\$\{laerer \|\| modus === "forslag" \? `<label>Plateselskap/);
   assert.match(markup, /\$\{laerer \? `<div class="full punktfelt">/);
 });

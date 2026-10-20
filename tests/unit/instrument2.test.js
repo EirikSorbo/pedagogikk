@@ -14,8 +14,8 @@ test("instrumenterFor gir begge, hovedinstrumentet først, uten tomme eller dobl
   assert.deepEqual(instrumenterFor({}), []);
 });
 
-test("Gruppe er lovlig, men har ingen egen instrumentside", () => {
-  assert.ok(INSTRUMENTS.includes("Gruppe"));
+test("«Gruppe» og «Annet» er ikke lenger lovlige verdier (fase 3: fagbakgrunn)", () => {
+  assert.ok(!INSTRUMENTS.includes("Gruppe"));
   assert.ok(!INSTRUMENT_TIMELINE_GROUPS.includes("Annet"));
 });
 
@@ -36,6 +36,6 @@ test("instrument2 følger med i eksport og fletting, og lærerskjemaet har felte
   // Fra v6.96 er lærerskjemaet det felles femstegs-skjemaet: feltet står i
   // steg 2 bare i lærermodusene, og lesingen tar det med.
   const skjema = lesJs("artist-skjema.js");
-  assert.match(skjema, /\$\{laerer \? `<label>Instrument 2\s*<select data-felt="instrument2">/);
+  assert.match(skjema, /\$\{laerer \? `<label>Fagbakgrunn 2\s*<select data-felt="instrument2">/);
   assert.match(skjema, /if \(felt\("instrument2"\)\) v\.instrument2 = /);
 });

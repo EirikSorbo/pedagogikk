@@ -102,10 +102,10 @@ function markup(modus) {
         <label>Metasjanger${stj("metaGenre")}
           <select data-felt="metaGenre"></select>
         </label>
-        <label>Instrument${stj("instrument")}
+        <label>Fagbakgrunn${stj("instrument")}
           <select data-felt="instrument"></select>
         </label>
-        ${laerer ? `<label>Instrument 2
+        ${laerer ? `<label>Fagbakgrunn 2
           <select data-felt="instrument2"></select>
         </label>` : ""}
         ${laerer || modus === "forslag" ? `<label>Plateselskap
