@@ -18,8 +18,7 @@
 //  (dyp kopi) som først skrives ved Lagre. Hver lagring og sletting rører
 //  bare sin egen plan (savePlan/deletePlan, v5.43), og ingenting skrives før
 //  planene har landet. To faner som redigerer SAMME plan samtidig
-//  overskriver hverandre; med én lærerkonto er det en akseptert enkelhet
-//  (samme som podkast-admin).
+//  overskriver hverandre; med én lærerkonto er det en akseptert enkelhet.
 //
 //  v5.75: stopp legges til ved å søke (samme indeks som søket i appen), rader
 //  kan dras, hvert stopp kan åpnes fra editoren («Vis»), lista står i

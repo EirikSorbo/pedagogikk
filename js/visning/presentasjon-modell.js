@@ -462,7 +462,6 @@ const VISNING_NAVN = {
   tidslinje: "Tidslinjen", sjangerperioder: "Epokeperiodene",
   himmel: "Epokehimmelen", referanser: "Referansene",
   "store-bildet": "Det store bildet", slektstre: "Slektstreet",
-  podkaster: "Podkastene",
   // Vinduene med egen adresse fra v6.08 (S7).
   sjangre: "Epokene", undersjangre: "Prinsippene", artister: "Teoretikerne",
 };

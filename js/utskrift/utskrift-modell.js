@@ -55,8 +55,7 @@ import { normaliserPunkter } from "../felles/punkter.js";
 import { safeUrl } from "../felles/util.js";
 
 // Måltypene som kan stå i et hefte. Resten av vis-typene (tidslinje,
-// koblinger, podkaster …) er skjermflater uten
-// papirform og hoppes stille over.
+// koblinger …) er skjermflater uten papirform og hoppes stille over.
 // Et lytteeksempel («yt:<video>», v5.77) er også med: det blir en linje i
 // lyttelista bakerst, også når artisten ikke er med i heftet.
 export const UTSKRIFT_TYPER = new Set(["artist", "sjanger", "undersjanger", "tech", "instrument", "historie", "side", "yt"]);

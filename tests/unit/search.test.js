@@ -47,7 +47,6 @@ const STATE = {
     rotter: { body: "Røttene ligger i møtet mellom Vest-Afrika og Europa." },
     omHistorie: { body: "Historiebevissthet handler om å se sammenhenger." },
   },
-  podcasts: [{ id: "p1", title: "Episode 1: Delta", description: "Om Mississippi." }],
 };
 
 const finn = (indeks, type, tittel) => indeks.find((p) => p.type === type && p.tittel === tittel);
@@ -80,7 +79,6 @@ test("indeksen dekker alt innholdet, én post per ting", () => {
   assert.equal(t.historie, 1);
   assert.equal(t.kobling, 1);
   assert.equal(t.side, 2);
-  assert.equal(t.podkast, 1);
   assert.ok(t.sjanger > 30, "treets sjangre er med");
   assert.ok(t.rot >= 8, "og røttene");
 });

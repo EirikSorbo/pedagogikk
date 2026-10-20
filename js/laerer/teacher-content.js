@@ -1,16 +1,15 @@
 // ============================================================================
 //  LÆRER — INNHOLDSREDIGERING
 // ----------------------------------------------------------------------------
-//  Sjangerbeskrivelser (enkeltmodaler), teknologi-admin og podkast-
-//  administrasjon. Deler tilstand/eksplore via teacher-state.
+//  Sjangerbeskrivelser (enkeltmodaler) og teknologi-admin. Deler
+//  tilstand/eksplore via teacher-state.
 // ============================================================================
 
 import { state, ctx, openAdminModal, closeAdminModal, lukkEtter, setContentCheck, guardTeacherAction } from "./teacher-state.js";
-import { saveGenreDescLevel, saveEdgeDesc, saveStoryBody, clearStory, savePage, deletePage, saveReferanser, addTech, updateTech, deleteTech, addPodcast, updatePodcast, deletePodcast, reorderPodcasts, runMigrationPlan } from "../data/store.js";
+import { saveGenreDescLevel, saveEdgeDesc, saveStoryBody, clearStory, savePage, deletePage, saveReferanser, addTech, updateTech, deleteTech, runMigrationPlan } from "../data/store.js";
 import { planSubRename } from "../sjangre/genre-migrate.js";
-import { flyttPodkast } from "../felles/podkast-rekkefolge.js";
 import { resolveMainDesc } from "../sjangre/genealogy.js";
-import { dropboxDirectUrl, escapeHtml } from "../felles/util.js";
+import { escapeHtml } from "../felles/util.js";
 import { GENEALOGY, edgeKey, TIDSROM } from "../sjangre/genre-model.js";
 import { storyFor, pageFor } from "../felles/story-format.js";
 import { renderRichText } from "../felles/rich-text.js";
@@ -18,7 +17,7 @@ import { wrapSelection, prefixLines } from "../ui/format-bar.js";
 import { buildMainGenreList, fillSelect } from "../ui/ui.js";
 import { techImage } from "../ui/ui-tech.js";
 import { resolveDesc } from "../sjangre/genre-descriptions.js";
-import { renderPodcastList, wirePlayerCloseGuard, wireCharCount, checkBtnHtml, toggleCheckBtn, techFactsLines, ICONS, fyllPunktfelt, lesPunktfelt } from "../ui/ui-helpers.js";
+import { wireCharCount, checkBtnHtml, toggleCheckBtn, techFactsLines, ICONS, fyllPunktfelt, lesPunktfelt } from "../ui/ui-helpers.js";
 import { redigerNotatForKort } from "../visning/pres-notater.js";
 import { INSTRUMENT_TIMELINE_GROUPS, INSTRUMENT_TITLE, instrumentPageId, SAMMENDRAG_MAKS } from "../felles/limits.js";
 import { erAar, visSpenn } from "../felles/aarstall.js";
@@ -28,7 +27,7 @@ import { wireAllLinks } from "../felles/linkify.js";
 import { $ } from "../data/shared.js";
 import { SOURCE_SPEC, SELES_SPEC, addRow, buildRows, collectRows, normalizeSources } from "../ui/row-editor.js";
 import { normaliserSeOgLes } from "../felles/se-og-les.js";
-import { melding, bekreft, setupModal, modalOpen, sporTekst } from "../ui/ui-modal.js";
+import { melding, bekreft, setupModal, sporTekst } from "../ui/ui-modal.js";
 
 // ----------------------------------------------------------------------------
 //  Sjangerbeskrivelser (enkeltmodaler)
@@ -498,130 +497,6 @@ export function setupTechAdmin() {
       lukkEtter("modal-tech-single", 800);
     } catch (err) {
       msg.textContent = "Feil: " + err.message; msg.className = "form-msg error";
-    }
-  });
-}
-
-// ----------------------------------------------------------------------------
-//  Podkast-administrasjon
-// ----------------------------------------------------------------------------
-
-export function openPodkastAdmin() {
-  const modal = document.getElementById("modal-podkast-admin");
-  // Samme spørsmål som studentene får: lukker læreren modalen midt i en
-  // episode, velger hen selv om lyden skal følge med ut.
-  wirePlayerCloseGuard(modal, "podkast-admin-list");
-  renderPodkastAdmin();
-  modalOpen(modal);
-}
-
-// Episoden som redigeres nå, eller null for «legg til ny». Skjemaet er det
-// samme; bare knappetekst, overskrift og lagringskall skifter.
-let editingPodId = null;
-
-function fillPodForm(ep) {
-  editingPodId = ep ? ep.id : null;
-  document.getElementById("pod-title").value = ep?.title || "";
-  document.getElementById("pod-desc").value = ep?.description || "";
-  document.getElementById("pod-duration").value = ep?.duration || "";
-  document.getElementById("pod-url").value = ep?.audioUrl || "";
-  document.getElementById("pod-form-title").textContent = ep ? "Rediger episode" : "Legg til episode";
-  document.getElementById("pod-save").textContent = ep ? "Lagre endringer" : "Lagre episode";
-  document.getElementById("pod-cancel").hidden = !ep;
-  const msg = document.getElementById("pod-msg");
-  msg.textContent = "";
-  msg.className = "form-msg ok";
-}
-
-export function renderPodkastAdmin() {
-  const el = document.getElementById("podkast-admin-list");
-  if (!el) return;
-  // Episoden som redigeres kan ha blitt slettet i en annen fane — da må
-  // skjemaet tilbake til «legg til», ellers skriver Lagre til et borte dokument.
-  if (editingPodId && !state.podcasts.some((p) => p.id === editingPodId)) fillPodForm(null);
-  // Usann = lista var uendret og DOM-en står urørt (så en episode læreren
-  // hører på ikke stoppes av hvert snapshot). Da henger knappelytterne
-  // fortsatt der de skal, og vi er ferdige.
-  if (!renderPodcastList(el, state.podcasts, {
-    admin: true,
-    empty: `<p class="muted empty">Ingen episoder ennå.</p>`,
-  })) return;
-  el.querySelectorAll("[data-pod-edit]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const ep = state.podcasts.find((p) => p.id === btn.dataset.podEdit);
-      if (!ep) return;
-      fillPodForm(ep);
-      document.getElementById("pod-title").focus();
-      document.querySelector(".podkast-add-form")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    });
-  });
-  // Opp og ned (v6.48): hele lista nummereres på nytt i én skriving
-  // (podkast-rekkefolge.js), og snapshotet tegner den i ny rekkefølge.
-  el.querySelectorAll("[data-pod-flytt]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const endringer = flyttPodkast(state.podcasts, btn.dataset.podId, Number(btn.dataset.podFlytt));
-      if (endringer.length) await guardTeacherAction(reorderPodcasts(endringer));
-    });
-  });
-  el.querySelectorAll("[data-pod-delete]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      if (!(await bekreft("Episoden slettes for godt.", { tittel: "Slette denne episoden?", ja: "Slett", farlig: true }))) return;
-      await guardTeacherAction(deletePodcast(btn.dataset.podDelete));
-    });
-  });
-}
-
-export function setupPodkastAdmin() {
-  const modal = document.getElementById("modal-podkast-admin");
-  if (!modal) return;
-  setupModal(modal);
-
-  document.getElementById("pod-cancel").addEventListener("click", () => fillPodForm(null));
-
-  document.getElementById("pod-save").addEventListener("click", async () => {
-    const title = document.getElementById("pod-title").value.trim();
-    const audioUrl = document.getElementById("pod-url").value.trim();
-    const msg = document.getElementById("pod-msg");
-    if (!title) { msg.textContent = "Tittel er påkrevd."; msg.className = "form-msg error"; return; }
-    // Tomt svar på en utfylt lenke betyr at den ikke er en http(s)-adresse. Si
-    // fra framfor å lagre tomt — ellers forsvinner spilleren uten forklaring.
-    const lyd = dropboxDirectUrl(audioUrl);
-    if (audioUrl && !lyd) {
-      msg.textContent = "Lydlenken må være en full adresse som starter med https://";
-      msg.className = "form-msg error";
-      return;
-    }
-
-    msg.textContent = "Lagrer …";
-    msg.className = "form-msg ok";
-    const felter = {
-      title,
-      description: document.getElementById("pod-desc").value.trim(),
-      duration: document.getElementById("pod-duration").value.trim(),
-      audioUrl: lyd,
-    };
-    try {
-      if (editingPodId) {
-        // `order` røres IKKE ved redigering — rekkefølgen er lærerens, ikke en
-        // funksjon av når episoden sist ble endret.
-        await updatePodcast(editingPodId, felter);
-        fillPodForm(null);
-        msg.textContent = "Episode oppdatert!";
-      } else {
-        await addPodcast({
-          ...felter,
-          // Maks eksisterende order + 1 (ikke lengde+1, som gjenbruker en verdi
-          // etter at en episode er slettet → to like order → ustabil sortering).
-          // Høyest står øverst (v6.48), så den nye episoden havner øverst.
-          order: Math.max(0, ...state.podcasts.map((p) => p.order || 0)) + 1,
-        });
-        fillPodForm(null);
-        msg.textContent = "Episode lagt til!";
-      }
-    } catch (err) {
-      console.error("Podkast-lagring feilet:", err);
-      msg.textContent = "Feil: " + err.message;
-      msg.className = "form-msg error";
     }
   });
 }

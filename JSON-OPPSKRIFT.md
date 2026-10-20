@@ -18,7 +18,6 @@ Eksport-/importformat for hele datagrunnlaget. Filen ligger på rota og oppdater
   "edgeDescriptions":  { "blues__rnb": { "description": "...", "kilder": [ ... ] } },
   "tech":              [ /* array av teknologiobjekter */ ],
   "pages":             { "omHistorie": { "body": "..." }, "rotter": { ... }, "appGuide": { ... }, "instrument-gitar": { ... } },
-  "podcasts":          [ /* episoder */ ],
   "teacherChecks":     { /* lærerens sjekk-fremdrift */ },
   "varmekart":         { "heat": { "Blues": [null, 2, 3, ...] } },
   "referanser":        { "kilder": [ ... ] },
@@ -35,7 +34,6 @@ Eksport-/importformat for hele datagrunnlaget. Filen ligger på rota og oppdater
 | `edgeDescriptions` | objekt | Koblingsbeskrivelser (strekene i slektstreet). Nøkkel = dokument-ID `fra__til`. |
 | `tech` | array | Teknologiske innovasjoner (alle statuser, også pending). Sortert etter `adoptedYear`. |
 | `pages` | objekt | Innholdssidene: `omHistorie`, `rotter`, `appGuide`, `skriveveiledning` (veiledningen øverst i «Foreslå en artist») og instrumentsammendragene (`instrument-<slug>`). |
-| `podcasts` | array | Podkast-episodene (matches på tittel ved import, så re-import ikke dupliserer). |
 | `teacherChecks` | objekt | Lærerens sjekk-fremdrift per kategori. |
 | `varmekart` | objekt | Varmekart-radene (`heat`: sjangeretikett → 13 tiårsnivåer). Flettes rad for rad ved import. |
 | `referanser` | objekt | Frittstående referanser (erstattes i sin helhet ved import). |
@@ -306,7 +304,7 @@ Tech-data eksporteres/importeres sammen med resten av datasettet (under `tech`-n
 ## Tekstformatering (gjelder ALLE beskrivelser)
 
 Alle tekstfelter i appen leses som **markdown-light** — artistbeskrivelser,
-sjanger- og koblingsbeskrivelser, innovasjonskort, podkastbeskrivelser,
+sjanger- og koblingsbeskrivelser, innovasjonskort,
 tiårstekstene og historiene/innholdssidene. Samme syntaks overalt, og samme
 knapper over hvert felt i editoren:
 
@@ -454,7 +452,7 @@ teksten slik den er skrevet.
 
 ## Import-/eksport-flyt
 
-1. **Eksport** (lærersiden → «Eksporter»): `musikkhistorie-YYYY-MM-DD.json` med ALLE seksjonene i toppnivåstrukturen over (artister, tiår, sjanger- og koblingsbeskrivelser med historier, tech, innholdssider, podkaster, sjekk-fremdrift, varmekart, frittstående referanser og hele sjangertreet). Tar med alle artister og tech-kort uansett status — også ventende forslag — så eksporten er en komplett, tapsfri backup.
+1. **Eksport** (lærersiden → «Eksporter»): `musikkhistorie-YYYY-MM-DD.json` med ALLE seksjonene i toppnivåstrukturen over (artister, tiår, sjanger- og koblingsbeskrivelser med historier, tech, innholdssider, sjekk-fremdrift, varmekart, frittstående referanser og hele sjangertreet). Tar med alle artister og tech-kort uansett status — også ventende forslag — så eksporten er en komplett, tapsfri backup.
 2. **Import** (lærersiden → «Importer»): velg fil. Hele artistlista valideres FØR noe skrives eller slettes; feil rapporteres med radnummer og ingenting endres. Deretter valget *Erstatt* eller *Slå sammen*.
 3. **Erstatt alle**: laster ned en full sikkerhetskopi av dagens data og krever bekreftelse på at fila faktisk kom, FØR noe slettes.
 4. **Slå sammen**: artister matches på navn (case-insensitive). Tomme felter fylles automatisk fra importfilen. Konflikter løses interaktivt eller med *Behold alle*/*Importer alle*.

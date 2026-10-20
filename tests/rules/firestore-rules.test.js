@@ -174,11 +174,18 @@ test("lærer kan endre alt; innlogget ikke-lærer (Google) kan ikke", async () =
   await assertFails(otherUserDb().collection("artists").doc("a4").update({ status: "removed" }));
 });
 
-test("kun lærer kan skrive config/genreDescriptions/podcasts/content", async () => {
-  for (const col of ["config", "genreDescriptions", "podcasts", "content"]) {
+test("kun lærer kan skrive config/genreDescriptions/content", async () => {
+  for (const col of ["config", "genreDescriptions", "content"]) {
     await assertFails(anonDb().collection(col).doc("x").set({ a: 1 }));
     await assertSucceeds(teacherDb().collection(col).doc("x").set({ a: 1 }));
   }
+});
+
+// Podkastene ble tatt ut i fase 4: samlingen har ingen regel lenger, og er dermed
+// stengt også for læreren (og for lesing).
+test("podcasts er stengt for alle (fase 4)", async () => {
+  await assertFails(teacherDb().collection("podcasts").doc("x").set({ title: "x" }));
+  await assertFails(anonDb().collection("podcasts").doc("x").get());
 });
 
 // Tiårsbeskrivelsene ble tatt ut i fase 2 (pedagogikkappen): samlingen har

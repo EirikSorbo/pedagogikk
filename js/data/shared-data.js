@@ -2,9 +2,9 @@
 //  DELT DATAROT — alle sider abonnerer på de delte samlingene herfra
 // ----------------------------------------------------------------------------
 //  De delte komponentene (sjangerkortet, artistlista, spillelista, innovasjons-
-//  kortet, instrumentsidene, slektstreet) leses fra SEKS samlinger: artists,
-//  genreDescs, edgeDescs, tech, content og podcasts. (decades, tiårs-
-//  beskrivelsene, var den sjuende til fase 2.) Før v4.44
+//  kortet, instrumentsidene, slektstreet) leses fra FEM samlinger: artists,
+//  genreDescs, edgeDescs, tech og content. (decades, tiårs-beskrivelsene, var
+//  den sjette til fase 2.) Før v4.44
 //  abonnerte hver side på sitt eget utvalg av dem, hver for seg, og da ga samme
 //  komponent ulikt innhold avhengig av hvilken inngang den ble åpnet fra:
 //
@@ -15,14 +15,8 @@
 //    · slektstresiden bygget sin egen sjangerOpts uten onShowTimeline, så
 //      «Tidslinje»-knappen på kortet fantes på forsiden, men ikke i treet
 //
-//  Her er den ene ruta inn. Alle sider får nøyaktig samme seks samlinger i
+//  Her er den ene ruta inn. Alle sider får nøyaktig samme fem samlinger i
 //  nøyaktig samme state-form, og en ny side kan ikke lenger gå glipp av én.
-//
-//  podcasts er med selv om den ser sidespesifikk ut: explore-podkaster.js
-//  gjør `s.podcasts.length` UTEN vakt, og flaten er nåbar fra enhver side som
-//  injiserer utforsk-modalene (instrumentlenkene på innovasjonskortene åpner
-//  instrumentsiden). Manglet den i state, ville et klikk kastet TypeError i
-//  stedet for å vise innhold. Samlingen er dessuten liten.
 //
 //  Lærersidens egne samlinger (pendingEdits) holdes utenfor. Sjekkene
 //  (config/teacherChecks) leses fra v6.89 også på studentflatene, for regelen
@@ -40,7 +34,6 @@ import {
   subscribeEdgeDescs,
   subscribeTech,
   subscribeContent,
-  subscribePodcasts,
   subscribeTeacherChecks,
 } from "./store.js";
 import { applyGenealogyDoc } from "../sjangre/genre-model.js";
@@ -69,13 +62,11 @@ export function sharedStateDefaults() {
     content: {},
     // contentLoaded skiller «laster fortsatt» fra «mangler faktisk tekst».
     contentLoaded: false,
-    podcasts: [],
     // Resten av lastet-flaggene (v5.35, audit-funn 26): lærerens eksport leser
     // ALLE samlingene rett fra state, og vakten foran den må kunne se at hver
     // enkelt har landet, ikke bare artister og content.
     edgeDescsLoaded: false,
     techLoaded: false,
-    podcastsLoaded: false,
   };
 }
 
@@ -89,7 +80,7 @@ export function sharedStateDefaults() {
 // forskjellene mellom sidene — alt annet er likt med vilje.
 export function subscribeSharedData(state, hooks = {}) {
   const {
-    onArtists, onGenreDescs, onEdgeDescs, onTech, onContent, onPodcasts,
+    onArtists, onGenreDescs, onEdgeDescs, onTech, onContent,
     keepPendingTech = false,
     laererside = false,
   } = hooks;
@@ -172,10 +163,4 @@ export function subscribeSharedData(state, hooks = {}) {
       if (state.contentLoaded) onContent?.(utled("content"));
     });
   }
-
-  subscribePodcasts((pods) => {
-    state.podcasts = pods || [];
-    state.podcastsLoaded = true;
-    onPodcasts?.(state.podcasts);
-  });
 }

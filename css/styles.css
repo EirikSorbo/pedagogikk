@@ -274,7 +274,6 @@
   --icon-l-oversikt: var(--icon-mono, var(--green-600));
   --icon-l-mangler: var(--icon-mono, var(--amber-700));
   --icon-l-sjangertre: var(--icon-mono, var(--violet-600));
-  --icon-l-podkast: var(--icon-mono, var(--pink-600));
   --icon-l-slides: var(--icon-mono, var(--teal-600));
   --icon-l-referanse: var(--icon-mono, var(--blue-700));
   --icon-l-handbok: var(--icon-mono, var(--cyan-600));
@@ -2025,14 +2024,6 @@ body.laerer-okt.samler-plukk .modal-head .modal-lenke { display: none; }
 .instr-faner { gap: 20px; margin: 0 0 14px; overflow-x: auto; scrollbar-width: none; }
 .instr-faner::-webkit-scrollbar { display: none; }
 .instr-faner .dv-fane { flex: none; white-space: nowrap; margin-bottom: 0; }
-/* Podkast-inngangen øverst i Instrumenter-kortet: full bredde, så den ikke kan
-   forveksles med en av instrumentknappene under. */
-.instr-podkast-inngang { margin-bottom: 12px; }
-.instr-podkast-btn {
-  width: 100%;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-}
-
 /* Radiovalg i skjemaene (korttype: innovasjon / hendelse) */
 .radio-row { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 4px; }
 .radio-opt { display: flex; align-items: center; gap: 6px; font-size: 0.88rem; cursor: pointer; }
@@ -2053,9 +2044,6 @@ body.laerer-okt.samler-plukk .modal-head .modal-lenke { display: none; }
 /* Tidslinjen har egen luft (.tl-rich), så seksjonen trenger ikke mer under. */
 .instr-tl .timeline { margin-bottom: 4px; }
 .instr-tl .gx-missing { margin: 10px 0 14px; }
-/* Sammendrag som ennå ikke er skrevet: en henvisning til podkastgruppen, ikke
-   et feilvarsel — kursiv i stedet for .gx-missing sin røde fete stil. */
-.instr-sum-hint { font-style: italic; color: var(--muted); margin: 10px 0 14px; }
 /* Sammendraget står ØVERST — teksten er inngangen til instrumentet. Skrives av
    studentene, som resten av innholdet. */
 .instr-sum-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
@@ -2533,28 +2521,6 @@ body:not(.presentasjon) :is(#modal-artistliste, #modal-spilleliste) > .modal > *
 .dash-icon { width: 22px; height: 22px; margin-bottom: 4px; flex-shrink: 0; stroke: var(--ikon, currentColor); }
 .dash-title { font-weight: 600; font-size: 0.95rem; color: var(--text); }
 .dash-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.35; }
-
-/* ----- Podkast ----- */
-/* Episodekortene: lave og slanke, hvit flate med tynn ramme i stedet for det
-   grønne fyllet — de skal lese som en liste, ikke som åtte tunge blokker. */
-.podkast-list { display: flex; flex-direction: column; gap: 10px; }
-.podkast-episode {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
-}
-/* Tittelraden bærer også lærerens knapper, skjøvet helt til høyre. baseline
-   ville løftet ikon-knappene skjevt, så raden sentreres i stedet. */
-.podkast-header { display: flex; align-items: center; gap: 8px; }
-.podkast-title { margin: 0; font-size: 0.95rem; }
-.podkast-duration { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
-.podkast-header .podkast-actions { display: flex; gap: 4px; margin-left: auto; }
-.podkast-desc { font-size: 0.86rem; color: var(--muted); margin: 4px 0 0; line-height: 1.45; }
-.podkast-desc p { margin: 0 0 6px; }
-/* Nettleserens standard lydavspiller er 54px høy — den dominerer et slankt
-   kort, så den skaleres ned litt her. */
-.podkast-episode audio { width: 100%; height: 34px; margin-top: 8px; display: block; }
 
 /* ===========================================================================
    Flersides-elementer: navigasjon, forside-hero, lærerport
@@ -3112,10 +3078,6 @@ html.pensum-locked, html.pensum-locked body { background: var(--bg); }
 .gen-tr-tabell input.gen-tr-aar { min-width: 5.5em; max-width: 7em; }
 .gen-tr-knapper { white-space: nowrap; }
 .gen-tr-knapper .btn + .btn { margin-left: 4px; }
-
-/* Podkast-episode som ikke lot seg spille av: en forklaring med direktelenke
-   under spilleren, siden nettleserens egne kontroller bare sier «Feil». */
-.podkast-feil { font-size: 0.82rem; color: var(--muted); margin: 6px 0 0; }
 
 /* Arbeidsforklaringen øverst i Instrumenter-kortet. Sammenleggbar, dempet
    ramme: den skal kunne stå åpen uten å ta oppmerksomheten fra innholdet. */

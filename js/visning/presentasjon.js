@@ -369,11 +369,6 @@ function gaTilStopp(i) {
 // Lukker alt som står åpent før et bytte (stopp eller side i historikken).
 // false når et kort nekter å lukkes: da avbrytes byttet.
 function lukkAlleKort() {
-  // Lyd som spiller i et åpent kort (en podkastepisode) stoppes før byttet:
-  // podkastkortets «stopp eller fortsett?»-vakt avviste ellers lukkingen, og
-  // spørsmålet havnet skjult under neste stopp mens lyden gikk videre
-  // (audit v5.42 funn 7). YouTube-spilleren river iframen selv.
-  document.querySelectorAll(".modal-backdrop.open audio").forEach((a) => { try { a.pause(); } catch (e) {} });
   // Ovenfra og ned. Nekter et kort å lukkes (en ulagret kladd i kjøreplan-
   // editoren), avbrytes byttet: posisjonen står, og kortene under blir
   // liggende urørt (i dokumentrekkefølge ble et lytteeksempel under

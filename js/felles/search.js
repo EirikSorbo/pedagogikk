@@ -4,7 +4,7 @@
 //  Bygger en flat liste over ALT som er skrevet i pensumet — artister,
 //  lytteeksempler, sjangre, undersjangre, sjangerhistorier, metasjanger-oversikter, innovasjonskort,
 //  innholdssider, instrumentsammendrag, sjangerkoblinger,
-//  plateselskaper og podkaster — og rangerer treff i
+//  plateselskaper — og rangerer treff i
 //  den. Hver post bærer med seg hvordan den åpnes (`apne`), så visningen bare
 //  sender payloaden videre til ruteren i explore-search.js. Samme grep som
 //  Referanser-kortet bruker for sine `opphav`.
@@ -39,7 +39,6 @@ export const TYPE_LABEL = {
   side: "Innholdsside",
   instrument: "Fagbakgrunn",
   kobling: "Epokekobling",
-  podkast: "Podkast",
   oversikt: "Retning",
   galleri: "Teoretikergalleri",
   slide: "Slide",
@@ -58,7 +57,6 @@ export const TYPE_FLERTALL = {
   side: "Innholdssider",
   instrument: "Fagbakgrunner",
   kobling: "Epokekoblinger",
-  podkast: "Podkaster",
   oversikt: "Retninger",
   galleri: "Teoretikergallerier",
   slide: "Slides",
@@ -68,7 +66,7 @@ export const TYPE_FLERTALL = {
 // etter først.
 export const TYPE_ORDER = [
   "artist", "lytteeksempel", "oversikt", "sjanger", "rot", "undersjanger", "tech", "hendelse",
-  "historie", "galleri", "side", "instrument", "kobling", "podkast", "slide",
+  "historie", "galleri", "side", "instrument", "kobling", "slide",
 ];
 
 const SIDE_TITTEL = { rotter: "Røtter før 1910", omHistorie: "Om historie", appGuide: "Slik bruker du appen" };
@@ -285,12 +283,6 @@ export function byggIndeks(state = {}, { erLærer = false, skjul = {}, skjulHub 
       ut.push(post("kobling", key, navn, "Epokekobling", [e.description],
         { hva: "kobling", id: key }));
     }
-  }
-
-  // --- Podkastepisodene -----------------------------------------------------
-  for (const p of state.podcasts || []) {
-    ut.push(post("podkast", p.id, p.title || "(uten tittel)", "Podkast",
-      [p.description, p.guest, p.host], { hva: "podkast", id: p.id }));
   }
 
   return ut;

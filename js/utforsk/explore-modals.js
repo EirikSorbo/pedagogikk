@@ -33,20 +33,6 @@ export const MODAL_HTML = `
   </div>
 </div>
 
-<!-- Podkastene: eget vindu (v5.07), åpnet fra «Hør podkastene» øverst i
-     Instrumenter-kortet. Lå tidligere som fane nummer to der inne — med
-     knappen på plass var fanen bare et ekstra lag rundt den samme lista. -->
-<div class="modal-backdrop" id="modal-podkaster" data-vis="podkaster">
-  <div class="modal modal-innhold">
-    <div class="modal-head">
-      <h2>Podkaster</h2>
-      <button class="modal-close btn ghost small">✕</button>
-    </div>
-    <div id="podkast-extra" class="head-actions"></div>
-    <div id="podkast-list" class="podkast-list"></div>
-  </div>
-</div>
-
 <!-- Søk i alt innholdet. Feltet i Utforsk-kortet (index.html/teacher.html)
      er inngangen; her søkes det videre, med treff mens man skriver. -->
 <div class="modal-backdrop" id="modal-sok">

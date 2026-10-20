@@ -26,7 +26,6 @@ import { openSubgenreList, openUndersjangre, openSubgenreInfo, tegnSjangre } fro
 import { openStoreBildet, openAppGuide, openOmHistorie, openRotter, openHistorier, openSjangerhimmel, renderPage, renderRotterChips, refreshHistorie } from "./explore-innhold.js";
 import { openVisningssider, openArtistGalleri } from "./explore-visningssider.js";
 import { openMetaOversikt } from "./explore-metaoversikt.js";
-import { openPodkaster, renderPodkaster } from "./explore-podkaster.js";
 import { openSok, wireSok } from "./explore-search.js";
 import { apneMaal } from "./explore-apne.js";
 import { erPresentasjon } from "../visning/presentasjon.js";
@@ -120,7 +119,7 @@ function wireModals() {
    "modal-artistliste", "modal-spilleliste", "modal-sjanger", "modal-tech-detail",
    "modal-store-bildet", "modal-app-guide", "modal-om-historie", "modal-rotter", "modal-historier",
    "modal-meta-oversikt", "modal-visningssider", "modal-galleri",
-   "modal-podkaster", "modal-sok", "modal-time", "modal-slide"].forEach((id) => setupModal(id));
+   "modal-sok", "modal-time", "modal-slide"].forEach((id) => setupModal(id));
 
   // Søkefeltet i Utforsk-kortet står i sidenes egen markup med faste ID-er, så
   // forsiden og lærersiden får søket av samme kode uten å wire noe selv.
@@ -317,8 +316,7 @@ export function initExplore(options) {
   setOpts(options);
   injectModals();
   wireModals();
-  // Kun medlemmer sidene faktisk kaller. renderPodkaster er no-op når
-  // vinduet er lukket, så sidene kan kalle den trygt fra ethvert snapshot.
+  // Kun medlemmer sidene faktisk kaller.
   return {
     openSok,
     openTime,
@@ -329,8 +327,6 @@ export function initExplore(options) {
     openOmHistorie,
     openRotter,
     openHistorier,
-    openPodkaster,
-    renderPodkaster,
     // Nøkkeltallet «Kilder» i lærerens Oversikt (v6.88) åpner Referanser.
     openReferanser,
     antallKilder,

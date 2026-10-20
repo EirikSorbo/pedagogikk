@@ -97,7 +97,7 @@ test("kanoniskVis: bare hefte-typer, guiden holdes utenfor, tiårene er tatt ut"
   // Et lytteeksempel kan stå i heftet fra v5.77 (lyttelista); resten av
   // skjermflatene kan ikke.
   assert.equal(kanoniskVis("yt:abc123"), "yt:abc123");
-  for (const v of ["varmekart", "varmekart:Blues", "tidslinje", "kobling:blues__rnb", "yt", "podkaster", "slektstre", "historie", "artist", "", null, undefined, 42]) {
+  for (const v of ["varmekart", "varmekart:Blues", "tidslinje", "kobling:blues__rnb", "yt", "slektstre", "historie", "artist", "", null, undefined, 42]) {
     assert.equal(kanoniskVis(v), null, String(v));
   }
 });

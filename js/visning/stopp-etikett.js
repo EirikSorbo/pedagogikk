@@ -26,7 +26,7 @@ export const TYPE_NAVN = {
   instrument: "Fagbakgrunn", kobling: "Kobling", tidslinje: "Tidslinje",
   sjangerperioder: "Epokeperioder",
   himmel: "Epokehimmel", referanser: "Referanser",
-  "store-bildet": "Det store bildet", podkaster: "Podkaster",
+  "store-bildet": "Det store bildet",
   teknologi: "Teknologi", slektstre: "Slektstre", yt: "Lytteeksempel",
   oversikt: "Oversikt", galleri: "Galleri",
   // Lytt heter Spillelister i appen fra v6.31.

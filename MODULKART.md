@@ -5,12 +5,12 @@ Kartet lages av `tools/modulkart.js` og skal ikke redigeres for hånd: endre inn
 i fila og kjør `./bump.sh` (eller `node tools/modulkart.js`). Pre-push-kroken og GitHub
 stopper et kart som ikke stemmer med filene.
 
-110 filer i 11 mapper.
+108 filer i 11 mapper.
 
 | Mappe | Innhold | Filer |
 |---|---|---|
 | `js/` | Sidene og oppsettet | 11 |
-| `js/utforsk/` | Utforsk | 16 |
+| `js/utforsk/` | Utforsk | 15 |
 | `js/sjangre/` | Sjangrene og slektstreet | 13 |
 | `js/visning/` | Visning | 15 |
 | `js/laerer/` | Lærersiden | 8 |
@@ -18,7 +18,7 @@ stopper et kart som ikke stemmer med filene.
 | `js/utskrift/` | Utskrift | 2 |
 | `js/ui/` | Byggeklosser for skjermen | 15 |
 | `js/data/` | Data | 9 |
-| `js/felles/` | Felles hjelpere | 17 |
+| `js/felles/` | Felles hjelpere | 16 |
 | `js/vendor/` | Tredjepart | 1 |
 
 ## Reglene koden holder seg til
@@ -60,7 +60,6 @@ Det store bildet, sjangrene, sjangerperiodene, tidslinja, Lytt, Instrumenter, re
 | `explore-innhold.js` | INNHOLDSSIDER, SJANGERHISTORIER, HUB & SJANGERHIMMEL |
 | `explore-metaoversikt.js` | METASJANGER-OVERSIKTEN (v5.94) — én side per aktiv metasjanger i visningen |
 | `explore-modals.js` | MODAL-MARKUP FOR UTFORSK-SIDENE |
-| `explore-podkaster.js` | PODKASTER — eget vindu (v5.07) |
 | `explore-referanser.js` | REFERANSER: alle kildene appen bygger på, samlet |
 | `explore-search.js` | SØK — visning og ruting |
 | `explore-sjanger.js` | SJANGRE OG UNDERSJANGRE |
@@ -198,7 +197,6 @@ Små hjelpere og vokabular som flere deler av appen bruker: tekst og lenker, kil
 | `kilder.js` | KILDER — vokabular, publikasjoner og aggregering |
 | `limits.js` | KONFIGURASJON, VOKABULAR OG TELLING |
 | `linkify.js` | LENKER I LØPENDE TEKST — artist-, sjanger- og innovasjonsnavn blir klikkbare |
-| `podkast-rekkefolge.js` | PODKASTENES REKKEFØLGE (v6.48, brukerbestilling 2026-10-06) |
 | `punkter.js` | OPPSUMMERINGSPUNKTER (v5.50) — 3–5 korte punkter per beskrivelse |
 | `rich-text.js` | RIK TEKST — markdown-light for ALL løpende tekst i appen |
 | `se-og-les.js` | SE OG LES — valgfri liste på et pedagogisk prinsipp (fase 3) |

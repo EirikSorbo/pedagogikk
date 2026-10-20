@@ -215,12 +215,6 @@ service cloud.firestore {
       allow write: if isTeacher();
     }
 
-    // ---- Podkast-episoder ----
-    match /podcasts/{doc} {
-      allow read: if true;
-      allow write: if isTeacher();
-    }
-
     // ---- Teknologiske innovasjoner ----
     match /tech/{doc} {
       // Innholdskrav og tak for et studentskrevet kort — delt av create og

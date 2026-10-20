@@ -131,7 +131,7 @@ stopper et kart som ikke stemmer med filene, så det kan ikke gå ut på dato.
 `decades`, `genreDescriptions` (nivåfeltene meta/main/sub + `story` =
 sjangerhistorien), `edgeDescriptions` (koblingstekster, doc-ID `fra__til`),
 `content` (innholdssider + varmekart + **`content/genealogy` = hele
-sjangertreet**, ett dokument), `tech`, `podcasts` og `pendingEdits`. Alt
+sjangertreet**, ett dokument), `tech` og `pendingEdits`. Alt
 pensuminnhold bor i Firestore — ingen fallback-tekster i koden, og heller ingen
 kopi av sjangertreet: `js/sjangre/genre-model.js` leser `content/genealogy` og avleder
 vokabularet. Artistfeltene er definert i `js/data/artist-schema.js`. Bare forslag

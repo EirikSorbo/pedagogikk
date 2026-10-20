@@ -117,7 +117,7 @@ export function erDelpost(a) {
 // Innholdsdeler en importfil kan bære utover artistene.
 // Tiårsbeskrivelsene (decades) og varmekartet (varmekart) var med til fase 2;
 // står de i en fil, hoppes de over.
-export const CONTENT_KEYS = ["genreDescriptions", "edgeDescriptions", "tech", "pages", "podcasts", "referanser", "genealogy", "presentasjoner"];
+export const CONTENT_KEYS = ["genreDescriptions", "edgeDescriptions", "tech", "pages", "referanser", "genealogy", "presentasjoner"];
 
 // Normaliserer en innlest importfil til appens interne form, eller returnerer
 // null når formatet ikke gjenkjennes. Skilt ut fra handleImportFile (v4.52) og
@@ -136,7 +136,7 @@ export function normalizeImportFile(raw) {
   if (!harInnhold) return null;
 
   // Filer UTEN artister godtas også — rene innholdsfiler (sider,
-  // historier/beskrivelser, podkaster, sjangertreet).
+  // historier/beskrivelser, sjangertreet).
   return {
     artists: Array.isArray(raw.artists) ? raw.artists : [],
     // Formatet er nestet pr. nivå ({ meta, main, sub }) — flat ut til
@@ -146,7 +146,6 @@ export function normalizeImportFile(raw) {
     tech: raw.tech || [],
     pages: raw.pages || {},
     referanser: raw.referanser || null,
-    podcasts: raw.podcasts || [],
     teacherChecks: raw.teacherChecks || null,
     genealogy: raw.genealogy || null,
     // Kjøreplanene (v5.44, audit v5.42 funn 5).

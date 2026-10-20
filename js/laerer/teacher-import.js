@@ -15,8 +15,6 @@ import {
   saveGenealogyTree,
   updateArtistFields,
   saveReferanser,
-  addPodcast,
-  updatePodcast,
   lagreNotat,
   setTeacherChecks,
   savePlaner,
@@ -170,7 +168,7 @@ function buildExportData() {
 
   // Innholdssidene (Om historie, Røtter) — fra content-samlingen, så
   // backupen inneholder ALT pensuminnhold (koden har ingen
-  // fallback-tekster). Podkast-metadata tas også med. (Config er borte, v3.68:
+  // fallback-tekster). (Config er borte, v3.68:
   // instrument-vokabularet bor i koden — INSTRUMENTS i limits.js.)
   const pages = {};
   for (const [id, docData] of Object.entries(state.content || {})) {
@@ -186,14 +184,9 @@ function buildExportData() {
     ? { kilder: state.content.referanser.kilder, updatedAt: state.content.referanser.updatedAt || null }
     : null;
 
-  const podcasts = state.podcasts.map((p) => {
-    const { id, ...rest } = p;
-    return rest;
-  });
-
   const out = {
     formatVersion: 1,
-    artists, genreDescriptions, edgeDescriptions, tech, pages, podcasts,
+    artists, genreDescriptions, edgeDescriptions, tech, pages,
     teacherChecks: state.teacherChecks || null,
   };
   if (referanser) out.referanser = referanser;
@@ -261,7 +254,6 @@ async function kanEksportere() {
     ["sjangerbeskrivelsene", state.genreDescsLoaded],
     ["koblingsbeskrivelsene", state.edgeDescsLoaded],
     ["innovasjonskortene", state.techLoaded],
-    ["podkastene", state.podcastsLoaded],
     ["avkryssingene", state.teacherChecksLoaded],
   ].filter(([, lastet]) => !lastet).map(([navn]) => navn);
   if (mangler.length) {
@@ -340,7 +332,6 @@ function importParts(data) {
   if (Array.isArray(data.referanser?.kilder) && data.referanser.kilder.length) parts.push(`${data.referanser.kilder.length} frittstående referanser`);
   const planAntall = Object.keys(normaliserPlaner(data.presentasjoner?.planer)).length;
   if (planAntall) parts.push(`${planAntall} kjøreplan(er) (legges til eller erstatter planen med samme id, du får se lista først)`);
-  if ((data.podcasts || []).length) parts.push(`${data.podcasts.length} podkastepisoder`);
   const notatAntall = Object.keys(data.notater || {}).length;
   if (notatAntall) parts.push(`${notatAntall} private notater (erstatter notatet til samme kort)`);
   if (Array.isArray(data.genealogy?.nodes) && data.genealogy.nodes.length) {
@@ -483,8 +474,7 @@ async function importDescriptions({ genreDescriptions, edgeDescriptions }) {
   }
 }
 
-// Innholdssider, sjangertre og podkaster fra importfila. Podkaster
-// oppdateres på tittel-match (så en re-import ikke dupliserer episoder);
+// Innholdssider, sjangertre, kjøreplaner og notater fra importfila.
 // (Config i gamle backuper ignoreres — vokabularet bor i koden, v3.68.)
 // Union av to sjekk-kart: { kategori: [id, ...] }. Verdier som ikke er lister
 // hoppes over framfor å velte importen. Ren funksjon, testet.
@@ -498,7 +488,7 @@ export function flettSjekker(gjeldende, fraFil) {
   return ut;
 }
 
-async function importExtras({ pages, referanser, podcasts, teacherChecks, genealogy, presentasjoner, notater }) {
+async function importExtras({ pages, referanser, teacherChecks, genealogy, presentasjoner, notater }) {
   const done = [];
   const failed = [];
 
@@ -587,23 +577,6 @@ async function importExtras({ pages, referanser, podcasts, teacherChecks, geneal
         done.push("kjøreplanene hoppet over");
       }
     }
-  }
-
-  if (Array.isArray(podcasts) && podcasts.length) {
-    try {
-      const byTitle = new Map(state.podcasts.map((p) => [String(p.title || "").trim().toLowerCase(), p]));
-      let n = 0;
-      for (const ep of podcasts) {
-        const title = String(ep?.title || "").trim();
-        if (!title) continue;
-        const { id: _omit, ...epData } = ep;
-        const existing = byTitle.get(title.toLowerCase());
-        if (existing) await updatePodcast(existing.id, epData);
-        else await addPodcast(epData);
-        n++;
-      }
-      if (n) done.push(`${n} podkastepisode(r)`);
-    } catch (e) { console.error("Podkast-import feilet:", e); failed.push("podkastene"); }
   }
 
   // Private notater (v6.50): ett dokument per kort. Nøklene er notatNokkel

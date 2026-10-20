@@ -13,7 +13,7 @@
 //    sidene                teacherChecks.pages: Røtter, Om historie og
 //                          instrumenttekstene
 //    plateselskapene       teacherChecks.plateselskaper
-//  Utenfor regelen med vilje: podkastene og «Fra timene» (læreren publiserer
+//  Utenfor regelen med vilje: «Fra timene» (læreren publiserer
 //  dem selv), skriveveiledningen (hjelp til skjemaet, ikke pensum),
 //  bruksveiledningen (v6.95: delene hukes av hver for seg),
 //  sjangertreet med tidsrommene (struktur), og det som bygges av

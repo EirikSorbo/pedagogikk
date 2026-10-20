@@ -25,7 +25,7 @@ const INNHOLDSKORT = {
   "tre.html": ["modal-artist-detail"],
   "teacher.html": ["modal-detail", "modal-laerer-handbok"],
   "js/utforsk/explore-modals.js": [
-    "modal-teknologi", "modal-podkaster",
+    "modal-teknologi",
     "modal-sjangerperioder", "modal-sjangerhimmel",
     "modal-tidslinje", "modal-subgenre-list", "modal-undersjangre", "modal-subgenre-info",
     "modal-store-bildet", "modal-referanser", "modal-app-guide", "modal-om-historie",

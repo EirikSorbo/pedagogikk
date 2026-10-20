@@ -47,7 +47,6 @@ test("hver innholdsdel overlever normaliseringen", () => {
     tech: [{ name: "T" }],
     pages: { omHistorie: { body: "x" } },
     referanser: { kilder: [{ tittel: "K" }] },
-    podcasts: [{ title: "P" }],
     teacherChecks: { genres: ["Blues"] },
     genealogy: tre(),
   };
@@ -62,7 +61,6 @@ test("hver innholdsdel overlever normaliseringen", () => {
 test("manglende deler blir tomme, ikke undefined", () => {
   const d = normalizeImportFile({ artists: [] });
   assert.deepEqual(d.pages, {});
-  assert.deepEqual(d.podcasts, []);
   assert.equal(d.genealogy, null);
 });
 

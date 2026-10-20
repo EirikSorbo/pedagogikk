@@ -43,7 +43,6 @@ import { normalizeArtist, buildArtistDoc, resubmitArtistFields } from "./artist-
 import { RETUR_FELTER } from "./artist-schema.js";
 import { genererReturKode, normaliserReturKode, merkHarSendtInn } from "../felles/util.js";
 import { PROPOSABLE_KEYS } from "../forslag/proposal-fields.js";
-import { sorterPodkaster } from "../felles/podkast-rekkefolge.js";
 import { BATCH_MAX, INSTRUMENT_TIMELINE_GROUPS, instrumentPageId } from "../felles/limits.js";
 
 // Normaliserings-/bygge-logikken bor i artist-normalize.js (ren modul,
@@ -79,7 +78,6 @@ const genreDescsCol = collection(db, "genreDescriptions");
 // Koblingsbeskrivelser (strekene i slektstreet). Doc-ID = edgeKey(fra, til),
 // f.eks. "blues__jazz" — se GENEALOGY_EDGES/edgeKey i genealogy.js.
 const edgeDescsCol = collection(db, "edgeDescriptions");
-const podcastsCol = collection(db, "podcasts");
 // Lærerens private notater til kortene (v6.50): egen samling, fordi
 // artistene og content kan leses av alle. Bare læreren leser og skriver.
 const notaterCol = collection(db, "notater");
@@ -375,17 +373,6 @@ export async function saveEdgeDesc(edgeId, data) {
     { ...data, updatedAt: new Date().toISOString() }, { merge: true });
 }
 
-export function subscribePodcasts(callback) {
-  return onSnapshot(podcastsCol, (snapshot) => {
-    // Nyeste øverst, og lærerens egen rekkefølge (v6.48, podkast-rekkefolge.js).
-    callback(sorterPodkaster(snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))));
-  }, onSubscribeError("podkaster"));
-}
-
-export async function addPodcast(data) {
-  return addDoc(podcastsCol, data);
-}
-
 // ---- Private notater (v6.50) ----
 
 // Alle notatene som { nøkkel: { tekst, oppdatert } }. Nøkkelen er
@@ -432,25 +419,6 @@ export async function addTimeforslag({ artist, student = "", kontekst = "" }) {
 
 export async function deleteTimeforslag(id) {
   return deleteDoc(doc(db, "timeforslag", id));
-}
-
-// Import-oppdatering av eksisterende episode (matchet på tittel i importen).
-export async function updatePodcast(id, data) {
-  return setDoc(doc(db, "podcasts", id), data, { merge: true });
-}
-
-export async function deletePodcast(id) {
-  return deleteDoc(doc(db, "podcasts", id));
-}
-
-// Lærerens flytting (v6.48): de nye order-tallene i én skriving, så lista
-// aldri står halvveis omnummerert. update (ikke set) feiler heller enn å lage
-// et halvtomt dokument av en episode som ble slettet i en annen fane.
-export async function reorderPodcasts(endringer) {
-  if (!endringer?.length) return;
-  const batch = writeBatch(db);
-  for (const { id, order } of endringer) batch.update(doc(db, "podcasts", id), { order });
-  return batch.commit();
 }
 
 export function subscribeTech(callback) {

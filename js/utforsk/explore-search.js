@@ -48,7 +48,6 @@ function hentIndeks(s, { tvingNy = false } = {}) {
     (s.techItems || []).length,
     Object.keys(s.content || {}).length,
     Object.keys(s.edgeDescs || {}).length,
-    (s.podcasts || []).length,
     !!s.isTeacher,
   ].join("|");
   if (tvingNy || !indeksCache || avtrykk !== indeksAvtrykk) {

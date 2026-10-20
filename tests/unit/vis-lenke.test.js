@@ -22,7 +22,6 @@ test("vis-verdi: rundtur for alle måltypene", () => {
     { hva: "himmel" },
     { hva: "referanser" },
     { hva: "store-bildet" },
-    { hva: "podkaster" },
     { hva: "teknologi" },
     { hva: "teknologi", id: "Opptak og avspilling" },
     { hva: "slektstre" },

@@ -9,11 +9,10 @@ import { lesJs } from "../helpers/js-filer.js";
 
 const kilde = (f) => lesJs(f);
 
-test("funn 7: et stoppbytte pauser lyd og avbrytes når et kort nekter å lukkes", () => {
+test("funn 7: et stoppbytte avbrytes når et kort nekter å lukkes", () => {
   const p = kilde("presentasjon.js");
   // Lukkingen bor i lukkAlleKort fra v5.95 (delt med sidehistorikken, ← →).
   const lukk = p.slice(p.indexOf("function lukkAlleKort("), p.indexOf("let historikk = TOM_HISTORIKK;"));
-  assert.match(lukk, /document\.querySelectorAll\("\.modal-backdrop\.open audio"\)\.forEach\(\(a\) => \{ try \{ a\.pause\(\); \} catch \(e\) \{\} \}\);/);
   // Ovenfra og ned, og stopp ved første nekt (kontrollrunden for v5.48).
   assert.match(lukk, /for \(let top = topOpenModal\(\), n = 0; top && n < 50; top = topOpenModal\(\), n\+\+\) \{\n\s*modalClose\(top\);\n\s*if \(top\.classList\.contains\("open"\)\) return false;\n\s*\}\n\s*return true;/);
   assert.doesNotMatch(lukk, /querySelectorAll\("\.modal-backdrop\.open"\)\.forEach\(\(m\) => modalClose\(m\)\)/, "ikke i dokumentrekkefølge");

@@ -24,8 +24,8 @@ import { $ } from "../data/shared.js";
 import { melding, bekreft, modalOpen, modalClose, modalCloseTop, setupModal } from "../ui/ui-modal.js";
 
 export const state = {
-  // De seks delte samlingene (artists, genreDescs, edgeDescs, tech, content,
-  // podcasts) kommer fra shared-data.js — samme form som forsiden og
+  // De fem delte samlingene (artists, genreDescs, edgeDescs, tech, content)
+  // kommer fra shared-data.js — samme form som forsiden og
   // slektstresidene. artistsLoaded er en del av den: destruktive handlinger
   // (Erstatt alle / Slett alt) må vente på den, ellers bygges backupen fra en
   // tom state mens slettingen går mot serveren.

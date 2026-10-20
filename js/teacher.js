@@ -32,9 +32,6 @@ import {
   setupEdgeSingleSave,
   openTechAdmin,
   setupTechAdmin,
-  openPodkastAdmin,
-  renderPodkastAdmin,
-  setupPodkastAdmin,
   openStoryEditor,
   openPageEditor,
   setupStoryEditor,
@@ -158,7 +155,6 @@ function startAppInner() {
   document.getElementById("btn-t-inn-mangler")?.addEventListener("click", openMangler);
   // Slides (v7.06) har overtatt flisen til Innovasjonskort (de finnes andre steder, se onTechAdmin under).
   document.getElementById("btn-t-inn-slides")?.addEventListener("click", () => openSlides());
-  document.getElementById("btn-t-inn-podkast")?.addEventListener("click", () => openPodkastAdmin());
   // Visning-vinduet bak presentasjonsikonet (v5.41): kjøreplanene og
   // editoren bor der nå, ikke i Oversikt.
   initVisning();
@@ -196,9 +192,6 @@ function startAppInner() {
     onTechEdit: (t, preset) => openTechEditor(t, preset),
     // «Legg til artist» i Instrumenter (v6.96): lærerens eget artistskjema.
     onNyArtist: () => openNyArtist(),
-    // Podkast-administrasjonen nås nå fra Podkaster-fanen under Instrumenter
-    // (dashbordkortet er borte), så lærer fortsatt kan laste opp episoder.
-    onPodkastAdmin: () => openPodkastAdmin(),
     // Returnerer et løfte (v6.25): bekreftelsen er appens egen dialog, ikke
     // nettleserens confirm, så svaret kommer etterpå. explore-tech venter.
     onTechDelete: async (id) => {
@@ -234,7 +227,6 @@ function startAppInner() {
   if (btnStoreBildet) btnStoreBildet.addEventListener("click", ctx.explore.openStoreBildet);
   const btnTReformer = document.getElementById("btn-t-reformer");
   if (btnTReformer) btnTReformer.addEventListener("click", () => ctx.explore.openTeknologi());
-  setupPodkastAdmin();
   const btnArtister = document.getElementById("btn-t-artister");
   if (btnArtister) btnArtister.addEventListener("click", () => {
     // Overskriften «Artistkort» øverst, under det faste toppfeltet (v6.67;
@@ -290,8 +282,6 @@ function startAppInner() {
       refreshControls();
       renderAll();
       refreshDesk();
-      // «Alle artister (n)» i Instrumenter-kortet telles av artistene.
-      ctx.explore?.renderPodkaster?.();
       // En åpen kjøreplan-kladd med «laster …»-stopp (audit v5.42 funn 8).
       visningTikk();
       provVisMaal();
@@ -304,7 +294,6 @@ function startAppInner() {
       // re-rendres så import/redigering slår gjennom umiddelbart.
       ctx.explore?.contentChanged?.();
       if (document.getElementById("modal-laerer-handbok")?.classList.contains("open")) tegnLaererHandbok();
-      ctx.explore?.renderPodkaster?.();
       refreshGenreAdmin();
       refreshDesk();
       // Kjøreplan-lista i Visning-vinduet følger snapshotet (aldri midt i en
@@ -313,7 +302,6 @@ function startAppInner() {
       samleTikk();
       provVisMaal();
     },
-    onPodcasts: () => { renderPodkastAdmin(); ctx.explore?.renderPodkaster?.(); },
     // ?vis=-lenker til en sjangerkobling venter på koblingstekstene.
     onEdgeDescs: () => provVisMaal(),
     // Åpne teknologi-visninger (admin-lista, innovasjonskortet og en åpen
@@ -323,7 +311,6 @@ function startAppInner() {
       refreshTechAdmin();
       ctx.explore?.refreshTechDetail?.();
       ctx.explore?.refreshTeknologi?.();
-      ctx.explore?.renderPodkaster?.();
       refreshDesk();
       visningTikk();
       provVisMaal();

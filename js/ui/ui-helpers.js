@@ -3,19 +3,18 @@
 // ----------------------------------------------------------------------------
 //  Rene, gjenbrukbare byggeklosser for rendering (HTML-snutter, formattering).
 //  Avhenger kun av util + linkify + rich-text + limits (GENDERS) + artist-strip
-//  + ui-modal (avhengighetsfri) — INGEN render-funksjoner, så modulen kan
+//  — INGEN render-funksjoner, så modulen kan
 //  importeres fritt uten import-sykler. Den sender ingenting videre (fra
 //  v6.29): escapeHtml og safeUrl hentes fra util.js, artistStripHtml fra
 //  artist-strip.js.
 // ============================================================================
 
-import { escapeHtml, buildKilderList, safeUrl, wikimediaThumb, dropboxDirectUrl } from "../felles/util.js";
+import { escapeHtml, buildKilderList, safeUrl, wikimediaThumb } from "../felles/util.js";
 import { visAar, visSpenn } from "../felles/aarstall.js";
 import { wireAllLinks, nevnteArtister } from "../felles/linkify.js";
 import { renderRichText } from "../felles/rich-text.js";
 import { GENDERS, UKJENT_KJONN, instrumenterFor, erSkjult } from "../felles/limits.js";
 import { artistSjekketOk } from "../felles/sjekket.js";
-import { askChoice, modalClose } from "./ui-modal.js";
 import { lesPunkter, punkterTilTekst, punktVarsel } from "../felles/punkter.js";
 
 // Bilde-fallback: når en skalert Wikimedia-thumbnail ikke lar seg hente
@@ -75,8 +74,6 @@ export const ICONS = {
   approve: ico("M22 11.08V12a10 10 0 11-5.93-9.14") + ico("M22 4L12 14.01l-3-3"),
   reject: ico("M18 6L6 18M6 6l12 12"),
   retur: ico("M9 14L4 9l5-5") + ico("M20 20v-7a4 4 0 00-4-4H4"),
-  opp: ico("M18 15l-6-6-6 6"),
-  ned: ico("M6 9l6 6 6-6"),
   // Private notater (v6.58): en side med tekstlinjer, ETT path med flere
   // «M»-segmenter (sideomriss, brettet hjørne, tre linjer) i stedet for flere
   // oppå hverandre svg-er — se merknaden over «edit» om de sammensatte
@@ -199,78 +196,6 @@ export function metaRader(a) {
   ].join("");
 }
 
-// Podkast-episodekort — ett enkelt kort. Begge listene (podkastfanen i
-// explore-podkaster.js og lærer-admin i teacher-content.js) tegnes gjennom
-// renderPodcastList under, så markupen ikke driver fra hverandre. `admin`
-// legger flytt opp/ned (v6.48), rediger og slett HELT TIL HØYRE i tittelraden,
-// over avspilleren; kalleren kobler lytterne (data-pod-flytt / data-pod-edit /
-// data-pod-delete). `forste`/`siste` slår av pila som ikke kan brukes.
-function podcastEpisodeHtml(ep, { admin = false, forste = false, siste = false } = {}) {
-  const duration = ep.duration ? `<span class="podkast-duration">(${escapeHtml(ep.duration)})</span>` : "";
-  const desc = ep.description ? `<div class="podkast-desc rt">${renderRichText(ep.description)}</div>` : "";
-  // Normaliseres HER, ikke bare når læreren lagrer, så episoder som allerede
-  // ligger i Firestore med en gammel «dl=1»-lenke spiller av på iOS med én gang
-  // — uten at noen må redigere dem på nytt.
-  const audio = dropboxDirectUrl(ep.audioUrl);
-  const id = escapeHtml(ep.id);
-  return `
-    <article class="podkast-episode" data-pod-id="${id}">
-      <div class="podkast-header">
-        <h3 class="podkast-title">${escapeHtml(ep.title || "Uten tittel")}</h3>
-        ${duration}
-        ${admin ? `<div class="podkast-actions">
-          <button class="icon-btn" data-pod-flytt="-1" data-pod-id="${id}" title="Flytt opp" aria-label="Flytt opp"${forste ? " disabled" : ""}>${ICONS.opp}</button>
-          <button class="icon-btn" data-pod-flytt="1" data-pod-id="${id}" title="Flytt ned" aria-label="Flytt ned"${siste ? " disabled" : ""}>${ICONS.ned}</button>
-          <button class="icon-btn" data-pod-edit="${id}" title="Rediger" aria-label="Rediger">${ICONS.edit}</button>
-          <button class="icon-btn danger" data-pod-delete="${id}" title="Slett" aria-label="Slett">${ICONS.trash}</button>
-        </div>` : ""}
-      </div>
-      ${desc}
-      ${audio ? `<audio controls preload="none" src="${escapeHtml(audio)}"></audio>` : ""}
-    </article>`;
-}
-
-// Tegner episodelista i `el`. To ting skjer utover en vanlig innerHTML:
-//
-//  1. Er lista uendret, røres DOM-en IKKE. Det er dette som gjør at en episode
-//     som spiller fortsetter å spille når instrumenter-kortet lukkes og åpnes
-//     igjen: et ferskt <audio>-element ville startet på null, og å sette det i
-//     gang igjen fra kode er uansett blokkert av iOS' autoplay-sperre — play()
-//     teller bare rett etter et brukertrykk.
-//  2. Må lista likevel bygges på nytt (læreren redigerer mens noen lytter),
-//     FLYTTES elementet som spiller over i det nye kortet framfor å erstattes.
-//     Flyttingen skjer synkront i samme steg: en nettleser pauser et
-//     medieelement som er tatt ut av dokumentet, men først ved neste stabile
-//     tilstand — er det tilbake i DOM-en innen den tid, spiller lyden videre
-//     uten et hakk.
-export function renderPodcastList(el, episodes, { admin = false, empty = "" } = {}) {
-  const sig = JSON.stringify([admin, episodes.map((ep) =>
-    [ep.id, ep.title, ep.description, ep.duration, ep.audioUrl])]);
-  if (el.dataset.podSig === sig) return false;
-
-  // Bare spillere som faktisk er i gang bevares. En urørt spiller skal bygges
-  // på nytt, ellers ville en rettet lenke aldri slått gjennom.
-  const iGang = new Map();
-  for (const a of el.querySelectorAll("audio")) {
-    if (a.paused && !a.currentTime) continue;
-    const id = a.closest(".podkast-episode")?.dataset.podId;
-    if (id) iGang.set(id, a);
-  }
-
-  el.innerHTML = episodes.length
-    ? episodes.map((ep, i) => podcastEpisodeHtml(ep, { admin, forste: i === 0, siste: i === episodes.length - 1 })).join("")
-    : empty;
-  el.dataset.podSig = sig;
-
-  for (const [id, gammel] of iGang) {
-    const ny = el.querySelector(`.podkast-episode[data-pod-id="${CSS.escape(id)}"] audio`);
-    // Kun når kilden er den samme — er lydlenken endret, SKAL den nye brukes,
-    // selv om det koster avspillingen.
-    if (ny && ny.getAttribute("src") === gammel.getAttribute("src")) ny.replaceWith(gammel);
-  }
-  return true;
-}
-
 // Tegnteller under et tekstfelt med tak. `max` = 0/null slår den AV igjen
 // (feltet deles av flere tekster, og bare noen av dem har tak).
 //
@@ -338,70 +263,6 @@ export function fyllPunktfelt(ta, liste) {
 // gir tom liste, så læreren kan fjerne punktene ved å tømme feltet.
 export function lesPunktfelt(ta) {
   return lesPunkter(ta?.value);
-}
-
-// Episoden som spiller akkurat nå i `el`, eller null. Pauset OG ferdigspilt
-// teller som «spiller ikke»: ingen av delene skal utløse et spørsmål.
-export function playingEpisodeIn(el) {
-  if (!el) return null;
-  return [...el.querySelectorAll("audio")].find((a) => !a.paused && !a.ended) || null;
-}
-
-// «Stopp eller fortsett?» ved lukking av en podkastspiller. Kobles som
-// _beforeClose på modalen (se ui-modal.js), så den dekker alle lukkeveiene:
-// ✕, ←, «Lukk alle», Escape og klikk på bakgrunnen.
-//
-// Returnerer true når ingenting spiller (lukk som normalt). Spiller noe,
-// returneres false og dialogen tar over: den lukker modalen selv når
-// studenten har svart. Escape og bakgrunnsklikk i dialogen betyr «fortsett» —
-// lukkingen var det brukeren ba om, og å la lyden gå er det ufarlige valget.
-export function askBeforeClosingPlayer(listEl, modal) {
-  const lyd = playingEpisodeIn(listEl);
-  if (!lyd) return true;
-  const tittel = lyd.closest(".podkast-episode")?.querySelector(".podkast-title")?.textContent?.trim();
-  askChoice({
-    title: "Episoden spiller fortsatt",
-    text: tittel
-      ? `«${tittel}» spiller nå. Vil du at den skal fortsette mens du bruker resten av appen?`
-      : "Episoden spiller nå. Vil du at den skal fortsette mens du bruker resten av appen?",
-    buttons: [
-      { value: "stopp", label: "Stopp episoden", className: "ghost" },
-      { value: "fortsett", label: "Fortsett å spille", className: "primary" },
-    ],
-    dismissValue: "fortsett",
-  }).then((svar) => {
-    if (svar === "stopp") lyd.pause();
-    modal._skipBeforeClose = true;
-    modalClose(modal);
-  });
-  return false;
-}
-
-// Kobler «stopp eller fortsett»-spørsmålet på en modal som inneholder en
-// podkastliste. Idempotent, så den kan kalles ved hver åpning.
-export function wirePlayerCloseGuard(modal, listId) {
-  if (!modal || modal._podLukkKlar) return;
-  modal._podLukkKlar = true;
-  modal._beforeClose = () => askBeforeClosingPlayer(document.getElementById(listId), modal);
-}
-
-// Lyd som ikke lar seg spille av: de innebygde kontrollene sier bare «Feil»,
-// uten å antyde hva man gjør med det. Vi legger en forklaring og en
-// direktelenke under spilleren i stedet. error bobler ikke fra medieelementer,
-// så lytteren må stå i capture-fasen — samme grep som bilde-fallbacken over.
-if (typeof document !== "undefined") {
-  document.addEventListener("error", (e) => {
-    const a = e.target;
-    if (!(a instanceof HTMLAudioElement)) return;
-    const kort = a.closest(".podkast-episode");
-    if (!kort || kort.querySelector(".podkast-feil")) return;
-    const url = safeUrl(a.getAttribute("src"));
-    const p = document.createElement("p");
-    p.className = "podkast-feil";
-    p.innerHTML = "Episoden kunne ikke spilles av her." +
-      (url ? ` <a href="${escapeHtml(url)}" target="_blank" rel="noopener">Åpne lydfila i ny fane</a>` : "");
-    a.insertAdjacentElement("afterend", p);
-  }, true);
 }
 
 // Årstallene her og under går gjennom visAar (fase 2): et verk eller en

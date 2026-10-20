@@ -20,13 +20,13 @@
 // Gyldige mål. De åtte første peker på et dokument eller navn (id), resten er
 // visninger uten id: historie uten id åpner oversikten, teknologi kan ta en
 // kategori som id. «slektstre» ruter til tre.html via opts.onSlektstre.
-// «tiår» og «varmekart» er tatt ut (fase 2, pedagogikkappen): en gammel lenke
-// til dem er ukjent og ignoreres stille, som andre ukjente typer.
+// «tiår» og «varmekart» (fase 2) og «podkaster» (fase 4) er tatt ut: en gammel
+// lenke til dem er ukjent og ignoreres stille, som andre ukjente typer.
 export const VIS_TYPER = new Set([
   "artist", "sjanger", "undersjanger", "historie", "tech", "side",
   "instrument", "kobling",
   "tidslinje", "sjangerperioder", "himmel", "referanser",
-  "store-bildet", "podkaster", "teknologi", "slektstre",
+  "store-bildet", "teknologi", "slektstre",
   // Et lytteeksempel (v5.28): «yt:<video-id>» eller «yt:<video-id>:<liste>».
   // YouTube-ID-er er kolonfrie, så de passer i vis-formatet.
   "yt",

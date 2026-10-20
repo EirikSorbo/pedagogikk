@@ -135,7 +135,7 @@ test("funn 26: én eksportvakt dekker alle samlingene, også før de automatiske
   const src = les("js/laerer/teacher-import.js");
   const vakt = kropp(src, "async function kanEksportere(");
   for (const flagg of ["artistsLoaded", "contentLoaded", "genreDescsLoaded", "edgeDescsLoaded",
-    "techLoaded", "podcastsLoaded", "teacherChecksLoaded"]) {
+    "techLoaded", "teacherChecksLoaded"]) {
     assert.ok(vakt.includes(`state.${flagg}`), `vakten mangler ${flagg}`);
   }
   // Fra v6.25 appens egen bekreftelse (bekreft), og vakten er async.
@@ -145,7 +145,7 @@ test("funn 26: én eksportvakt dekker alle samlingene, også før de automatiske
   assert.equal(antall(src, /downloadJson\(buildExportData\(\)/g), 3,
     "ny eksportvei? Den må også gå via kanEksportere");
   const shared = les("js/data/shared-data.js");
-  for (const flagg of ["edgeDescsLoaded", "techLoaded", "podcastsLoaded"]) {
+  for (const flagg of ["edgeDescsLoaded", "techLoaded"]) {
     assert.match(shared, new RegExp(`${flagg}: false,`), `${flagg} mangler i standardverdiene`);
     assert.match(shared, new RegExp(`state\\.${flagg} = true;`), `${flagg} settes aldri`);
   }
