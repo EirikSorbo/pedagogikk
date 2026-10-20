@@ -1058,7 +1058,7 @@ textarea { resize: vertical; }
 .me-row .me-genre { flex: 0 0 240px; }
 /* Fjern-knappen kapper eksempelet øverst til høyre, ved siden av sjangeren:
    etter at sjangeren flyttet opp (v4.95) ble knappen ellers stående mutters
-   alene på en linje under «Hør etter». Kun visuell rekkefølge — tab-
+   alene på en linje under epoken. Kun visuell rekkefølge — tab-
    rekkefølgen følger DOM og er uendret. */
 .me-row .me-genre { order: -2; }
 .me-row .remove-me { order: -1; margin-left: auto; }
@@ -2761,28 +2761,6 @@ body.is-teacher #gate { display: none; }
 .gx-rel strong { color: var(--text); font-weight: 600; }
 .gx-react-rel strong { color: var(--tree-reaction-text); }
 
-/* «Hør etter» på sjangerkortet: kuraterte lytteforslag for sjangeren som sådan.
-   Rundt 100 forfattede eksempler lå usett som `t` på treets noder til v4.64.
-   Egen ramme, ikke bare en liste, så de ikke leses som en del av beskrivelsen
-   over — de er en oppfordring, ikke prosa. */
-.gx-lytt {
-  margin: 0 0 12px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-m);
-  background: var(--surface-2);
-}
-.gx-lytt-head {
-  margin: 0 0 6px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--muted-2);
-}
-.gx-lytt ul { margin: 0; padding-left: 16px; list-style: disc; }
-.gx-lytt li { font-size: 0.86rem; line-height: 1.6; color: var(--text); }
-
 /* Spilleliste-popup */
 .pl-list { margin: 0 0 4px; padding-left: 16px; list-style: disc; }
 .pl-item { font-size: 0.88rem; line-height: 2.4; }
@@ -3241,7 +3219,7 @@ body.presentasjon .pres-artist-hoyre .related-list { justify-content: center; }
 body.presentasjon .pres-artist-hoyre .related-chip { font-size: 0.95rem; }
 /* Sjangerkortets spalter (v5.89, brukerønske 2026-09-29; bygges av
    js/pres-sjanger.js): varmestripa øverst over hele bredden, så epoken,
-   punktene eller beskrivelsen, «Hør etter» og slektskapet til venstre, og
+   punktene eller beskrivelsen og slektskapet til venstre, og
    artistene i sjangeren som navneliste til høyre. Uten synlig navneliste
    (nivå 1, en sjanger uten artister, eller slått av i tannhjulet) får
    venstre spalte hele bredden. */

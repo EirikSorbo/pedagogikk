@@ -85,12 +85,6 @@ export function openSingleSubgenreModal(subgenreId, level = "sub") {
       $("#ss-skole").value = resolved.skole || "";
     }
   }
-  // Lytteforslagene er én per linje i tekstfeltet, en liste i data.
-  const lyttWrap = $("#ss-lytt-wrap");
-  if (lyttWrap) {
-    lyttWrap.hidden = level !== "main";
-    if (level === "main") $("#ss-lytt").value = (resolved.lytt || []).join("\n");
-  }
   buildUsikreRows(Array.isArray(resolved.usikre) ? resolved.usikre : []);
   // Navnebytte (v6.90) bare for frie undersjangre; treets sjangre bytter navn
   // i sjangertre-editoren.
@@ -254,7 +248,6 @@ export function setupSubgenreSingleSave() {
       data.activeFrom = from;
       data.activeTo = to;
       data.era = $("#ss-era").value.trim();
-      data.lytt = $("#ss-lytt").value.split("\n").map((x) => x.trim()).filter(Boolean);
       data.punkter = lesPunktfelt($("#ss-punkter"));
       data.samfunn = $("#ss-samfunn").value.trim();
       data.skole = $("#ss-skole").value.trim();

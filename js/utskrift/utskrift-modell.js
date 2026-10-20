@@ -22,8 +22,7 @@
 //
 //  Feature-flaggene gjelder her som i appen: det studentene ikke ser på
 //  skjermen, kommer heller ikke på papir (historier, punkter, de skjulte
-//  hubsidene). Læreren får alt, unntatt «Hør etter», som ikke er med for
-//  noen (innholdet er ikke ferdig).
+//  hubsidene). Læreren får alt.
 //
 //  UTVIDELSEN (v5.58, brukerbestilling 2026-09-25): utvalget er det studenten
 //  har VALGT pluss det valget DRAR MED SEG, minus det studenten har huket
@@ -533,8 +532,6 @@ export function settSammen(utvalg, data = {}, valg = {}) {
       punkter: punkterOk ? r.punkter : [],
       beskrivelse: r.description || "",
       koblinger: koblingerFor(n),
-      // «Hør etter»-lista på sjangerkortet er BEVISST ikke med i heftet
-      // (brukervalg 2026-09-25): innholdet er ikke ferdig.
       artister: [],
       sort: [fra ?? radAar(n), GENEALOGY.indexOf(n)],
     };

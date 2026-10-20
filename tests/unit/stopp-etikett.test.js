@@ -54,7 +54,7 @@ test("lytteeksempel og ugyldige lenker, også gamle tiårsstopp (fase 2)", () =>
   assert.equal(stoppEtikett({ vis: "tiår:1950:tech" }).feil, "ugyldig lenke", "tiårskortene er tatt ut");
   assert.equal(stoppEtikett({ vis: "varmekart" }).feil, "ugyldig lenke", "varmekartet også");
   assert.equal(stoppEtikett({ vis: "yt:abcdefghijk" }).navn, "Hoochie Coochie Man (Muddy Waters)");
-  assert.equal(stoppEtikett({ vis: "yt:zzzzzzzzzzz" }).tekst, "Lytteeksempel (YouTube)");
+  assert.equal(stoppEtikett({ vis: "yt:zzzzzzzzzzz" }).tekst, "Video (YouTube)");
   assert.equal(stoppEtikett({ vis: "" }).feil, "ugyldig lenke");
 });
 

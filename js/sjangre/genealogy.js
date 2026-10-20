@@ -80,19 +80,6 @@ export function eraLine(resolved) {
   return `${aar}. ${ord}`;
 }
 
-// Kuraterte lytteforslag for sjangeren. Sto som `t` på treets noder fram til
-// v4.64 uten at noe leste dem — rundt 100 forfattede eksempler var usynlige.
-// De er FRI TEKST («Cross Road Blues – Robert Johnson (1937)»), ikke lenker til
-// artistkort: artistenes musicExamples er en annen ting, knyttet til kortet og
-// til spillelistene.
-function lyttHtml(lytt) {
-  if (!lytt?.length) return "";
-  return `<div class="gx-lytt">
-    <p class="gx-lytt-head">Hør etter</p>
-    <ul>${lytt.map((x) => `<li>${escapeHtml(x)}</li>`).join("")}</ul>
-  </div>`;
-}
-
 export function resolveMainDesc(genreDescs, genreId) {
   const n = GENEALOGY.find((x) => x.l === genreId || x.f === genreId);
   return n
@@ -230,7 +217,6 @@ export function showSjangerInfo(label, opts = {}, { reopen = true } = {}) {
     ${sekt("beskrivelse", `<div class="gx-desc rt">${descText ? renderRichText(descText, lcSelv) : `<span class="gx-missing">${missingDesc("main")}</span>`}</div>`)}
     ${sekt("samfunn", resolved.samfunn ? `<h4 class="related-head">Samfunn</h4><div class="gx-desc rt">${renderRichText(resolved.samfunn, lcSelv)}</div>` : "")}
     ${sekt("skole", resolved.skole ? `<h4 class="related-head">Skole og oppdragelse</h4><div class="gx-desc rt">${renderRichText(resolved.skole, lcSelv)}</div>` : "")}
-    ${sekt("lytt", (onEdit || !SKJUL_I_STUDENTVISNING.horEtter) ? lyttHtml(resolved.lytt) : "")}
     ${sekt("relasjoner", relasjoner)}
     ${sekt("artister", artisterHtml)}
     ${sekt("kilder", kilderHtml)}

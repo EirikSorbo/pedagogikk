@@ -23,7 +23,6 @@
 //                          STÅR PÅ IGJEN fra 2026-09-10: studentene skal inn i
 //                          huben, men bare til de tre visualiseringene. Hvilke
 //                          kort de ser inne i den, styres av SKJUL_I_HUBEN.
-//    horEtter              «Hør etter»-lista på tre-sjangrene (js/sjangre/genealogy.js)
 //    utskrift              hele utskriftsfunksjonen for STUDENTROLLEN
 //                          (body.role-student): skriverikonet i toppmenyen,
 //                          «Ta med»-knappen i kortene, «Til utskrift» i Finn
@@ -57,7 +56,6 @@ export const SKJUL_I_STUDENTVISNING = {
   koblingsbeskrivelser: true,
   metasjangerhistorier: true,
   storeBildet:          false,
-  horEtter:             true,
   utskrift:             true,
   merking:              true,
   // «Fra timene» (v6.10, U1): timene læreren deler, på forsiden og i Lytt.

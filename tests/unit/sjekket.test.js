@@ -54,7 +54,7 @@ test("sjekkene leses per kategori, og før de har landet er ingenting sjekket", 
 test("sjangerbeskrivelsene: teksten tas bort, årstallene blir stående", () => {
   const descs = {
     // Treets sjanger sjekkes med etiketten, beskrivelsen kan stå under det fulle navnet.
-    "Europeisk folkemusikk": { main: { description: "tekst", punkter: ["p"], lytt: ["l"], kilder: [{ text: "k" }], activeFrom: 1900 } },
+    "Europeisk folkemusikk": { main: { description: "tekst", punkter: ["p"], kilder: [{ text: "k" }], activeFrom: 1900 } },
     "Blues": { meta: { description: "m" }, main: { description: "b" }, story: { body: "historie" } },
     "Doo-wop": { sub: { description: "s", activeFrom: 1950 } },
   };

@@ -875,7 +875,7 @@ export function artistPlassering(sekt) {
 // ----------------------------------------------------------------------------
 //  Sjangerkortets lerret (v5.89, brukerønske 2026-09-29): epokelinja øverst
 //  over hele bredden, artistene i sjangeren (navnelista) i en egen spalte til
-//  høyre, og resten (punkter eller beskrivelse, «Hør etter», slektskap) til
+//  høyre, og resten (punkter eller beskrivelse, slektskap) til
 //  venstre, så punktene og «Artister»-overskriften begynner på samme linje.
 //  (Varmestripa sto over epokelinja til fase 2.) DOM-flyttingen bor i
 //  js/visning/pres-sjanger.js.

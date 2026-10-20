@@ -27,10 +27,9 @@ export const TYPE_NAVN = {
   sjangerperioder: "Epokeperioder",
   himmel: "Epokehimmel", referanser: "Referanser",
   "store-bildet": "Det store bildet",
-  teknologi: "Teknologi", slektstre: "Slektstre", yt: "Lytteeksempel",
+  teknologi: "Teknologi", slektstre: "Slektstre", yt: "Video",
   oversikt: "Oversikt", galleri: "Galleri",
-  // Lytt heter Spillelister i appen fra v6.31.
-  sjangre: "Epoker", undersjangre: "Prinsipper", artister: "Teoretikere", lytt: "Spillelister",
+  sjangre: "Epoker", undersjangre: "Prinsipper", artister: "Teoretikere",
   slide: "Slide",
 };
 

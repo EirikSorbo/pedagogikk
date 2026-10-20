@@ -124,12 +124,11 @@ function klarFor(apne, s) {
       return isGenreModelReady() && s.edgeDescsLoaded && s.genreDescsLoaded ? "klar" : "vent";
     case "himmel": case "tidslinje":
       return isGenreModelReady() && s.artistsLoaded ? "klar" : "vent";
-    // Lytt-vinduet (v6.07) teller artistenes eksempler per metasjanger, og
     // Sjangre/Undersjangre/Artister (v6.08) tegnes av treet og artistene.
     // Sjangre viser periodene fra beskrivelsene, så de må ha landet også.
     case "sjangre":
       return isGenreModelReady() && s.artistsLoaded && s.genreDescsLoaded ? "klar" : "vent";
-    case "lytt": case "undersjangre": case "artister":
+    case "undersjangre": case "artister":
       return isGenreModelReady() && s.artistsLoaded ? "klar" : "vent";
     // En time (v6.10): planene i content og artistene (navn og lytteeksempler).
     case "time":

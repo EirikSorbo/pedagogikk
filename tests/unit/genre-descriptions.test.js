@@ -133,22 +133,18 @@ test("eraLine: sjangerkortet viser årstallene OG epoke-friteksten", async () =>
   assert.equal(eraLine(undefined), "");
 });
 
-test("resolveDesc tar med epoke-fritekst og lytteforslag", () => {
+test("resolveDesc tar med epoke-fritekst, og «lytt» er ikke lenger et felt (fase 4)", () => {
   const d = { Blues: { main: { description: "x", era: "ca. 1900", lytt: ["Cross Road Blues", ""] } } };
   const r = resolveDesc(d, "Blues", "main");
   assert.equal(r.era, "ca. 1900");
-  assert.deepEqual(r.lytt, ["Cross Road Blues"], "tomme linjer lukes bort");
+  assert.equal("lytt" in r, false);
 });
 
-test("epoke eller lytteforslag ALENE gir treff — de fire rot-nodene har ikke prosa", () => {
-  // Europeisk, Vestafrikansk, Work songs og Spirituals hadde ingen beskrivelse
-  // da era/lytt ble flyttet inn. Uten dette ville nettopp de blitt usynlige.
+test("epoken ALENE gir treff, og et nivå med bare det gamle lytt-feltet er ingenting", () => {
   const bare = { "Work songs": { main: { era: "1800-tallet" } } };
   assert.equal(resolveDesc(bare, "Work songs", "main").era, "1800-tallet");
-  const bareLytt = { X: { main: { lytt: ["Noe"] } } };
-  assert.deepEqual(resolveDesc(bareLytt, "X", "main").lytt, ["Noe"]);
-  // Men et helt tomt nivå er fortsatt ingenting.
-  assert.equal(resolveDesc({ Y: { main: { era: "  ", lytt: [] } } }, "Y", "main").era, "");
+  assert.equal(resolveDesc({ X: { main: { lytt: ["Noe"] } } }, "X", "main").era, "");
+  assert.equal(resolveDesc({ Y: { main: { era: "  " } } }, "Y", "main").era, "");
 });
 
 test("usikre påstander følger med, og er alltid en liste", () => {

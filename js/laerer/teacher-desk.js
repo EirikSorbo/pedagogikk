@@ -282,7 +282,6 @@ export function renderDesk(el) {
 const SYNLIGHET_RADER = [
   { id: "historier", navn: "Epokehistoriene", student: ["metasjangerhistorier"], hub: ["sb-historier"] },
   { id: "koblinger", navn: "Koblingstekstene (i slektstreet og på epokekortet)", student: ["koblingsbeskrivelser"] },
-  { id: "horEtter", navn: "«Hør etter» på epokekortene", student: ["horEtter"] },
   { id: "viktighet", navn: "Viktighetsgraden", student: ["viktighetsgrad"] },
   { id: "fraTimene", navn: "«Fra timene» (delte timer på forsiden)", student: ["fraTimene"] },
   { id: "omHistorie", navn: "Om historie", hub: ["sb-om-historie"] },
