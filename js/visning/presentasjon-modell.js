@@ -36,7 +36,6 @@ export const FLATER = {
     // på nivå 3 (Alt), som alle nye seksjoner.
     { id: "samfunn", navn: "Samfunn" },
     { id: "skole", navn: "Skole og oppdragelse" },
-    { id: "lytt", navn: "Hør etter" },
     { id: "relasjoner", navn: "Slektskap (vokste ut av …)" },
     { id: "artister", navn: "Teoretikere i epoken (navneliste)" },
   ],
@@ -452,7 +451,7 @@ export function tellerTekst(i, antall) {
 
 export const OVERSIKT_KATEGORIER = [
   { id: "artister", navn: "Teoretikere" },
-  { id: "lytteeksempler", navn: "Lytteeksempler" },
+  { id: "lytteeksempler", navn: "Videoer" },
   { id: "sjangre", navn: "Epoker" },
   { id: "teknologi", navn: "Reformer og milepæler" },
   { id: "instrumenter", navn: "Fagbakgrunner" },
@@ -465,7 +464,7 @@ const VISNING_NAVN = {
   "store-bildet": "Det store bildet", slektstre: "Slektstreet",
   podkaster: "Podkastene",
   // Vinduene med egen adresse fra v6.08 (S7).
-  sjangre: "Epokene", undersjangre: "Prinsippene", artister: "Teoretikerne", lytt: "Spillelistene",
+  sjangre: "Epokene", undersjangre: "Prinsippene", artister: "Teoretikerne",
 };
 const SIDE_NAVN = { omHistorie: "Om historie", rotter: "Røtter før 1910" };
 
@@ -847,11 +846,10 @@ export const PRES_TASTER = [
     { taster: [","], hva: "Innstillinger" },
     { taster: ["R"], hva: "Ny påminnelse i denne visningen (om noen minutter eller på et klokkeslett)" },
     { taster: ["X"], hva: "Avslutt visningen" },
-    { taster: ["Mellomrom", "K"], hva: "Spill av eller pause lytteeksempelet" },
+    { taster: ["Mellomrom", "K"], hva: "Spill av eller pause videoen" },
   ] },
   { gruppe: "Ellers", rader: [
     { taster: ["S"], hva: "Søk" },
-    { taster: ["L"], hva: "Lytt: spill det første lytteeksempelet til teoretikeren som vises" },
     { taster: ["N"], hva: "Navn fra timen: noter en teoretiker som kom opp, og hvem som foreslo den", laerer: true },
     { taster: ["P"], hva: "Private notater for kortet som vises (bare på din skjerm)", laerer: true },
     { taster: ["Å"], hva: "Rediger de private notatene til kortet som vises", laerer: true },

@@ -29,7 +29,7 @@ import { ytMaal } from "../visning/presentasjon-modell.js";
 // Etikettene som vises på treffene. Nøkkelen er postens `type`.
 export const TYPE_LABEL = {
   artist: "Teoretiker",
-  lytteeksempel: "Lytteeksempel",
+  lytteeksempel: "Video",
   sjanger: "Epoke",
   rot: "Rot",
   undersjanger: "Prinsipp",
@@ -48,7 +48,7 @@ export const TYPE_LABEL = {
 // Overskriften over en gruppe treff.
 export const TYPE_FLERTALL = {
   artist: "Teoretikere",
-  lytteeksempel: "Lytteeksempler",
+  lytteeksempel: "Videoer",
   sjanger: "Epoker",
   rot: "Røtter",
   undersjanger: "Prinsipper",

@@ -219,16 +219,13 @@ test("ordlista: undersjangrene fra artistkortene havner i familien, valgte under
   assert.deepEqual(uten.familier[0].ordliste.map((u) => u.navn), ["Delta blues"]);
 });
 
-test("lyttelista nummereres i heftets rekkefølge, og numrene står på kortene", () => {
+// Fase 4: lytteeksemplene på teoretikerkortene og «Lytteliste» som valg er borte fra heftet.
+// Bare videoer valgt fra spilleren (yt:) kommer i lista, bakerst.
+test("heftet har ingen lytteliste fra kortene lenger, og kortene bærer ingen lyttenumre", () => {
   const m = settSammen(["artist:muddy", "sjanger:Electric blues", "artist:robert", "sjanger:Blues", "artist:bessie"], DATA, STUDENT);
-  assert.deepEqual(m.lytteliste.map((l) => [l.nr, l.artist, l.label]), [
-    [1, "Bessie Smith", "St. Louis Blues"], [2, "Robert Johnson", "Cross Road Blues"], [3, "Muddy Waters", "Got My Mojo Working"],
-  ]);
-  assert.equal(m.familier[0].hodeKort.artister[0].lytte[0].nr, 1);
-  assert.equal(m.familier[0].sjangre[0].artister[0].lytte[0].nr, 3);
-  const uten = settSammen(["artist:bessie"], DATA, { ...STUDENT, deler: { "bak.lytteliste": false } });
-  assert.deepEqual(uten.lytteliste, []);
-  assert.equal(uten.familier[0].loseArtister[0].lytte[0].nr, 0);
+  assert.deepEqual(m.lytteliste, []);
+  assert.equal("artist.lytte" in STANDARD_DELER, false);
+  assert.equal("bak.lytteliste" in STANDARD_DELER, false);
 });
 
 test("kildene er ikke med i heftet (brukervalg 2026-09-25): ingen kilde-del, ingen kilde-felt", () => {
@@ -552,7 +549,7 @@ test("liten: høyst LITEN_GRENSE kort gir kompakt forside uten egen innholdsfort
 });
 
 test("lytteliste bærer YouTube-ID-en til «Spill hele lista»", () => {
-  const m = settSammen(["artist:robert", "artist:muddy"], DATA, { ...STUDENT });
+  const m = settSammen(["yt:GtDlZdhHRCI", "yt:-SBmury81Ws"], DATA, { ...STUDENT });
   assert.deepEqual(m.lytteliste.map((l) => l.video), ["GtDlZdhHRCI", "-SBmury81Ws"]);
 });
 
@@ -594,7 +591,7 @@ test("settSammen: et valgt lytteeksempel uten artisten blir en linje i lyttelist
   assert.deepEqual(m.tre.annet.map((x) => [x.navn, x.type, x.med]), [["Cross Road Blues (Robert Johnson)", "yt", true]]);
   assert.deepEqual(m.mangler, []);
   assert.deepEqual(planFraModell(m), [{ vis: "yt:GtDlZdhHRCI" }]);
-  assert.equal(foreslaaTittel(m), "Lytteeksempler");
+  assert.equal(foreslaaTittel(m), "Videoer");
   assert.equal(anslagSider(m.tellinger), 1);
   assert.equal(anslagSider({ lytteeksempler: 0 }), 0);
 });
@@ -603,11 +600,11 @@ test("settSammen: er artisten med, står eksempelet én gang, og de valgte komme
   const m = settSammen(["artist:robert", "yt:GtDlZdhHRCI", "yt:-SBmury81Ws"], DATA, STUDENT);
   // Robert Johnsons eget eksempel er alt med; Muddy Waters' kommer i tillegg.
   assert.deepEqual(m.lytteliste.map((l) => [l.nr, l.artist, l.label, !!l.valgt]),
-    [[1, "Robert Johnson", "Cross Road Blues", false], [2, "Muddy Waters", "Got My Mojo Working", true]]);
+    [[1, "Robert Johnson", "Cross Road Blues", true], [2, "Muddy Waters", "Got My Mojo Working", true]]);
   assert.equal(m.tellinger.lytteeksempler, 2, "begge er valgt, selv om det ene faller sammen med kortet");
   assert.equal(m.tellinger.artister, 1);
-  assert.deepEqual(planFraModell(m).map((s) => s.vis), ["artist:robert", "yt:-SBmury81Ws"], "kortet først, det løse eksempelet sist");
-  assert.notEqual(foreslaaTittel(m), "Lytteeksempler", "heftet har kort");
+  assert.deepEqual(planFraModell(m).map((s) => s.vis), ["artist:robert", "yt:GtDlZdhHRCI", "yt:-SBmury81Ws"], "kortet først, videoene etter");
+  assert.notEqual(foreslaaTittel(m), "Videoer", "heftet har kort");
 });
 
 test("settSammen: et valgt lytteeksempel står selv om lyttelista er huket av, men ikke når det selv er huket bort", () => {

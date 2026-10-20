@@ -188,7 +188,7 @@ function renderListe() {
           <button type="button" class="btn ghost small" data-pres-samle="${escapeHtml(id)}" title="Ta opp alt du åpner som stopp, til du trykker Ferdig">Ta opp</button>
           <button type="button" class="btn ghost small" data-pres-rediger="${escapeHtml(id)}">Rediger</button>
           <button type="button" class="btn ghost small" data-pres-dupliser="${escapeHtml(id)}" title="Lag en kopi, for eksempel til neste kull">Dupliser</button>
-          <label class="vis-del" title="Vis planen for studentene under «Fra timene» på forsiden og i Spillelister"><input type="checkbox" data-pres-del="${escapeHtml(id)}"${p.delt ? " checked" : ""}> Del med studentene</label>
+          <label class="vis-del" title="Vis planen for studentene under «Fra timene» på forsiden"><input type="checkbox" data-pres-del="${escapeHtml(id)}"${p.delt ? " checked" : ""}> Del med studentene</label>
           <button type="button" class="btn ghost small danger" data-pres-slett="${escapeHtml(id)}">Slett</button>` : ""}
         </span>
       </div>`;
@@ -480,7 +480,7 @@ function byggModal() {
         </label>
       </div>
       <div id="pres-adm-stopp" style="margin-top:10px"></div>
-      <p class="muted pres-adm-hint">Et oversiktskort over innholdet, gruppert etter teoretikere, lytteeksempler, epoker og så videre, legges automatisk først og sist i avspillingen. Dra radene for å endre rekkefølgen.</p>
+      <p class="muted pres-adm-hint">Et oversiktskort over innholdet, gruppert etter teoretikere, videoer, epoker og så videre, legges automatisk først og sist i avspillingen. Dra radene for å endre rekkefølgen.</p>
       <div class="pres-adm-sok">
         <input type="search" id="pres-adm-sok" class="sok-felt" autocomplete="off" enterkeyhint="search"
           placeholder="Legg til stopp: søk etter teoretiker, epoke, reform …" aria-label="Legg til stopp" />

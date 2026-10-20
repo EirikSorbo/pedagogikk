@@ -579,8 +579,6 @@ test("presTast: N åpner «Navn fra timen» utenfor skrivefelt (v5.82, N fra v5.
   assert.equal(presTast(tast("l")), null, "L er lytteeksempelet (yt-spiller.js), ikke navnelista");
   const rad = PRES_TASTER.flatMap((g) => g.rader).find((r) => r.taster.includes("N"));
   assert.ok(rad?.laerer, "oversikten viser N bare for læreren");
-  const lytt = PRES_TASTER.flatMap((g) => g.rader).find((r) => r.taster.includes("L"));
-  assert.match(lytt?.hva || "", /lytteeksempel/i);
 });
 
 test("PRES_TASTER: hver tast i oversikten har en handling i presTast", () => {

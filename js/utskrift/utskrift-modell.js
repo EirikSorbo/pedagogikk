@@ -78,7 +78,7 @@ export const UNDERSJANGRE_LOSE = "Prinsipper";
 export const TYPE_ETIKETT = {
   metasjanger: "Retning",
   artist: "Teoretiker", sjanger: "Epoke", undersjanger: "Prinsipp",
-  tech: "Reform", instrument: "Fagbakgrunn", historie: "Historie", side: "Side", yt: "Lytteeksempel",
+  tech: "Reform", instrument: "Fagbakgrunn", historie: "Historie", side: "Side", yt: "Video",
 };
 
 // Metasjangeren finnes bare i heftet (ingen ?vis=-type, ingen modal): verdien
@@ -171,7 +171,6 @@ export const DELER = [
     { id: "artist.punkter", navn: "Oppsummering i punkter", punkter: true },
     { id: "artist.beskrivelse", navn: "Beskrivelse" },
     { id: "artist.verk", navn: "Sentrale verk" },
-    { id: "artist.lytte", navn: "Lytteeksempler" },
   ] },
   { gruppe: "Epokekort", valg: [
     { id: "sjanger.era", navn: "Epoke" },
@@ -191,7 +190,6 @@ export const DELER = [
   ] },
   { gruppe: "Foran og bak", valg: [
     { id: "foran.tidslinje", navn: "Tidslinje over utvalget" },
-    { id: "bak.lytteliste", navn: "Lytteliste" },
   ] },
 ];
 
@@ -514,7 +512,7 @@ export function settSammen(utvalg, data = {}, valg = {}) {
         .sort((x, y) => (x.aar ?? 9999) - (y.aar ?? 9999)),
       lytte: (a.musicExamples || [])
         .filter((m) => m && safeUrl(m.url))
-        .map((m) => ({ nr: 0, label: m.label || "Lytt", year: heltall(m.year), performanceYear: heltall(m.performanceYear), url: safeUrl(m.url) })),
+        .map((m) => ({ nr: 0, label: m.label || "Video", year: heltall(m.year), performanceYear: heltall(m.performanceYear), url: safeUrl(m.url) })),
       span,
       sort: [span ? span.start : 9999, a.name || ""],
     };
@@ -961,6 +959,6 @@ export function foreslaaTittel(modell, { planTittel = "" } = {}) {
   if (modell?.innovasjoner?.length) return "Reformer";
   if (modell?.instrumenter?.length) return "Fagbakgrunnene";
   const lytte = modell?.lytteliste || [];
-  if (lytte.length && lytte.every((l) => l.valgt) && !(modell?.sider || []).length) return "Lytteeksempler";
+  if (lytte.length && lytte.every((l) => l.valgt) && !(modell?.sider || []).length) return "Videoer";
   return "Pensumutdrag";
 }

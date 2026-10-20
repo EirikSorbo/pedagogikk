@@ -613,7 +613,7 @@ function tegnOversikt() {
   const verktoy = m.querySelector("#pres-ov-verktoy");
   if (verktoy) {
     verktoy.innerHTML = ider.length >= 2
-      ? `<button type="button" class="btn ghost small" id="pres-ov-spill" title="Spiller alle lytteeksemplene i planen etter hverandre">Spill alle ${ider.length} lytteeksemplene</button>`
+      ? `<button type="button" class="btn ghost small" id="pres-ov-spill" title="Spiller alle videoene i planen etter hverandre">Spill alle ${ider.length} videoene</button>`
       : "";
   }
   m.querySelector("#pres-ov-grid").innerHTML = grupper.map((k) => `
@@ -1082,8 +1082,8 @@ export async function avsluttPresentasjon() {
     const valg = await askChoice({
       title: "Lagre det du viste som en time?",
       text: kjoreplan
-        ? `${stopp.length} kort ble vist (lytteeksemplene regnet med), også det du åpnet utenom kjøreplanen. Timen lagres for seg med dagens dato, og kjøreplanen «${kjoreplan.tittel}» endres ikke. En time kan deles med studentene under «Fra timene» (Visning-vinduet).`
-        : `${stopp.length} kort ble vist (lytteeksemplene regnet med). En time kan deles med studentene under «Fra timene» (Visning-vinduet).`,
+        ? `${stopp.length} kort ble vist (videoene regnet med), også det du åpnet utenom kjøreplanen. Timen lagres for seg med dagens dato, og kjøreplanen «${kjoreplan.tittel}» endres ikke. En time kan deles med studentene under «Fra timene» (Visning-vinduet).`
+        : `${stopp.length} kort ble vist (videoene regnet med). En time kan deles med studentene under «Fra timene» (Visning-vinduet).`,
       buttons: [
         { label: "Lagre som time", value: "lagre", className: "primary" },
         { label: "Avslutt uten å lagre", value: "nei", tast: "u" },
@@ -1436,7 +1436,7 @@ function lytteeksemplerIPlanen() {
 function spillAlleLytteeksempler() {
   const ider = lytteeksemplerIPlanen();
   if (!ider.length) return;
-  apneYtSpiller(ytWatchUrl(ider[0], null, null), `Alle lytteeksemplene i «${plan.tittel}»`, { kø: ider.slice(1) });
+  apneYtSpiller(ytWatchUrl(ider[0], null, null), `Alle videoene i «${plan.tittel}»`, { kø: ider.slice(1) });
 }
 
 // ----------------------------------------------------------------------------

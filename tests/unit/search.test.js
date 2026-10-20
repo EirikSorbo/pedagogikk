@@ -211,7 +211,7 @@ test("lytteeksemplene er egne treff som spilles direkte", () => {
   const indeks = byggIndeks(STATE, { erLærer: false });
   const res = sok(indeks, "mannish boy");
   assert.equal(res.grupper[0].type, "lytteeksempel", "tittelen veier tyngst");
-  assert.equal(res.grupper[0].label, "Lytteeksempler");
+  assert.equal(res.grupper[0].label, "Videoer");
   const t = res.grupper[0].treff[0];
   assert.equal(t.tittel, "Mannish Boy");
   assert.equal(t.sti, "Muddy Waters, Beyoncé", "samme video hos to artister er ett treff med begge navnene");

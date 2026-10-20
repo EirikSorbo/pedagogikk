@@ -214,11 +214,9 @@ function tegnHurtig() {
   const el = $("utskrift-hurtig");
   if (!el) return;
   if (!modell || modell.tom) { el.innerHTML = ""; return; }
-  const utenLytte = artisterUten("lytte").length;
   const utenBilde = artisterUten("bilde").length;
-  if (!utenLytte && !utenBilde) { el.innerHTML = ""; return; }
+  if (!utenBilde) { el.innerHTML = ""; return; }
   el.innerHTML = `<span class="muted">Ta ut:</span>` +
-    (utenLytte ? ` <button type="button" class="btn ghost small" data-hurtig="lytte">teoretikere uten lytteeksempel (${utenLytte})</button>` : "") +
     (utenBilde ? ` <button type="button" class="btn ghost small" data-hurtig="bilde">teoretikere uten bilde (${utenBilde})</button>` : "");
 }
 
@@ -608,7 +606,7 @@ function tocHtml() {
   if (modell.innovasjoner.length) punkter.push({ navn: "Reformer", linjer: [kortListe(modell.innovasjoner.map((t) => t.navn))], ref: "innovasjoner" });
   if (modell.instrumenter.length) punkter.push({ navn: "Fagbakgrunner", linjer: [kortListe(modell.instrumenter.map((i) => i.tittel))], ref: "instrumenter" });
   for (const s of modell.sider) punkter.push({ navn: s.tittel, linjer: [], ref: `side:${s.id}` });
-  if (modell.lytteliste.length) punkter.push({ navn: "Lytteliste", linjer: [], ref: "lytteliste" });
+  if (modell.lytteliste.length) punkter.push({ navn: "Videoer", linjer: [], ref: "lytteliste" });
   // Tidslinja står på side 2, altså før familiene: sorter etter rekkefølgen i
   // heftet, som er den vi tegner i (tidslinja rett etter forsiden).
   const rekkefolge = (p) => (p.ref === "tidslinje" ? 0 : 1);
@@ -732,7 +730,7 @@ function lyttelisteHtml() {
   const egne = modell.lytteliste.filter((l) => !l.valgt).map(rad);
   const valgte = modell.lytteliste.filter((l) => l.valgt).map(rad);
   const skille = egne.length && valgte.length ? `<p class="h-lytte-skille">Valgt i tillegg til kortene</p>` : "";
-  return `<section class="h-seksjon h-lytteliste" data-toc="lytteliste">${seksjonHode("Bakerst", "Lytteliste")}
+  return `<section class="h-seksjon h-lytteliste" data-toc="lytteliste">${seksjonHode("Bakerst", "Videoer")}
     ${spillAlleHtml()}
     <div class="h-liste-2sp">${egne.join("")}${skille}${valgte.join("")}</div>
   </section>`;
