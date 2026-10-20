@@ -127,7 +127,8 @@ js/                   Modulene, i mapper etter område (alle filene: MODULKART.m
 MODULKART.md          Alle filene i js/, én linje hver, laget av tools/modulkart.js
 tests/                Enhetstester (node --test) + regeltester (emulator)
 tools/                check-imports, find-stale-refs, importkart, modulkart, check-versjon,
-                      lag-pedagogikk-skjelett (treet), finn-musikkord, ordbytte,
+                      lag-pedagogikk-skjelett (treet), sjekk-innholdsfil (før import),
+                      finn-musikkord, ordbytte,
                       seed-genealogy, build-genealogy-doc, dump-genre-fixture
 firestore.rules       Sikkerhetsregler for databasen
 json files/           pedagogikk-skjelett.json: treet som importeres på lærersiden (lages av tools/)
