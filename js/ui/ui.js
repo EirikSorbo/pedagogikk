@@ -21,6 +21,8 @@ import { resolveDesc, missingDesc } from "../sjangre/genre-descriptions.js";
 import { safeUrl, escapeHtml, buildKilderList } from "../felles/util.js";
 import { visAar, visSpenn } from "../felles/aarstall.js";
 import { artistStripHtml } from "./artist-strip.js";
+import { seOgLesHtml } from "../felles/se-og-les.js";
+import { hosHvemHtml } from "../sjangre/prinsipp.js";
 import {
   linkDesc,
   wireLinks,
@@ -633,9 +635,12 @@ function showGenreLevelInfo(label, level, opts = {}) {
   mBody.innerHTML = `
     ${seeGenreBtn}
     <div class="gx-desc rt">${resolved.description ? linkDesc(resolved.description, medSelv(lc, { genre: label })) : `<span class="gx-missing">${missingDesc(level)}</span>`}</div>
+    ${resolved.seOgLes?.length ? `<h4 class="related-head">Se og les</h4>${seOgLesHtml(resolved.seOgLes)}` : ""}
+    ${hosHvemHtml(label, artists)}
     ${buildKilderList(resolved.kilder, "Kilder")}
     ${btnArea ? `<div style="margin-top:10px;display:flex;gap:8px">${btnArea}</div>` : ""}`;
   wireLinks(mBody, lc);
+  wireRelated(mBody, lc);
   const sg = mBody.querySelector(".gx-see-genre-btn");
   if (sg) sg.addEventListener("click", () => showSjangerInfo(treeNode.l, opts));
   const b = mBody.querySelector(".gx-artists-btn");

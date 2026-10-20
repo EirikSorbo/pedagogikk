@@ -5,20 +5,20 @@ Kartet lages av `tools/modulkart.js` og skal ikke redigeres for hånd: endre inn
 i fila og kjør `./bump.sh` (eller `node tools/modulkart.js`). Pre-push-kroken og GitHub
 stopper et kart som ikke stemmer med filene.
 
-111 filer i 11 mapper.
+113 filer i 11 mapper.
 
 | Mappe | Innhold | Filer |
 |---|---|---|
 | `js/` | Sidene og oppsettet | 11 |
 | `js/utforsk/` | Utforsk | 18 |
-| `js/sjangre/` | Sjangrene og slektstreet | 12 |
+| `js/sjangre/` | Sjangrene og slektstreet | 13 |
 | `js/visning/` | Visning | 15 |
 | `js/laerer/` | Lærersiden | 8 |
 | `js/forslag/` | Endringsforslag | 3 |
 | `js/utskrift/` | Utskrift | 2 |
 | `js/ui/` | Byggeklosser for skjermen | 15 |
 | `js/data/` | Data | 9 |
-| `js/felles/` | Felles hjelpere | 17 |
+| `js/felles/` | Felles hjelpere | 18 |
 | `js/vendor/` | Tredjepart | 1 |
 
 ## Reglene koden holder seg til
@@ -92,6 +92,7 @@ Sjangermodellen (treet bor i Firestore, og alt annet avledes av det), beskrivels
 | `genre-picker.js` | SJANGERVELGER — nedtrekk + brikker (flervalg fra slektstreet) |
 | `genre-validate.js` | VALIDERING AV SJANGERTREET |
 | `gx-camera.js` | KARTKAMERA — panorering, zoom og pinch for slektstre-flatene |
+| `prinsipp.js` | PEDAGOGISKE PRINSIPPER — «Hos hvem og når» (fase 3) |
 
 ## `js/visning/` Visning
 
@@ -203,6 +204,7 @@ Små hjelpere og vokabular som flere deler av appen bruker: tekst og lenker, kil
 | `podkast-rekkefolge.js` | PODKASTENES REKKEFØLGE (v6.48, brukerbestilling 2026-10-06) |
 | `punkter.js` | OPPSUMMERINGSPUNKTER (v5.50) — 3–5 korte punkter per beskrivelse |
 | `rich-text.js` | RIK TEKST — markdown-light for ALL løpende tekst i appen |
+| `se-og-les.js` | SE OG LES — valgfri liste på et pedagogisk prinsipp (fase 3) |
 | `search.js` | SØK — én indeks over alt innholdet i appen |
 | `sjekket.js` | BARE SJEKKET INNHOLD FOR STUDENTENE (v6.89, brukervalg 2026-10-13) |
 | `story-format.js` | SJANGERHISTORIER OG INNHOLDSSIDER — oppslag |

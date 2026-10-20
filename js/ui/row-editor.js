@@ -35,6 +35,19 @@ export const WORK_SPEC = {
   ],
 };
 
+// Se og les på et pedagogisk prinsipp (fase 3, js/felles/se-og-les.js): en
+// post er en video, en lenke eller et kort utdrag med kilde. Typen utledes.
+export const SELES_SPEC = {
+  rowClass: "sl-row", removeClass: "remove-sl", keepKey: "tittel",
+  removeLabel: "Fjern post",
+  fields: [
+    { key: "tittel", cls: "sl-tittel", type: "text", ph: "Tittel (f.eks. «Pestalozzi om anskuelse»)", label: "Tittel", always: true },
+    { key: "kilde", cls: "sl-kilde", type: "text", ph: "Kilde (forfatter, verk, år)", label: "Kilde" },
+    { key: "url", cls: "sl-url", type: "url", ph: "https://… video eller tekst (valgfritt)", label: "Lenke (https)" },
+    { key: "tekst", cls: "sl-tekst", type: "textarea", ph: "Kort utdrag (valgfritt, høyst 1200 tegn)", label: "Utdrag", max: 1200, rows: 4 },
+  ],
+};
+
 export const MUSIC_SPEC = {
   rowClass: "me-row", removeClass: "remove-me", keepKey: "url",
   removeLabel: "Fjern musikkeksempel",
@@ -209,6 +222,11 @@ function inputHtml(f, values) {
     html += opts.map((o) =>
       `<option value="${escapeHtml(o)}"${o === vs ? " selected" : ""}>${escapeHtml(o)}</option>`).join("");
     return html + "</select>";
+  }
+  if (f.type === "textarea") {
+    // Flerlinjet felt (Se og les, fase 3): maxlength fra spec.
+    return `<textarea class="${f.cls}" rows="${f.rows || 3}" placeholder="${escapeHtml(f.ph || "")}"`
+      + `${f.label ? ` aria-label="${escapeHtml(f.label)}"` : ""}${f.max ? ` maxlength="${f.max}"` : ""}>${escapeHtml(String(v))}</textarea>`;
   }
   const type = f.type === "number" ? "number" : (f.type === "url" ? "url" : "text");
   let html = `<input type="${type}" class="${f.cls}" placeholder="${escapeHtml(f.ph || "")}" value="${escapeHtml(String(v))}"`;

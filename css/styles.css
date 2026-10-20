@@ -4464,3 +4464,25 @@ body .modal.modal-slide .slide-kropp.rt { font-size: 1.3rem; line-height: 1.55; 
 .modal-slide .slide-kropp h3 { font-size: 1.5rem; margin: 1.1em 0 0.4em; }
 .modal-slide .slide-kropp ul, .modal-slide .slide-kropp ol { padding-left: 1.4em; }
 .modal-slide .slide-kropp li { margin: 0.25em 0; }
+
+/* Se og les og «Hos hvem og når» på prinsipp-kortet (fase 3) */
+.seles-liste { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 10px; }
+.seles-rad { border-left: 3px solid var(--line-strong); padding: 2px 0 2px 12px; }
+.seles-tittel { margin: 0 0 2px; font-weight: 600; font-size: 0.92rem; }
+.seles-tekst { margin: 4px 0; padding: 0; font-size: 0.9rem; line-height: 1.55; color: var(--text-body); font-style: italic; }
+.seles-kilde { margin: 2px 0 0; font-size: 0.78rem; color: var(--muted); }
+.seles-lenke { color: var(--accent-2); }
+.hh { margin: 0 0 14px; }
+.hh-epoker { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.hh-epoke { cursor: pointer; font: inherit; font-size: 0.78rem; color: var(--text); }
+.hh-epoke:hover, .hh-epoke:focus-visible { background: var(--surface); text-decoration: underline; }
+.hh-liste { list-style: none; margin: 6px 0 0; padding: 0; columns: 2 14rem; column-gap: 18px; }
+.hh-liste li { break-inside: avoid; padding: 2px 0; font-size: 0.88rem; }
+.hh-person { padding: 0; border: 0; background: none; cursor: pointer; font: inherit; color: var(--text); }
+.hh-person:hover, .hh-person:focus-visible { color: var(--accent-2); text-decoration: underline; }
+.ai-bar-flere { bottom: auto; height: 0.45rem; border-radius: 2px; }
+.sl-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.sl-row .sl-tittel { flex: 1 1 14rem; }
+.sl-row .sl-kilde { flex: 1 1 12rem; }
+.sl-row .sl-url, .sl-row .sl-tekst { flex: 1 1 100%; }
+.sl-row .sl-tekst { resize: vertical; }

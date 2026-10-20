@@ -18,7 +18,7 @@ const har = (liste, navn) => Array.isArray(liste) && liste.some((x) => lik(x, na
 
 // Innholdet i et nivå (meta/main/sub). Årstallene, epoken og «usikre» er
 // struktur og blir stående.
-const TEKSTFELT = ["description", "punkter", "lytt", "kilder", "samfunn", "skole"];
+const TEKSTFELT = ["description", "punkter", "lytt", "kilder", "samfunn", "skole", "seOgLes"];
 function utenTekst(nivaa) {
   const ut = { ...nivaa };
   for (const f of TEKSTFELT) delete ut[f];

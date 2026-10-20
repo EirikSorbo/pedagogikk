@@ -27,7 +27,8 @@ import { erAar, visSpenn } from "../felles/aarstall.js";
 const LEVEL_LABEL = { meta: "metasjanger", main: "sjanger", sub: "undersjanger" };
 import { wireAllLinks } from "../felles/linkify.js";
 import { $ } from "../data/shared.js";
-import { SOURCE_SPEC, addRow, buildRows, collectRows, normalizeSources } from "../ui/row-editor.js";
+import { SOURCE_SPEC, SELES_SPEC, addRow, buildRows, collectRows, normalizeSources } from "../ui/row-editor.js";
+import { normaliserSeOgLes } from "../felles/se-og-les.js";
 import { melding, bekreft, setupModal, modalOpen, sporTekst } from "../ui/ui-modal.js";
 
 // ----------------------------------------------------------------------------
@@ -70,6 +71,12 @@ export function openSingleSubgenreModal(subgenreId, level = "sub") {
   if (punktWrap) {
     punktWrap.hidden = level !== "main";
     if (level === "main") fyllPunktfelt($("#ss-punkter"), resolved.punkter);
+  }
+  // Se og les (fase 3) gjelder bare prinsippene (sub).
+  const selesWrap = $("#ss-seles-wrap");
+  if (selesWrap) {
+    selesWrap.hidden = level !== "sub";
+    if (level === "sub") buildRows($("#ss-seles-rows"), SELES_SPEC, resolved.seOgLes || []);
   }
   // Samfunn og Skole og oppdragelse (fase 3) gjelder bare epokene (main).
   const kontekstWrap = $("#ss-kontekst-wrap");
@@ -205,6 +212,7 @@ function collectKilderRows(wrap) {
 }
 
 export function setupSubgenreSingleSave() {
+  $("#ss-seles-add")?.addEventListener("click", () => addRow($("#ss-seles-rows"), SELES_SPEC, {}));
   const addKilderBtn = $("#ss-add-kilder");
   if (addKilderBtn) addKilderBtn.addEventListener("click", () => addKilderRow($("#ss-kilder-rows")));
 
@@ -229,6 +237,7 @@ export function setupSubgenreSingleSave() {
     // Epoken lagres KUN på main-nivå (tre-sjangre). Tomt felt = ingen verdi,
     // ikke 0 — null lar sjangerkortet falle tilbake på fritekst-epoken.
     const data = { description, kilder, usikre: collectUsikreRows() };
+    if (level === "sub") data.seOgLes = normaliserSeOgLes(collectRows($("#ss-seles-rows"), SELES_SPEC));
     if (level === "main") {
       // Samme grenser som resten av appen (aarstall.js); år før Kristus er
       // negative tall (fase 2).

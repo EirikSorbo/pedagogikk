@@ -128,3 +128,12 @@ test("normalizeSources: kategori, forfatter og årstall bæres videre", () => {
   assert.equal("year" in normalizeSources([{ text: "SNL", year: "" }])[0], false);
   assert.equal(normalizeSources([{ text: "SNL", year: "1998" }])[0].year, 1998);
 });
+
+// Se og les (fase 3): flerlinjet utdrag i rad-editoren.
+test("SELES_SPEC: utdraget er et textarea med tak, og verdien escapes", async () => {
+  const { SELES_SPEC, rowInnerHtml } = await import("../../js/ui/row-editor.js");
+  const html = rowInnerHtml(SELES_SPEC, { tittel: "T", tekst: "Linje <én>\nLinje to" });
+  assert.match(html, /<textarea class="sl-tekst" rows="4"[^>]*maxlength="1200">Linje &lt;én&gt;\nLinje to<\/textarea>/);
+  assert.match(html, /class="sl-tittel"[^>]*value="T"/);
+  assert.match(html, /class="btn ghost small remove-sl"/);
+});

@@ -13,6 +13,7 @@
 
 import { normaliserPunkter } from "../felles/punkter.js";
 import { erAar } from "../felles/aarstall.js";
+import { normaliserSeOgLes } from "../felles/se-og-les.js";
 
 const LVL = { meta: "metasjanger", main: "sjanger", sub: "undersjanger" };
 
@@ -32,7 +33,7 @@ function yr(v) {
   return erAar(v) ? v : null;
 }
 
-const TOM = { description: "", kilder: [], activeFrom: null, activeTo: null, activeToUgyldig: false, usikre: [], era: "", lytt: [], punkter: [], samfunn: "", skole: "" };
+const TOM = { description: "", kilder: [], activeFrom: null, activeTo: null, activeToUgyldig: false, usikre: [], era: "", lytt: [], punkter: [], samfunn: "", skole: "", seOgLes: [] };
 
 function fromOverride(o, level) {
   if (!o) return null;
@@ -51,7 +52,8 @@ function fromOverride(o, level) {
   const har = !!lvl.description || yr(lvl.activeFrom) !== null
     || !!String(lvl.era || "").trim() || (Array.isArray(lvl.lytt) && lvl.lytt.length > 0)
     || normaliserPunkter(lvl.punkter).length > 0
-    || !!String(lvl.samfunn || "").trim() || !!String(lvl.skole || "").trim();
+    || !!String(lvl.samfunn || "").trim() || !!String(lvl.skole || "").trim()
+    || normaliserSeOgLes(lvl.seOgLes).length > 0;
   if (!har) return null;
   return {
     description: lvl.description || "",
@@ -79,6 +81,8 @@ function fromOverride(o, level) {
     // gjorde. Bare main-nivået (epokene) bruker dem.
     samfunn: String(lvl.samfunn || "").trim(),
     skole: String(lvl.skole || "").trim(),
+    // Se og les (fase 3): valgfri liste på prinsippene (sub-nivået).
+    seOgLes: normaliserSeOgLes(lvl.seOgLes),
   };
 }
 

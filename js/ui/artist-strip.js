@@ -19,7 +19,7 @@
 //  genre-model + util), så ui-helpers.js kan importere den uten import-sykel.
 // ============================================================================
 
-import { resolveSpan } from "../felles/timeline-lanes.js";
+import { resolveSpan, packLanes } from "../felles/timeline-lanes.js";
 import { aksePos, forAksen, etterAksen, tidsromGrenser } from "../felles/tidsakse.js";
 import { visAar, visSpenn } from "../felles/aarstall.js";
 import { META_GENRE_COLOR, FAMILIES, TIDSROM } from "../sjangre/genre-model.js";
@@ -90,4 +90,32 @@ export function artistStripHtml(artist, { nowYear = new Date().getFullYear(), ti
     `<div class="${cls}" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%;` +
     `background:${color}2e;border-color:${color}b3"></div>` +
     `</div></div>`;
+}
+
+// Flere perioder på samme akse (prinsippets «Hos hvem og når», fase 3): én
+// stolpe per teoretiker, lagt i baner så de ikke dekker hverandre. Samme akse
+// og samme farger som artistStripHtml. poster = [{ span, tittel, farge?, meta? }].
+// Banepakkingen går i aksens enhet (prosent), som tidslinjen i Utforsk.
+export function flerStripeHtml(poster, { nowYear = new Date().getFullYear(), tidsrom = TIDSROM } = {}) {
+  const grenser = tidsromGrenser(tidsrom, nowYear);
+  const gyldige = (poster || []).filter((p) => p?.span);
+  if (!grenser.length || !gyldige.length) return "";
+  const items = gyldige.map((p) => ({
+    ...p, name: p.tittel,
+    span: { start: aksePos(tidsrom, p.span.start, nowYear) * 100, end: aksePos(tidsrom, p.span.end, nowYear) * 100 },
+    aapen: !!p.span.open,
+  }));
+  const lanes = packLanes(items, { gap: 0.5, minSpan: 1.5 });
+  const BANE = 0.55;   // rem per bane
+  const stolper = lanes.flatMap((lane, li) => lane.map((it) => {
+    const farge = safeColor(it.farge || META_GENRE_COLOR[it.meta] || FAMILIES.gray?.stroke);
+    const left = Math.max(0, it.span.start);
+    const width = Math.max(1.5, Math.min(100, it.visualEnd) - left);
+    return `<div class="ai-bar ai-bar-flere${it.aapen ? " is-cut-end" : ""}" title="${escapeHtml(it.tittel)}" `
+      + `style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%;top:${(li * BANE).toFixed(2)}rem;`
+      + `background:${farge}59;border-color:${farge}b3"></div>`;
+  })).join("");
+  return `<div class="ai-strip" role="img" aria-label="${gyldige.length} teoretikere på tidsaksen">`
+    + axisHtml(grenser)
+    + `<div class="ai-track ai-flere" style="--ai-n:${grenser.length};height:${(lanes.length * BANE + 0.2).toFixed(2)}rem">${stolper}</div></div>`;
 }
