@@ -17,7 +17,7 @@ import { showSubsjangerInfo } from "../ui/ui.js";
 import { showEdgeInfo } from "../sjangre/genealogy.js";
 import { openTechDetail, openTeknologi } from "./explore-tech.js";
 import { openRotter, openOmHistorie, openHistorier, openAppGuide, openStoreBildet, openSjangerhimmel } from "./explore-innhold.js";
-import { openInstrumenter, openPodkaster } from "./explore-instrument.js";
+import { openPodkaster } from "./explore-podkaster.js";
 import { openSjangerperioder } from "./explore-sjangerperioder.js";
 import { openTidslinje } from "./explore-tidslinje.js";
 import { openReferanser } from "./explore-referanser.js";
@@ -77,7 +77,6 @@ export function apneMaal(apne) {
       if (apne.id === "rotter") return openRotter();
       if (apne.id === "omHistorie") return openOmHistorie();
       return openAppGuide();
-    case "instrument": return openInstrumenter(apne.id);
     case "kobling": {
       const [fra, til] = String(apne.id).split("__");
       showEdgeInfo(fra, til, sjangerOpts());
@@ -158,8 +157,6 @@ function klarFor(apne, s) {
       return s.techLoaded ? "klar" : "vent";
     case "side": case "sjangerperioder": case "referanser": case "store-bildet":
       return s.contentLoaded ? "klar" : "vent";
-    case "instrument":
-      return s.contentLoaded && s.artistsLoaded ? "klar" : "vent";
     default:
       return "klar";   // podkaster: modalen tegnes på nytt når episodene lander
   }

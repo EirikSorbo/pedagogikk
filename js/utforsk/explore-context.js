@@ -19,7 +19,7 @@ import { modalClose } from "../ui/ui-modal.js";
 import { buildMainGenreList, openPlaylistModal, openArtistListModal, artistsByInstrument, showSubsjangerInfo } from "../ui/ui.js";
 import { showSjangerInfo } from "../sjangre/genealogy.js";
 import { teacherActionRow, wireTeacherRow } from "../ui/ui-helpers.js";
-import { INSTRUMENT_GROUPS, INSTRUMENT_TIMELINE_GROUPS, INSTRUMENT_TITLE, artistsInGenre } from "../felles/limits.js";
+import { artistsInGenre } from "../felles/limits.js";
 import { opts, getState } from "../data/app-state.js";
 
 // Funksjonene kjernen og featurene bruker for å åpne hverandre. explore.js
@@ -120,13 +120,7 @@ export function showArtistsForSjanger({ label }) {
   openArtistListModal(label, artistsInGenre(getState().artists, label), opts.onArtistClick, "Ingen forslag i denne epoken ennå.");
 }
 
-// Med vei til instrumentets egen side når instrumentet hører til en gruppe
-// som har en (v6.07, K6): «Saksofon» fører til Soloinstrument, «Banjo» til
-// Gitar. «Annet» har ingen side.
+// Teoretikere med en bestemt fagbakgrunn.
 export function showArtistsForInstrument(instrument) {
-  const gruppe = Object.entries(INSTRUMENT_GROUPS).find(([, liste]) => liste.includes(instrument))?.[0];
-  const lenke = gruppe && INSTRUMENT_TIMELINE_GROUPS.includes(gruppe)
-    ? { tekst: INSTRUMENT_TITLE[gruppe] || gruppe, onClick: () => nav.openInstrumenter(gruppe) }
-    : null;
-  openArtistListModal(instrument, artistsByInstrument(getState().artists, instrument), opts.onArtistClick, "Ingen forslag med dette fagbakgrunnen ennå.", { lenke });
+  openArtistListModal(instrument, artistsByInstrument(getState().artists, instrument), opts.onArtistClick, "Ingen forslag med dette fagbakgrunnen ennå.", {});
 }

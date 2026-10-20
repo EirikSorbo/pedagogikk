@@ -779,7 +779,7 @@ function init() {
       // Instrumenter-kortet teller artister på knappen («Alle artister (n)»),
       // så en åpen fane må tegnes på nytt når artistene lander. Uten dette blir
       // tallet stående med cachens verdi mens lista viser den ferske.
-      explore?.renderInstrumenter?.();
+      explore?.renderPodkaster?.();
       // Utenom throttlingen: deep-linkene skal åpnes straks data finnes
       // (no-op når det ikke venter noen). provVisMaal er ?vis=-ruteren.
       applyPendingDeepLink();
@@ -800,20 +800,20 @@ function init() {
     },
     // Tech-lenkene i artistkortene bygges av linkifiseringen — render på nytt
     // når tech-lista kommer/endres, ellers mangler lenkene ved førstegangslasting.
-    // renderInstrumenter: en åpen Instrumenter-fane bygges av tech-kortene og
+    // renderPodkaster: en åpen Instrumenter-fane bygges av tech-kortene og
     // skal følge med (no-op når seksjonen er lukket).
     // refreshTeknologi + provVisMaal (audit v5.42 funn 18): en åpen
     // teknologiliste og en ventende ?vis=tech/teknologi-lenke skal
     // følge tech-snapshotet, ikke vente på at noe annet lander.
-    onTech: () => { applyArtistSnapshot(); explore?.renderInstrumenter?.(); explore?.refreshTeknologi?.(); provVisMaal(); presPlanTikk(); visningTikk(); },
+    onTech: () => { applyArtistSnapshot(); explore?.renderPodkaster?.(); explore?.refreshTeknologi?.(); provVisMaal(); presPlanTikk(); visningTikk(); },
     // En ventende ?vis=kobling-lenke venter på koblingstekstene.
     onEdgeDescs: () => provVisMaal(),
     // Innholdssidene: re-render åpne visninger ved endring.
     // Instrumentsammendragene bor i content, så en åpen Instrumenter-fane
     // tegnes på nytt her også.
-    onContent: () => { explore?.contentChanged?.(); explore?.renderInstrumenter?.(); provVisMaal(); presPlanTikk(); samleTikk(); visningTikk(); renderFraTimene(); },
+    onContent: () => { explore?.contentChanged?.(); explore?.renderPodkaster?.(); provVisMaal(); presPlanTikk(); samleTikk(); visningTikk(); renderFraTimene(); },
     // En åpen Podkaster-fane skal vise nye episoder uten å lukkes/åpnes.
-    onPodcasts: () => explore?.renderInstrumenter?.(),
+    onPodcasts: () => explore?.renderPodkaster?.(),
   });
 
   // Sjangervokabularet kommer fra Firestore og lander ETTER at filtrene ble

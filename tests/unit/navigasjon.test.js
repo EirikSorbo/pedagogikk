@@ -22,7 +22,7 @@ test("alt som slås opp i nav, registreres i explore.js", () => {
   for (const f of jsFiler()) {
     for (const m of utenKommentarer(lesJs(f)).matchAll(/(?<![\w$.])nav\.([A-Za-z0-9_$]+)/g)) brukt.add(m[1]);
   }
-  assert.ok(brukt.size >= 6, `fant nav-oppslagene (${[...brukt].join(", ")})`);
+  assert.ok(brukt.size >= 5, `fant nav-oppslagene (${[...brukt].join(", ")})`);
   assert.deepEqual([...brukt].filter((n) => !registrert.has(n)), [], "slås opp i nav, men registreres ikke i explore.js");
 });
 

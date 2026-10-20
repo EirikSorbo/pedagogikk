@@ -18,7 +18,7 @@
 //  Her er den ene ruta inn. Alle sider får nøyaktig samme seks samlinger i
 //  nøyaktig samme state-form, og en ny side kan ikke lenger gå glipp av én.
 //
-//  podcasts er med selv om den ser sidespesifikk ut: explore-instrument.js
+//  podcasts er med selv om den ser sidespesifikk ut: explore-podkaster.js
 //  gjør `s.podcasts.length` UTEN vakt, og flaten er nåbar fra enhver side som
 //  injiserer utforsk-modalene (instrumentlenkene på innovasjonskortene åpner
 //  instrumentsiden). Manglet den i state, ville et klikk kastet TypeError i

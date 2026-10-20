@@ -25,7 +25,7 @@ const INNHOLDSKORT = {
   "tre.html": ["modal-artist-detail"],
   "teacher.html": ["modal-detail", "modal-laerer-handbok"],
   "js/utforsk/explore-modals.js": [
-    "modal-teknologi", "modal-instrumenter", "modal-podkaster", "modal-instr-tech",
+    "modal-teknologi", "modal-podkaster",
     "modal-sjangerperioder", "modal-sjangerhimmel",
     "modal-tidslinje", "modal-subgenre-list", "modal-undersjangre", "modal-subgenre-info",
     "modal-store-bildet", "modal-referanser", "modal-app-guide", "modal-om-historie",
@@ -76,7 +76,7 @@ test("alle modalene i den delte markupen er registrert (← og ✕ virker)", () 
   const reg = les("js/utforsk/explore.js");
   const start = reg.indexOf("function wireModals()");
   const liste = reg.slice(start, reg.indexOf("setupModal(id)", start));
-  assert.ok(ider.length > 20, "fant modalene i markupen");
+  assert.ok(ider.length > 15, "fant modalene i markupen");
   for (const id of ider) assert.ok(liste.includes(`"${id}"`), `#${id} mangler i wireModals`);
 });
 

@@ -58,9 +58,9 @@ Det store bildet, sjangrene, sjangerperiodene, tidslinja, Lytt, Instrumenter, re
 | `explore-apne.js` | DELT ÅPNER + ?vis=-RUTER (v5.22) |
 | `explore-context.js` | DELT KJERNE FOR UTFORSK-MODULENE |
 | `explore-innhold.js` | INNHOLDSSIDER, SJANGERHISTORIER, HUB & SJANGERHIMMEL |
-| `explore-instrument.js` | INSTRUMENTER — utvikling per instrumentgruppe |
 | `explore-metaoversikt.js` | METASJANGER-OVERSIKTEN (v5.94) — én side per aktiv metasjanger i visningen |
 | `explore-modals.js` | MODAL-MARKUP FOR UTFORSK-SIDENE |
+| `explore-podkaster.js` | PODKASTER — eget vindu (v5.07) |
 | `explore-referanser.js` | REFERANSER: alle kildene appen bygger på, samlet |
 | `explore-search.js` | SØK — visning og ruting |
 | `explore-sjanger.js` | SJANGRE OG UNDERSJANGRE |

@@ -198,7 +198,7 @@ export function initTrePage({ render }) {
       // Sjangertreet ligger i samme snapshot; er det ikke der, sier vi fra.
       onContent: () => {
         explore.contentChanged();
-        explore.renderInstrumenter?.();
+        explore.renderPodkaster?.();
         if (!isGenreModelReady()) visTreMangler(true);
         // Kjøreplan-stopp virker også her (v5.25): modalene er injisert, og
         // ventende mål trenger samme dytt som på forsiden.
@@ -211,10 +211,10 @@ export function initTrePage({ render }) {
       onGenreDescs: () => { explore.genreDescsChanged?.(); provVisMaal(); visningTikk(); },
       // Artistene teller på «Alle artister (n)» i Instrumenter-kortet.
       // presPlanTikk: kjøreplanens oversiktskort viser artist- og kortnavn.
-      onArtists: () => { explore.renderInstrumenter?.(); provVisMaal(); presPlanTikk(); visningTikk(); },
-      onTech: () => { explore.renderInstrumenter?.(); explore.refreshTeknologi?.(); provVisMaal(); presPlanTikk(); visningTikk(); },
+      onArtists: () => { explore.renderPodkaster?.(); provVisMaal(); presPlanTikk(); visningTikk(); },
+      onTech: () => { explore.renderPodkaster?.(); explore.refreshTeknologi?.(); provVisMaal(); presPlanTikk(); visningTikk(); },
       onEdgeDescs: () => provVisMaal(),
-      onPodcasts: () => explore.renderInstrumenter?.(),
+      onPodcasts: () => explore.renderPodkaster?.(),
     });
     // ?vis= (v6.23): kortene skriver adressen sin her også (ui-modal.js), så
     // en oppdatering skal åpne kortet igjen, som på forsiden og lærersiden.

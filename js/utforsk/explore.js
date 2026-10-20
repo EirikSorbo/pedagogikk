@@ -26,7 +26,7 @@ import { openSubgenreList, openUndersjangre, openSubgenreInfo, tegnSjangre } fro
 import { openStoreBildet, openAppGuide, openOmHistorie, openRotter, openHistorier, openSjangerhimmel, renderPage, renderRotterChips, refreshHistorie } from "./explore-innhold.js";
 import { openVisningssider, openArtistGalleri } from "./explore-visningssider.js";
 import { openMetaOversikt } from "./explore-metaoversikt.js";
-import { openInstrumenter, openPodkaster, renderInstrumenter } from "./explore-instrument.js";
+import { openPodkaster, renderPodkaster } from "./explore-podkaster.js";
 import { openSok, wireSok } from "./explore-search.js";
 import { apneMaal } from "./explore-apne.js";
 import { erPresentasjon } from "../visning/presentasjon.js";
@@ -36,7 +36,7 @@ import { storyOrderSynlig, pageFor } from "../felles/story-format.js";
 // Det kjernen (explore-context.js) og «Fra timene» (explore-timer.js) må kunne
 // åpne. Fylles her, idet modulen lastes, og ikke i kjernen selv: da hang 13
 // filer i én importring (se toppteksten i explore-context.js).
-registrerNavigasjon({ openTechDetail, openTidslinje, tidslinjeHarSjanger, openArtistGalleri, openInstrumenter, apneMaal });
+registrerNavigasjon({ openTechDetail, openTidslinje, tidslinjeHarSjanger, openArtistGalleri, apneMaal });
 
 // Kalles av sidene når genreDescriptions-snapshotet endres: et åpent
 // sjangerkort skal vise den nye beskrivelsen med én gang, ikke først når
@@ -114,13 +114,13 @@ function injectModals() {
 }
 
 function wireModals() {
-  ["modal-teknologi", "modal-instrumenter",
+  ["modal-teknologi",
    "modal-subgenre-list", "modal-undersjangre", "modal-subgenre-info",
    "modal-sjangerperioder", "modal-tidslinje", "modal-referanser", "modal-sjangerhimmel",
    "modal-artistliste", "modal-spilleliste", "modal-sjanger", "modal-tech-detail",
    "modal-store-bildet", "modal-app-guide", "modal-om-historie", "modal-rotter", "modal-historier",
    "modal-meta-oversikt", "modal-visningssider", "modal-galleri",
-   "modal-instr-tech", "modal-podkaster", "modal-sok", "modal-time", "modal-slide"].forEach((id) => setupModal(id));
+   "modal-podkaster", "modal-sok", "modal-time", "modal-slide"].forEach((id) => setupModal(id));
 
   // Søkefeltet i Utforsk-kortet står i sidenes egen markup med faste ID-er, så
   // forsiden og lærersiden får søket av samme kode uten å wire noe selv.
@@ -139,11 +139,6 @@ function wireModals() {
       e.preventDefault(); e.stopPropagation();
       openTeknologi(kat.dataset.techCat);
       return;
-    }
-    const instr = e.target.closest("[data-tech-instr]");
-    if (instr) {
-      e.preventDefault(); e.stopPropagation();
-      openInstrumenter(instr.dataset.techInstr);
     }
   });
 
@@ -322,8 +317,8 @@ export function initExplore(options) {
   setOpts(options);
   injectModals();
   wireModals();
-  // Kun medlemmer sidene faktisk kaller. renderInstrumenter er no-op når
-  // seksjonen er lukket, så sidene kan kalle den trygt fra ethvert snapshot.
+  // Kun medlemmer sidene faktisk kaller. renderPodkaster er no-op når
+  // vinduet er lukket, så sidene kan kalle den trygt fra ethvert snapshot.
   return {
     openSok,
     openTime,
@@ -334,9 +329,8 @@ export function initExplore(options) {
     openOmHistorie,
     openRotter,
     openHistorier,
-    openInstrumenter,
     openPodkaster,
-    renderInstrumenter,
+    renderPodkaster,
     // Nøkkeltallet «Kilder» i lærerens Oversikt (v6.88) åpner Referanser.
     openReferanser,
     antallKilder,

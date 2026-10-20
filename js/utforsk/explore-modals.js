@@ -33,44 +33,6 @@ export const MODAL_HTML = `
   </div>
 </div>
 
-<!-- Instrumenter: én nyvinnings-tidslinje per instrumentgruppe, bygget av
-     innovasjonskortene som har instrument satt (se explore-instrument.js).
-     Innholdet skrives av studentene via «Foreslå nytt kort» i hver seksjon.
-     NB: markupen her er én stor template-literal — ingen backticks i teksten. -->
-<div class="modal-backdrop" id="modal-instrumenter">
-  <div class="modal modal-innhold">
-    <!-- Tittelen er tilbake i hodet (v5.07). Kortet hadde to faner her, men
-         podkastene har fått sitt eget vindu, og én fane er ingen fane. -->
-    <div class="modal-head">
-      <h2>Fagbakgrunner</h2>
-      <button class="modal-close btn ghost small">✕</button>
-    </div>
-    <!-- Podkast-inngangen står ØVERST, over instrumentknappene (brukervalg
-         2026-09-01). Episodene er studentenes eget arbeid, og som fane nummer
-         to var de lette å gå glipp av. Knappen fylles av renderPodkastInngang
-         og åpner podkastvinduet under. -->
-    <div id="instr-podkast-inngang" class="instr-podkast-inngang"></div>
-    <!-- Instrumentene som faner (v6.23, brukervalg 2026-10-03), samme fanerad
-         som Sjangre; før blå knapper i to rader. -->
-    <div class="dv-faner instr-faner" id="instr-faner" role="tablist" aria-label="Fagbakgrunn"></div>
-    <!-- Arbeidsforklaringen står UNDER instrumentfanene (brukervalg
-         2026-09-01): den hører til arbeidet med det valgte instrumentet, ikke
-         til selve valget. LUKKET som standard — den er en oppskrift man slår
-         opp i, ikke noe man skal lese hver gang. -->
-    <details class="instr-guide">
-      <summary>Slik jobber dere med denne delen</summary>
-      <p>Hver gruppe har ansvar for sitt fagbakgrunn. Fire ting skal på plass:</p>
-      <ol>
-        <li><strong>Podkasten.</strong> Send den ferdige episoden til Eirik på e-post, så legges den ut under «Hør podkastene».</li>
-        <li><strong>Sammendraget.</strong> Skriv teksten om fagbakgrunnens utvikling, og legg ved kildene dere har brukt. Knappen heter «Skriv sammendrag».</li>
-        <li><strong>Nyvinningene.</strong> Sørg for at sentrale teknologiske nyvinninger (eller sentrale måter å bruke fagbakgrunnen på) er med, slik at tidslinjen blir god. Knappen heter «Legg til nyvinning».</li>
-        <li><strong>Teoretikerne.</strong> Sjekk at de viktigste utøverne på fagbakgrunnen ligger i appen, og legg til dem som mangler. Knappen heter «Legg til teoretiker».</li>
-      </ol>
-    </details>
-    <div id="instr-body" role="tabpanel" aria-label="Valgt fagbakgrunn"></div>
-  </div>
-</div>
-
 <!-- Podkastene: eget vindu (v5.07), åpnet fra «Hør podkastene» øverst i
      Instrumenter-kortet. Lå tidligere som fane nummer to der inne — med
      knappen på plass var fanen bare et ekstra lag rundt den samme lista. -->
@@ -82,19 +44,6 @@ export const MODAL_HTML = `
     </div>
     <div id="podkast-extra" class="head-actions"></div>
     <div id="podkast-list" class="podkast-list"></div>
-  </div>
-</div>
-
-<!-- Nyvinningene for ETT instrument, åpnet fra knapperaden i Instrumenter-
-     kortet. Samme kortmarkup som Teknologi-seksjonen, men uten kategorifaner
-     og MED hendelseskortene: lista skal svare til instrumentets tidslinje. -->
-<div class="modal-backdrop" id="modal-instr-tech">
-  <div class="modal modal-innhold">
-    <div class="modal-head">
-      <h2 id="itl-title">Nyvinninger</h2>
-      <button class="modal-close btn ghost small">✕</button>
-    </div>
-    <div id="itl-body" class="tech-grid"></div>
   </div>
 </div>
 

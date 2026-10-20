@@ -177,17 +177,7 @@ test("fase 2: historien viser epokene i retningen, ikke varmestriper", () => {
   assert.match(src, /class="tag hist-epoke" data-sjanger=/);
 });
 
-test("funn 33: instrumentkortet viser ferske lister", () => {
-  const src = les("js/utforsk/explore-instrument.js");
-  assert.match(src, /\[t\.id, t\.name, t\.adoptedYear, t\.adoptedLabel, t\.type\]/,
-    "signaturen må dekke det tidslinja viser");
-  assert.match(src, /openArtistListModal\(\n?\s*`Artister: \$\{group\}`, artistsInInstrumentGroup\(getState\(\)\.artists, group\)/,
-    "artistlista hentes ved klikk");
-  assert.match(src, /openTechListModal\(group, instrumentInnovations\(getState\(\)\.techItems, group\)\)/,
-    "nyvinningslista hentes ved klikk");
-  assert.match(kropp(src, "export function openInstrumenter("), /renderUtvikling\(true\);/,
-    "åpning skal tvinge omtegning forbi signaturvakten");
-});
+// funn 33 (instrumentkortets ferske lister) gikk ut med Instrumenter-siden i fase 4.
 
 test("funn 34: slektstreet dimmes bare ved tastaturfokus", () => {
   const src = les("js/sjangre/genealogy-bundled.js");

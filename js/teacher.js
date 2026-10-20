@@ -291,7 +291,7 @@ function startAppInner() {
       renderAll();
       refreshDesk();
       // «Alle artister (n)» i Instrumenter-kortet telles av artistene.
-      ctx.explore?.renderInstrumenter?.();
+      ctx.explore?.renderPodkaster?.();
       // En åpen kjøreplan-kladd med «laster …»-stopp (audit v5.42 funn 8).
       visningTikk();
       provVisMaal();
@@ -304,7 +304,7 @@ function startAppInner() {
       // re-rendres så import/redigering slår gjennom umiddelbart.
       ctx.explore?.contentChanged?.();
       if (document.getElementById("modal-laerer-handbok")?.classList.contains("open")) tegnLaererHandbok();
-      ctx.explore?.renderInstrumenter?.();
+      ctx.explore?.renderPodkaster?.();
       refreshGenreAdmin();
       refreshDesk();
       // Kjøreplan-lista i Visning-vinduet følger snapshotet (aldri midt i en
@@ -313,7 +313,7 @@ function startAppInner() {
       samleTikk();
       provVisMaal();
     },
-    onPodcasts: () => { renderPodkastAdmin(); ctx.explore?.renderInstrumenter?.(); },
+    onPodcasts: () => { renderPodkastAdmin(); ctx.explore?.renderPodkaster?.(); },
     // ?vis=-lenker til en sjangerkobling venter på koblingstekstene.
     onEdgeDescs: () => provVisMaal(),
     // Åpne teknologi-visninger (admin-lista, innovasjonskortet og en åpen
@@ -323,7 +323,7 @@ function startAppInner() {
       refreshTechAdmin();
       ctx.explore?.refreshTechDetail?.();
       ctx.explore?.refreshTeknologi?.();
-      ctx.explore?.renderInstrumenter?.();
+      ctx.explore?.renderPodkaster?.();
       refreshDesk();
       visningTikk();
       provVisMaal();

@@ -200,7 +200,7 @@ export function metaRader(a) {
 }
 
 // Podkast-episodekort — ett enkelt kort. Begge listene (podkastfanen i
-// explore-instrument.js og lærer-admin i teacher-content.js) tegnes gjennom
+// explore-podkaster.js og lærer-admin i teacher-content.js) tegnes gjennom
 // renderPodcastList under, så markupen ikke driver fra hverandre. `admin`
 // legger flytt opp/ned (v6.48), rediger og slett HELT TIL HØYRE i tittelraden,
 // over avspilleren; kalleren kobler lytterne (data-pod-flytt / data-pod-edit /
@@ -657,7 +657,7 @@ export function techFactsLines(t) {
     // på det instrumentet. (Boblene de erstattet var rene spans — dette er ny
     // funksjonalitet, ikke gjenoppretting.)
     ["Kategori", t.category, { attr: "data-tech-cat" }],
-    ["Fagbakgrunn", t.instrument, { attr: "data-tech-instr" }],
+    ["Fagbakgrunn", t.instrument],
     ["Oppfunnet", visAar(t.inventedYear)],
     ["Tatt i bruk", t.adoptedLabel],
   ]);

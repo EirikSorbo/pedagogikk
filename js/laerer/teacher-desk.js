@@ -21,7 +21,7 @@ import { openDetail } from "./teacher-artists.js";
 import { openSingleEdgeModal } from "./teacher-content.js";
 import { GENEALOGY_EDGES, GENEALOGY_MAIN_GENRES, edgeKey, isMainGenre, genreNodeById } from "../sjangre/genre-model.js";
 import { storyOrder, pageFor } from "../felles/story-format.js";
-import { isVisible, erTilModerasjon, INSTRUMENT_TIMELINE_GROUPS, INSTRUMENT_TITLE, instrumentPageId } from "../felles/limits.js";
+import { isVisible, erTilModerasjon } from "../felles/limits.js";
 import { pct } from "../ui/ui-helpers.js";
 import { escapeHtml } from "../felles/util.js";
 import { deleteTimeforslag, savePage } from "../data/store.js";
@@ -122,7 +122,6 @@ function buildCategories() {
 const SIDER = [
   ["rotter", "Røtter"],
   ["omHistorie", "Om historie"],
-  ...INSTRUMENT_TIMELINE_GROUPS.map((g) => [instrumentPageId(g), INSTRUMENT_TITLE[g] || `Utviklingen av ${g}`]),
 ];
 
 function catCard(cat) {
@@ -496,10 +495,6 @@ function openItem(key, id) {
     case "pages": {
       if (id === "rotter") ctx.explore?.openRotter();
       else if (id === "omHistorie") ctx.explore?.openOmHistorie();
-      else {
-        const gruppe = INSTRUMENT_TIMELINE_GROUPS.find((g) => instrumentPageId(g) === id);
-        if (gruppe) ctx.explore?.openInstrumenter(gruppe);
-      }
       break;
     }
   }
