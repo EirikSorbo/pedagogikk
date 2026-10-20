@@ -25,7 +25,7 @@ import { renderPage } from "./utforsk/explore-innhold.js";
 import { lesVisFraUrl, provVisMaal } from "./utforsk/explore-apne.js";
 
 import { state, ctx, renderAll, refreshControls, openAdminModal, setContentCheck, guardTeacherAction, setupModals } from "./laerer/teacher-state.js";
-import { openDetail, addMainGenreCheckToggle, openOversikt, openMangler, oppdaterOversiktPlateselskaper, setupFilters, openNyArtist } from "./laerer/teacher-artists.js";
+import { openDetail, addMainGenreCheckToggle, openOversikt, openMangler, setupFilters, openNyArtist } from "./laerer/teacher-artists.js";
 import {
   openSingleSubgenreModal,
   setupSubgenreSingleSave,
@@ -293,9 +293,6 @@ function startAppInner() {
       refreshDesk();
       // «Alle artister (n)» i Instrumenter-kortet telles av artistene.
       ctx.explore?.renderInstrumenter?.();
-      // Plateselskapskortet viser artistene med selskapet (v6.37).
-      ctx.explore?.renderPlateselskaper?.();
-      oppdaterOversiktPlateselskaper();
       // En åpen kjøreplan-kladd med «laster …»-stopp (audit v5.42 funn 8).
       visningTikk();
       provVisMaal();
@@ -309,7 +306,6 @@ function startAppInner() {
       ctx.explore?.contentChanged?.();
       if (document.getElementById("modal-laerer-handbok")?.classList.contains("open")) tegnLaererHandbok();
       ctx.explore?.renderInstrumenter?.();
-      oppdaterOversiktPlateselskaper();
       refreshGenreAdmin();
       refreshDesk();
       // Kjøreplan-lista i Visning-vinduet følger snapshotet (aldri midt i en
@@ -336,8 +332,6 @@ function startAppInner() {
   });
   subscribeTeacherChecks((checks) => {
     state.teacherChecks = checks; state.teacherChecksLoaded = true; refreshDesk();
-    // Avhukingen på plateselskapskortene teller i Oversikten (v6.37).
-    oppdaterOversiktPlateselskaper();
   });
   // Navn fra timen (v5.82): bare læreren kan lese samlingen, og lærersiden
   // starter først etter innlogging, så abonnementet får aldri avslag.

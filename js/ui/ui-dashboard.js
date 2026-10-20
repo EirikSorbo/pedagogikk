@@ -27,8 +27,6 @@ import { visAar } from "../felles/aarstall.js";
 import { GENEALOGY, GENEALOGY_MAIN_GENRES, GENEALOGY_META_GENRES, GENEALOGY_EDGES, TIDSROM, edgeKey, isMainGenre } from "../sjangre/genre-model.js";
 import { resolveDesc, resolveDescAny } from "../sjangre/genre-descriptions.js";
 import { storyOrder, storyFor, pageFor } from "../felles/story-format.js";
-import { selskaperSortert, plateselskapSideId } from "../felles/plateselskaper.js";
-import { SKJUL_I_HUBEN } from "../felles/feature-flags.js";
 
 const GENDER_COLORS = {
   kvinne: "var(--c-kvinne)",
@@ -164,11 +162,10 @@ export function renderDashboard(el, {
   onEditPage,
   onEditEdge,
   onEdgeCheck,
-  onPlateselskapCheck,
   onShowArtistList,
   onShowPlaylist,
   // «Mangler» (v6.66, brukerønske 2026-10-09): det som ikke er skrevet ennå,
-  // med plateselskapene som ett av punktene, tegnes i et eget vindu. Uten
+  // tegnes i et eget vindu. Uten
   // manglerEl havner det under Oversikten som før (testene tegner slik).
   manglerEl = null,
   onOpenMangler,
@@ -363,7 +360,6 @@ export function renderDashboard(el, {
   const edgesFilled = GENEALOGY_EDGES.length - gaps.edgeDesc.length;
   const edgeX = expandList(edgeRows, GENEALOGY_EDGES.length);
 
-  const psTall = plateselskapTelling({ content, teacherChecks });
   const oversiktHtml = `
     <div class="ov-kick">Pensumets form</div>
     <div class="ov-kpis">
@@ -398,10 +394,6 @@ export function renderDashboard(el, {
         <span class="ov-prio-i">${PRIO_ICONS[p]}</span>
         <span class="ov-kpi-n">${prioLists[p].length}</span>
       </button>`).join("")}
-      <button type="button" class="ov-kpi ov-click" data-ov-open="plateselskaper" title="Åpner plateselskapene slik studentene ser dem">
-        <span class="ov-kpi-n">${psTall.antall}</span>
-        <span class="ov-kpi-l">Plateselskaper</span>
-      </button>
       <button type="button" class="ov-kpi ov-click" data-ov-open="historier" title="Skrevne sjangerhistorier. Åpner historiene">
         <span class="ov-kpi-n">${historieListe.length - storiesMissing.length}</span>
         <span class="ov-kpi-l">Sjangerhistorier</span>
@@ -467,15 +459,6 @@ export function renderDashboard(el, {
       ${pageItem("Røtter før 1910", rotterOk, "rotter")}
       ${pageItem("Om historie", omHistorieOk, "omHistorie")}
       ${pageItem("Skriveveiledning", pageStatus("skriveveiledning"), "skriveveiledning")}
-      <div class="ov-miss-item ov-miss-bred">
-        <button type="button" class="ov-miss-head" data-ov-toggle="ov-x-plateselskaper">
-          <span>Plateselskaper</span>
-          <span id="ov-ps-telling" class="ov-count ${psTall.ok ? "ov-ok" : "ov-warn"}" title="Sjekket">${psTall.tekst}</span>
-        </button>
-        <div id="ov-x-plateselskaper" class="ov-expand" style="display:none">
-          <div id="ov-plateselskaper">${plateselskapSeksjonHtml({ artists, content, contentLoaded, teacherChecks })}</div>
-        </div>
-      </div>
       ${missItem("Sjangre uten beskrivelse", mainMissing.length,
         mainMissing.map((n) => nameRow(n, `data-ov-desc="${escapeHtml(n)}" data-ov-level="main"`)).join(""))}
       ${missItem("Undersjangre uten beskrivelse", subMissing.length,
@@ -599,18 +582,6 @@ export function renderDashboard(el, {
     const desc = hit("[data-ov-desc]");
     if (desc) return onEditDesc?.(desc.dataset.ovDesc, desc.dataset.ovLevel);
 
-    // Plateselskapskortene (v6.37): Sjekk, Rediger, og ellers åpnes kortet
-    // slik studentene ser det. Før koblingene under, som ellers ville tatt
-    // Sjekk-klikket og ikke funnet noe kort å lagre det på.
-    const ps = hit("[data-ov-ps]");
-    if (ps) {
-      const id = ps.dataset.ovPs;
-      const chk = hit(".tcr-check");
-      if (chk) return void onPlateselskapCheck?.(id, toggleCheckBtn(chk, "tcr-check"));
-      if (hit(".tcr-edit")) return onEditPage?.(plateselskapSideId(id));
-      return explore?.openPlateselskap?.(id);
-    }
-
     // Sjekk-knappen skifter utseende optimistisk (modalen re-rendres ikke) og
     // skriver til teacherChecks. Håndteres FØR edit-fanget, ellers ville den
     // også åpnet editoren via kortets data-attributt.
@@ -632,7 +603,6 @@ export function renderDashboard(el, {
       switch (open.dataset.ovOpen) {
         case "tech": return explore?.openTeknologi();
         case "subgenres": return explore?.openSubgenreList();
-        case "plateselskaper": return explore?.openPlateselskaper?.();
         case "historier": return explore?.openHistorier?.();
         case "kilder": return explore?.openReferanser?.();
         case "instrumenter": return explore?.openInstrumenter?.();
@@ -651,55 +621,6 @@ export function renderDashboard(el, {
   };
   el.onclick = klikk;
   if (manglerEl) manglerEl.onclick = klikk;
-}
-
-// ---------------------------------------------------------------------------
-//  Plateselskapene (v6.37, brukervalg 2026-10-04)
-// ---------------------------------------------------------------------------
-//  Ett kort per selskap, i tidsrekkefølge, så læreren kan gå gjennom dem ett
-//  og ett. Fra v6.55 (brukerønske 2026-10-07) står bare navnet, Sjekk og
-//  Rediger på kortet; årstall, tekst-, fakta- og kildemerker og artisttallet
-//  er tatt bort, så kortene blir lave. Klikk ellers på kortet åpner
-//  selskapets kort slik studentene ser det. Seksjonen har sin egen beholder
-//  (#ov-plateselskaper) og tegnes på nytt alene når innholdet, artistene eller
-//  avhukingen endres (oppdaterPlateselskapSeksjon), så resten av Oversikten
-//  ikke folder seg sammen midt i gjennomgangen.
-export function plateselskapSeksjonHtml({ content = {}, teacherChecks = {} }) {
-  const sjekket = new Set(teacherChecks.plateselskaper || []);
-  const sideFor = (id) => content?.[plateselskapSideId(id)] || null;
-  const liste = selskaperSortert(sideFor);
-  const kort = liste.map((p) => `<div class="ov-ps-kort" data-ov-ps="${escapeHtml(p.id)}">
-      <span class="ov-ps-navn">${escapeHtml(p.navn)}</span>
-      ${teacherActionRow({ checked: sjekket.has(p.id), edit: true, del: false })}
-    </div>`).join("");
-  const nSjekket = liste.filter((p) => sjekket.has(p.id)).length;
-  const nTekst = liste.filter((p) => pageFor(plateselskapSideId(p.id), content)?.body?.trim()).length;
-  const synlig = !SKJUL_I_HUBEN["sb-plateselskaper"];
-  return `<p class="ov-ps-ingress">
-      <strong>${nSjekket} av ${liste.length} sjekket</strong> · ${nTekst} med tekst ·
-      ${synlig ? "synlige for studentene" : "skjult for studentene til du slår på «Plateselskapene» under Synlig for studentene på Skrivebordet"}
-    </p>
-    <div class="ov-ps-grid">${kort}</div>`;
-}
-
-// «Sjekket X/Y» på plateselskap-punktet i Mangler, og antallet selskaper til
-// nøkkeltallet i Oversikten.
-function plateselskapTelling({ content = {}, teacherChecks = {} }) {
-  const sjekket = new Set(teacherChecks.plateselskaper || []);
-  const liste = selskaperSortert((id) => content?.[plateselskapSideId(id)] || null);
-  const n = liste.filter((p) => sjekket.has(p.id)).length;
-  return { tekst: `${n}/${liste.length}`, ok: liste.length > 0 && n === liste.length, antall: liste.length };
-}
-
-export function oppdaterPlateselskapSeksjon(el, data) {
-  const boks = el?.querySelector("#ov-plateselskaper");
-  if (boks) boks.innerHTML = plateselskapSeksjonHtml(data);
-  const telling = el?.querySelector("#ov-ps-telling");
-  if (telling) {
-    const t = plateselskapTelling(data);
-    telling.textContent = t.tekst;
-    telling.className = `ov-count ${t.ok ? "ov-ok" : "ov-warn"}`;
-  }
 }
 
 function renderGenderChart(dist) {

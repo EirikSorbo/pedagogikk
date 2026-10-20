@@ -20,7 +20,7 @@ const seksjoner = markup.split('<section class="steg"').slice(1);
 // Steg 4 er Hovedverk (fase 3; før Lytteeksempler): verkene har egne rader, ikke data-felt.
 const STEGENE = [
   ["STEGNAVN[0]", ["name", "gender", "birthYear", "deathYear", "geography"]],
-  ["STEGNAVN[1]", ["metaGenre", "instrument", "instrument2", "recordLabel", "influenceStart", "influenceEnd", "mainGenre", "subGenre"]],
+  ["STEGNAVN[1]", ["metaGenre", "instrument", "instrument2", "influenceStart", "influenceEnd", "mainGenre", "subGenre"]],
   ["STEGNAVN[2]", ["description", "punkter"]],
   ["STEGNAVN[3]", []],
   ["STEGNAVN[4]", ["imageUrl", "imageCredit", "proposedBy", "studentComment"]],
@@ -77,9 +77,9 @@ test("obligatoriske felt per modus", () => {
   assert.match(src, /if \(LAERERMODUS\.includes\(modus\)\) return new Set\(\["name", "gender", "metaGenre", "influenceStart"\]\);/);
 });
 
-test("lærerfeltene bare for læreren, plateselskapet også i «Foreslå endring»", () => {
+test("lærerfeltene bare for læreren (plateselskapsfeltet er tatt ut i fase 4)", () => {
   assert.match(markup, /\$\{laerer \? `<label>Fagbakgrunn 2/);
-  assert.match(markup, /\$\{laerer \|\| modus === "forslag" \? `<label>Plateselskap/);
+  assert.doesNotMatch(markup, /Plateselskap/);
   assert.match(markup, /\$\{laerer \? `<div class="full punktfelt">/);
 });
 
@@ -126,14 +126,14 @@ test("skjemaets lengdegrenser for studenter følger firestore.rules", () => {
   const regler = readFileSync(new URL("../../firestore.rules", import.meta.url), "utf8");
   const blokk = skjema.slice(skjema.indexOf("const STUDENT_MAKS = {"), skjema.indexOf("const STUDENT_MAKS_UNDERSJANGRE"));
   const grenser = Object.fromEntries([...blokk.matchAll(/(\w+): \{ maks: (\d+)/g)].map((m) => [m[1], Number(m[2])]));
-  assert.deepEqual(Object.keys(grenser).sort(), ["description", "geography", "imageCredit", "imageUrl", "name", "recordLabel"]);
+  assert.deepEqual(Object.keys(grenser).sort(), ["description", "geography", "imageCredit", "imageUrl", "name"]);
   const artist = regler.slice(regler.indexOf("function artistInnholdOk"), regler.indexOf("function erReturInnsending"));
   assert.match(artist, new RegExp(`name\\.size\\(\\) <= ${grenser.name}`));
-  for (const k of ["description", "geography", "recordLabel", "imageUrl", "imageCredit"]) {
+  for (const k of ["description", "geography", "imageUrl", "imageCredit"]) {
     assert.match(artist, new RegExp(`strOk\\("${k}", ${grenser[k]}\\)`), `artists: ${k}`);
   }
   const forslag = regler.slice(regler.indexOf("function forslagOk"));
-  for (const k of ["name", "description", "geography", "recordLabel", "imageUrl", "imageCredit"]) {
+  for (const k of ["name", "description", "geography", "imageUrl", "imageCredit"]) {
     assert.match(forslag, new RegExp(`capOk\\("${k}", ${grenser[k]}\\)`), `pendingEdits: ${k}`);
   }
   assert.match(skjema, /const STUDENT_MAKS_UNDERSJANGRE = 20;/);

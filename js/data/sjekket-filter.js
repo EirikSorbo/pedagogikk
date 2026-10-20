@@ -11,7 +11,6 @@
 // ============================================================================
 
 import { GENEALOGY } from "../sjangre/genre-model.js";
-import { plateselskapForSide } from "../felles/plateselskaper.js";
 
 const lik = (a, b) => String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
 const har = (liste, navn) => Array.isArray(liste) && liste.some((x) => lik(x, navn));
@@ -67,8 +66,6 @@ const SIDER = ["rotter", "omHistorie"];
 export function sideSjekk(id) {
   const s = String(id || "");
   if (SIDER.includes(s) || s.startsWith("instrument-")) return { kategori: "pages", id: s };
-  const selskap = plateselskapForSide(s);
-  if (selskap) return { kategori: "plateselskaper", id: selskap.id };
   return null;
 }
 

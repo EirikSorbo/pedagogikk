@@ -211,7 +211,7 @@ export function initTrePage({ render }) {
       onGenreDescs: () => { explore.genreDescsChanged?.(); provVisMaal(); visningTikk(); },
       // Artistene teller på «Alle artister (n)» i Instrumenter-kortet.
       // presPlanTikk: kjøreplanens oversiktskort viser artist- og kortnavn.
-      onArtists: () => { explore.renderInstrumenter?.(); explore.renderPlateselskaper?.(); provVisMaal(); presPlanTikk(); visningTikk(); },
+      onArtists: () => { explore.renderInstrumenter?.(); provVisMaal(); presPlanTikk(); visningTikk(); },
       onTech: () => { explore.renderInstrumenter?.(); explore.refreshTeknologi?.(); provVisMaal(); presPlanTikk(); visningTikk(); },
       onEdgeDescs: () => provVisMaal(),
       onPodcasts: () => explore.renderInstrumenter?.(),

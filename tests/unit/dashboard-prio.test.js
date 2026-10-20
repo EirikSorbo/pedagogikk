@@ -84,30 +84,7 @@ test("skjulte kort teller ikke som «uten viktighetsgrad»", () => {
 
 // v6.87 (brukerønske 2026-10-13): «Plateselskaper» er et nøkkeltall i
 // Pensumets form, og «Hull og skjevheter» står nederst i Mangler-vinduet.
-test("Plateselskaper er et nøkkeltall som åpner plateselskapene", async () => {
-  const { PLATESELSKAPER } = await import("../../js/felles/plateselskaper.js");
-  const el = { innerHTML: "", onclick: null };
-  const mangler = { innerHTML: "", onclick: null };
-  let aapnet = 0;
-  renderDashboard(el, { artists: ARTISTER, manglerEl: mangler, explore: { openPlateselskaper: () => { aapnet++; } } });
-  const m = el.innerHTML.match(/data-ov-open="plateselskaper"[^>]*>\s*<span class="ov-kpi-n">(\d+)<\/span>\s*<span class="ov-kpi-l">Plateselskaper</);
-  assert.ok(m, "fant ikke nøkkeltallet Plateselskaper");
-  assert.equal(Number(m[1]), PLATESELSKAPER.length);
-  const knapp = { dataset: { ovOpen: "plateselskaper" } };
-  el.onclick({ target: { closest: (sel) => (sel === "[data-ov-open]" ? knapp : null) }, currentTarget: el });
-  assert.equal(aapnet, 1);
-});
-
-test("«Hull og skjevheter» står nederst i Mangler, ikke i Oversikten", () => {
-  const el = { innerHTML: "", onclick: null };
-  const mangler = { innerHTML: "", onclick: null };
-  renderDashboard(el, { artists: ARTISTER, manglerEl: mangler });
-  assert.doesNotMatch(el.innerHTML, /Hull og skjevheter/);
-  const i = mangler.innerHTML.indexOf("Hull og skjevheter");
-  assert.ok(i > mangler.innerHTML.indexOf("Artister uten viktighetsgrad"), "hullene skal stå etter siste mangler-punkt");
-  // Tidsrommene (fase 2; før tiårene) kommer fra treet, her test-frøets.
-  assert.match(mangler.innerHTML.slice(i), /Tynne tidsrom[\s\S]*Artister uten sjanger[\s\S]*Undersjangre uten artistkort/);
-});
+// (Plateselskapene, nøkkeltallet og kortene, ble tatt ut i fase 4.)
 
 test("Sjangerhistorier, Kilder og Instrumenter fyller tredje rad og åpner hver sin visning", () => {
   const el = { innerHTML: "", onclick: null };
@@ -132,8 +109,10 @@ test("Sjangerhistorier, Kilder og Instrumenter fyller tredje rad og åpner hver 
     el.onclick({ target: { closest: (sel) => (sel === "[data-ov-open]" ? knapp : null) }, currentTarget: el });
   }
   assert.deepEqual(aapnet, ["historier", "kilder", "instrumenter"]);
-  // 10 hele nøkkeltall à to spor + 4 halve = 24 spor: tre fulle rader à åtte.
+  // 10 hele nøkkeltall à to spor + 4 halve var 24 spor: tre fulle rader à åtte.
+  // Plateselskap-tallet gikk ut i fase 4, så det er 22 spor, og siste rad er
+  // ikke full. Rutenettet må justeres (se PLAN.md, fase 4).
   const hele = (el.innerHTML.match(/class="ov-kpi(?: ov-click)?"/g) || []).length;
   const halve = (el.innerHTML.match(/class="ov-kpi ov-kpi-half/g) || []).length;
-  assert.equal(hele * 2 + halve, 24);
+  assert.equal(hele * 2 + halve, 22);
 });

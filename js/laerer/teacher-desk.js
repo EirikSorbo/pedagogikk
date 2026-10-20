@@ -4,7 +4,7 @@
 //  To deler: innboksen (nye artistforslag + endringsforslag → eksisterende
 //  flater) og sjekk-fremdrift per innholdskategori (artistkort, sjangre,
 //  undersjangre, sjangerhistorier, innovasjonskort, sjangerkoblinger, og fra
-//  v6.89 sidene og plateselskapene) —
+//  v6.89 sidene) —
 //  x/y sjekket med utvidbar liste over de usjekkede. Artistkort sjekkes via
 //  teacherChecked på artist-dokumentet; alle andre kategorier er navnelister
 //  i config/teacherChecks (config/* er lærer-skrivbart, så ingen regelendring).
@@ -22,7 +22,6 @@ import { openSingleEdgeModal } from "./teacher-content.js";
 import { GENEALOGY_EDGES, GENEALOGY_MAIN_GENRES, edgeKey, isMainGenre, genreNodeById } from "../sjangre/genre-model.js";
 import { storyOrder, pageFor } from "../felles/story-format.js";
 import { isVisible, erTilModerasjon, INSTRUMENT_TIMELINE_GROUPS, INSTRUMENT_TITLE, instrumentPageId } from "../felles/limits.js";
-import { selskaperSortert, plateselskapSideId } from "../felles/plateselskaper.js";
 import { pct } from "../ui/ui-helpers.js";
 import { escapeHtml } from "../felles/util.js";
 import { deleteTimeforslag, savePage } from "../data/store.js";
@@ -115,12 +114,6 @@ function buildCategories() {
       items: SIDER.map(([id, name]) => ({ id, name }))
         .filter((it) => pageFor(it.id, state.content)?.body?.trim()),
       checkedSet: set("pages"),
-    },
-    {
-      key: "plateselskaper", label: "Plateselskaper",
-      items: selskaperSortert((id) => state.content?.[plateselskapSideId(id)] || null)
-        .map((p) => ({ id: p.id, name: p.navn })),
-      checkedSet: set("plateselskaper"),
     },
   ];
 }
@@ -297,7 +290,6 @@ const SYNLIGHET_RADER = [
   { id: "rotter", navn: "Røtter", hub: ["sb-rotter"] },
   { id: "himmel", navn: "Sjangerhimmelen", hub: ["sb-himmel"] },
   { id: "referanser", navn: "Referanser", hub: ["sb-referanser"] },
-  { id: "plateselskaper", navn: "Plateselskapene (kortene, lenkene på artistkortene og søket)", hub: ["sb-plateselskaper"] },
   { id: "guide", navn: "Slik bruker du appen", hub: ["sb-guide"] },
   { id: "utskrift", navn: "Utskrift", student: ["utskrift"] },
   { id: "merking", navn: "Merking (stemming)", student: ["merking"] },
@@ -500,7 +492,7 @@ function openItem(key, id) {
       openSingleEdgeModal(from, to);
       break;
     }
-    // Sidene og plateselskapene åpnes slik studentene ser dem, med Sjekk-knappen.
+    // Sidene åpnes slik studentene ser dem, med Sjekk-knappen.
     case "pages": {
       if (id === "rotter") ctx.explore?.openRotter();
       else if (id === "omHistorie") ctx.explore?.openOmHistorie();
@@ -510,9 +502,6 @@ function openItem(key, id) {
       }
       break;
     }
-    case "plateselskaper":
-      ctx.explore?.openPlateselskap(id);
-      break;
   }
 }
 

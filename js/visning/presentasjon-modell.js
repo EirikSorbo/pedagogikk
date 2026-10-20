@@ -13,7 +13,6 @@
 // ============================================================================
 
 import { parseVisVerdi } from "../felles/vis-lenke.js";
-import { finnSelskapId } from "../felles/plateselskaper.js";
 
 // Flatene som styres av detaljnivået, med seksjonene i visningsrekkefølge.
 // Navnene vises i tannhjul-panelet. Flater som ikke står her (tidslinje,
@@ -21,7 +20,7 @@ import { finnSelskapId } from "../felles/plateselskaper.js";
 export const FLATER = {
   artist: [
     { id: "bilde", navn: "Bilde" },
-    { id: "fakta", navn: "Fakta (levetid, plateselskap …)" },
+    { id: "fakta", navn: "Fakta (levetid, fagbakgrunn …)" },
     { id: "tags", navn: "Instrument og sjanger" },
     { id: "stripe", navn: "Innflytelseslinje" },
     { id: "punkter", navn: "Oppsummering i punkter" },
@@ -467,7 +466,6 @@ const VISNING_NAVN = {
   podkaster: "Podkastene",
   // Vinduene med egen adresse fra v6.08 (S7).
   sjangre: "Sjangrene", undersjangre: "Undersjangrene", artister: "Artistene", lytt: "Spillelistene",
-  plateselskaper: "Plateselskapene",
 };
 const SIDE_NAVN = { omHistorie: "Om historie", rotter: "Røtter før 1910" };
 
@@ -518,9 +516,6 @@ function oversiktPunkt(m, oppslag) {
     // (den vises også for studenter og på lerretet).
     case "slide":
       return null;
-    // Plateselskapene (v6.37) står blant oversiktene, med navnet fra lista.
-    case "plateselskap":
-      return { kat: "oversikter", tekst: `Plateselskap: ${finnSelskapId(m.id)?.navn || m.id || "?"}` };
     default:
       return { kat: "oversikter", tekst: VISNING_NAVN[m.hva] || m.hva };
   }

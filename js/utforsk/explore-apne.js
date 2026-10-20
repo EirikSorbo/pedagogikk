@@ -32,8 +32,6 @@ import { openTime, timeTilgjengelig } from "./explore-timer.js";
 import { openSlide } from "../visning/slide-kort.js";
 import { finnSlide, slidesLastet, onSlidesEndret } from "../visning/slides-liste.js";
 import { openSubgenreList, openUndersjangre } from "./explore-sjanger.js";
-import { openPlateselskap, openPlateselskaper } from "./explore-plateselskap.js";
-import { finnSelskapId, plateselskapeneSynlige, plateselskapSynlig } from "../felles/plateselskaper.js";
 import { artistSjekketOk } from "../felles/sjekket.js";
 
 // Tittel for et yt-stopp: let etter lytteeksempelet blant artistene, så
@@ -103,8 +101,6 @@ export function apneMaal(apne) {
     case "artister": return void opts.onOpenArtister?.();
     case "time": return openTime(apne.id);
     case "slide": return void openSlide(apne.id);
-    case "plateselskap": return openPlateselskap(apne.id);
-    case "plateselskaper": return openPlateselskaper();
   }
 }
 
@@ -166,14 +162,6 @@ function klarFor(apne, s) {
       return s.contentLoaded ? "klar" : "vent";
     case "instrument":
       return s.contentLoaded && s.artistsLoaded ? "klar" : "vent";
-    // Plateselskapene (v6.37): teksten i content, artistene fra artistlista.
-    // Bryteren bor også i content (content/synlighet), så når innholdet har
-    // landet, vet vi om studentene får se kortene. Skjult = finnes ikke.
-    case "plateselskap": case "plateselskaper":
-      if (!(s.contentLoaded && s.artistsLoaded)) return "vent";
-      if (!plateselskapeneSynlige()) return "finnes-ikke";
-      if (apne.hva === "plateselskaper") return "klar";
-      return finnSelskapId(apne.id) && plateselskapSynlig(apne.id) ? "klar" : "finnes-ikke";
     default:
       return "klar";   // podkaster: modalen tegnes på nytt når episodene lander
   }

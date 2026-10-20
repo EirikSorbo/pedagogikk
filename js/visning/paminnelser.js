@@ -205,7 +205,7 @@ function boks() {
 // En lenke i påminnelsen (v6.74, brukerønske 2026-10-11): kortet åpnes av
 // lenkens egen lytter (linkify.js), og påminnelsen lukkes like etter, når
 // kortet står. Bare i lærerens vindu: lerretet har ingen lukking.
-const LENKE = ".artist-link, .tech-link, .genre-link, .plateselskap-link";
+const LENKE = ".artist-link, .tech-link, .genre-link";
 function lukkEtterLenke(mal) {
   const lenke = mal?.closest?.(LENKE);
   const id = lenke?.closest("[data-pam-id]")?.dataset.pamId;

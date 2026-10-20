@@ -41,8 +41,6 @@ export const VIS_TYPER = new Set([
   // En slide (v7.06): «slide:<id>», lærerens egne sider i visningen. Bare
   // læreren kan lese dem (samlingen notater); for andre finnes de ikke.
   "slide",
-  // Plateselskapene (v6.37): ett kort («plateselskap:<id>») og oversikten.
-  "plateselskap", "plateselskaper",
 ]);
 
 // «artist:abc123» → { hva: "artist", id: "abc123" }. Ukjent type → null, så

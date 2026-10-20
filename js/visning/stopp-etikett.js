@@ -18,7 +18,6 @@ import { parseVisVerdi } from "../felles/vis-lenke.js";
 import { lytteeksempelNavn } from "./presentasjon-modell.js";
 import { GENEALOGY, GENEALOGY_META_GENRES, edgeExists } from "../sjangre/genre-model.js";
 import { INSTRUMENT_TIMELINE_GROUPS, isVisible } from "../felles/limits.js";
-import { finnSelskapId } from "../felles/plateselskaper.js";
 import { finnSlide, slidesLastet } from "./slides-liste.js";
 
 export const TYPE_NAVN = {
@@ -32,7 +31,6 @@ export const TYPE_NAVN = {
   oversikt: "Oversikt", galleri: "Galleri",
   // Lytt heter Spillelister i appen fra v6.31.
   sjangre: "Sjangre", undersjangre: "Undersjangre", artister: "Artister", lytt: "Spillelister",
-  plateselskap: "Plateselskap", plateselskaper: "Plateselskaper",
   slide: "Slide",
 };
 
@@ -88,12 +86,6 @@ export function stoppEtikett(stopp) {
     case "instrument":
       if (!m.id) return ut(type);
       return ut(m.id, INSTRUMENT_TIMELINE_GROUPS.includes(m.id) ? {} : { feil: DOD });
-    case "plateselskap": {
-      const p = finnSelskapId(m.id);
-      return p ? ut(p.navn) : ut(m.id, { feil: DOD });
-    }
-    case "plateselskaper":
-      return ut(type);
     // Slide (v7.06): bare læreren kan lese dem. For andre står bare «Slide».
     case "slide": {
       const sl = finnSlide(m.id);

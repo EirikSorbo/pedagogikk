@@ -163,7 +163,7 @@ test("foerHeleTimen: to minutter før førstkommende hele time, og timen etter",
 
 test("en lenke i påminnelsen lukker påminnelsen etter at kortet er åpnet (v6.74)", () => {
   const kilde = les("js/visning/paminnelser.js");
-  assert.match(kilde, /const LENKE = "\.artist-link, \.tech-link, \.genre-link, \.plateselskap-link";/);
+  assert.match(kilde, /const LENKE = "\.artist-link, \.tech-link, \.genre-link";/);
   assert.match(kilde, /lukkEtterLenke\(e\.target\)/);
   assert.match(kilde, /setTimeout\(\(\) => lukk\(id\), 150\)/);
   assert.match(kilde, /if \(!id \|\| !planAktiv \|\| !nokler\) return;/, "aldri på lerretet");

@@ -17,7 +17,7 @@
 //   - Hovedverkene (keyWorks) har steg 4 (fase 3). Lytteeksemplene
 //     (musicExamples) blir liggende i dataene: skjemaet verken leser eller
 //     skriver feltet.
-//   - Lærerfeltene står der de hører hjemme: Fagbakgrunn 2 og plateselskap i
+//   - Lærerfeltene står der de hører hjemme: Fagbakgrunn 2 i
 //     steg 2, punktene i steg 3, «Foreslått av» i steg 5.
 //   - Nye artister lagres som utkast i nettleseren. Redigeringer spør før
 //     vinduet lukkes med endringer som ikke er lagret.
@@ -108,9 +108,6 @@ function markup(modus) {
         </label>
         ${laerer ? `<label>Fagbakgrunn 2
           <select data-felt="instrument2"></select>
-        </label>` : ""}
-        ${laerer || modus === "forslag" ? `<label>Plateselskap
-          <input type="text" data-felt="recordLabel" placeholder="f.eks. Motown" />
         </label>` : ""}
         <label>Innflytelse fra (år)${stj("influenceStart")}
           <input type="number" data-felt="influenceStart" min="${AAR_MIN}" max="${AAR_MAKS}" placeholder="f.eks. 1780" />
@@ -237,7 +234,6 @@ const FELTSTEG = { name: 0, gender: 0, metaGenre: 1, instrument: 1, influenceSta
 const STUDENT_MAKS = {
   name: { maks: 120, navn: "Navn", steg: 0 },
   geography: { maks: 200, navn: "Geografisk tilhørighet", steg: 0 },
-  recordLabel: { maks: 200, navn: "Plateselskap", steg: 1 },
   description: { maks: 5000, navn: "Begrunnelsen", steg: 2 },
   imageUrl: { maks: 2000, navn: "Bilde-URL", steg: 4 },
   imageCredit: { maks: 300, navn: "Bildekrediteringen", steg: 4 },

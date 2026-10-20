@@ -781,8 +781,6 @@ function init() {
       // så en åpen fane må tegnes på nytt når artistene lander. Uten dette blir
       // tallet stående med cachens verdi mens lista viser den ferske.
       explore?.renderInstrumenter?.();
-      // Plateselskapskortet viser artistene med selskapet (v6.37).
-      explore?.renderPlateselskaper?.();
       // Utenom throttlingen: deep-linkene skal åpnes straks data finnes
       // (no-op når det ikke venter noen). provVisMaal er ?vis=-ruteren.
       applyPendingDeepLink();

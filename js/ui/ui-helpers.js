@@ -17,7 +17,6 @@ import { GENDERS, UKJENT_KJONN, instrumenterFor, erSkjult } from "../felles/limi
 import { artistSjekketOk } from "../felles/sjekket.js";
 import { askChoice, modalClose } from "./ui-modal.js";
 import { lesPunkter, punkterTilTekst, punktVarsel } from "../felles/punkter.js";
-import { selskaperIFelt, plateselskapeneSynlige, plateselskapSynlig } from "../felles/plateselskaper.js";
 
 // Bilde-fallback: når en skalert Wikimedia-thumbnail ikke lar seg hente
 // (Wikimedia avviser enkelte ferske bredder), bytt <img> tilbake til
@@ -615,24 +614,9 @@ export function factsLines(a, { showGender = false } = {}) {
       : visSpenn(a.influenceStart, a.influenceEnd);
     rows.push(["Innflytelse", `ca. ${p}`]);
   }
-  if (a.recordLabel) rows.push(["Plateselskap", a.recordLabel, { html: plateselskapHtml(a.recordLabel) }]);
   if (showGender) rows.push(["Kjønn", GENDER_LABEL[a.gender] || "Ukjent"]);
   if (a.geography) rows.push(["Virkested", a.geography]);
   return factsHtml(rows);
-}
-
-// Plateselskapsfeltet med hvert selskap som har eget kort som lenke (v6.37).
-// Feltet kan bære flere («Columbia / Atlantic»), og bare delene med kort blir
-// klikkbare; resten står som tekst, i feltets egen rekkefølge og skrivemåte.
-// Mens kortene er skjult for studentene, er hele feltet ren tekst for dem.
-// Klikket kobles delegert i explore.js ([data-plateselskap]).
-function plateselskapHtml(felt) {
-  if (!plateselskapeneSynlige()) return escapeHtml(felt);
-  const deler = selskaperIFelt(felt);
-  if (!deler.some((d) => d.selskap)) return escapeHtml(felt);
-  return deler.map(({ tekst, selskap }) => selskap && plateselskapSynlig(selskap.id)
-    ? `<button type="button" class="facts-link" data-plateselskap="${escapeHtml(selskap.id)}">${escapeHtml(tekst)}</button>`
-    : escapeHtml(tekst)).join(" / ");
 }
 
 // Delt renderer for «etikett: verdi»-linjene. Fet etikett, vanlig verdi —

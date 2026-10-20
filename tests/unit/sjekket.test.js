@@ -14,7 +14,6 @@ import {
   sideSjekk, sjekkerEndretAvImport, sjekkerUten,
 } from "../../js/data/sjekket-filter.js";
 import { storyOrderSynlig, storyOrder } from "../../js/felles/story-format.js";
-import { plateselskapSideId } from "../../js/felles/plateselskaper.js";
 
 const les = (f) => fs.readFileSync(new URL(`../../${f}`, import.meta.url), "utf8");
 
@@ -50,7 +49,6 @@ test("sjekkene leses per kategori, og før de har landet er ingenting sjekket", 
   brukSjekker({ tech: ["t1"] });
   assert.equal(sjekketOk("tech", "t1"), true);
   assert.equal(sjekketOk("tech", "t2"), false);
-  assert.equal(sjekketOk("plateselskaper", "t1"), false);
 });
 
 test("sjangerbeskrivelsene: teksten tas bort, årstallene blir stående", () => {
@@ -85,17 +83,15 @@ test("innholdssidene: pensumsidene følger sjekken, resten av content står", ()
   const content = {
     rotter: { body: "r" }, omHistorie: { body: "o" }, appGuide: { body: "g" },
     "instrument-gitar": { body: "i" },
-    [plateselskapSideId("columbia")]: { body: "c" },
     skriveveiledning: { body: "s" }, varmekart: { heat: {} }, genealogy: { nodes: [] }, synlighet: {}, referanser: { kilder: [] },
   };
-  const ut = filtrerContent(content, { pages: ["omHistorie"], plateselskaper: ["columbia"] });
+  const ut = filtrerContent(content, { pages: ["omHistorie"] });
   // Bruksveiledningen er unntatt fra v6.95: avhukingen av delene styrer den.
   assert.deepEqual(Object.keys(ut).sort(), [
-    "appGuide", "genealogy", "omHistorie", plateselskapSideId("columbia"), "referanser", "skriveveiledning", "synlighet", "varmekart",
+    "appGuide", "genealogy", "omHistorie", "referanser", "skriveveiledning", "synlighet", "varmekart",
   ].sort());
   assert.equal(sideSjekk("appGuide"), null);
   assert.deepEqual(sideSjekk("instrument-vokal"), { kategori: "pages", id: "instrument-vokal" });
-  assert.deepEqual(sideSjekk(plateselskapSideId("columbia")), { kategori: "plateselskaper", id: "columbia" });
   assert.equal(sideSjekk("skriveveiledning"), null);
 });
 

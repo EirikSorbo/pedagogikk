@@ -9,7 +9,7 @@ import { aktivtNivaa, settNivaa, vedNivaaEndring } from "../ui/viktighet.js";
 import { state, ctx, openAdminModal, renderList, settTeacherView, guardTeacherAction, setContentCheck } from "./teacher-state.js";
 import { updateArtistFields, setTeacherChecks, addArtistAktiv } from "../data/store.js";
 import { renderArtistDetail, openArtistListModal, openArtistsPlaylistModal, countPlaylistExamples, countArtistExamples } from "../ui/ui.js";
-import { renderDashboard, oppdaterPlateselskapSeksjon } from "../ui/ui-dashboard.js";
+import { renderDashboard } from "../ui/ui-dashboard.js";
 import { isMainGenre, edgeKey } from "../sjangre/genre-model.js";
 import { openSingleSubgenreModal, openSingleEdgeModal, openPageEditor } from "./teacher-content.js";
 import { checkBtnHtml, setCheckBtn, toggleCheckBtn } from "../ui/ui-helpers.js";
@@ -99,7 +99,6 @@ function tegnOversiktOgMangler() {
     onEditPage: (id) => openPageEditor(id),
     onEditEdge: (fromId, toId) => openSingleEdgeModal(fromId, toId),
     onEdgeCheck: (fromId, toId, on) => setContentCheck("edges", edgeKey(fromId, toId), on),
-    onPlateselskapCheck: (id, on) => setContentCheck("plateselskaper", id, on),
     onShowArtistList: (title, list) => openArtistListModal(title, list, openDetail, "Ingen artister her ennå."),
     // Metasjangerens lytteeksempler: samme bygger som popupen, så tallet i
     // kolonnen og antallet i lista alltid er det samme.
@@ -114,19 +113,10 @@ export function openOversikt() {
 }
 
 // «Mangler» (v6.66, brukerønske 2026-10-09): innholdet som ikke er skrevet
-// ennå, og plateselskapene, i et eget vindu fra Innhold-flisa.
+// ennå, i et eget vindu fra Innhold-flisa.
 export function openMangler() {
   tegnOversiktOgMangler();
   openAdminModal("modal-mangler");
-}
-
-// Plateselskap-seksjonen i et ÅPENT Mangler-vindu (v6.37, flyttet v6.66): tegnes på nytt når
-// innholdet, artistene eller avhukingen endres, så status og telling følger
-// lagringen. Bare seksjonen, så utfoldede lister ellers i Oversikten blir
-// stående. No-op når Oversikten er lukket.
-export function oppdaterOversiktPlateselskaper() {
-  if (!document.getElementById("modal-mangler")?.classList.contains("open")) return;
-  oppdaterPlateselskapSeksjon($("#mangler-body"), state);
 }
 
 // ----------------------------------------------------------------------------

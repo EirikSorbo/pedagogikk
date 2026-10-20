@@ -36,19 +36,7 @@ function prepareTargets(ctx) {
     .filter((g) => !SKIP.has(g.toLowerCase()))
     .sort((a, b) => b.length - a.length)
     .map((g) => ({ id: g, nameEsc: esc(g) }));
-  // Plateselskapene: fra v6.91 (brukerønske 2026-10-13) i alle tekstene, når
-  // konteksten har dem med (buildLinkCtx tar med de studentene får se). Før
-  // bare i selskapskortene, fordi «Sun» og «Savoy» også står i titler og navn.
-  // Det løses nå i linkifyAll: artistene går foran (Sun Ra), titler i «» hoppes
-  // over (Music of the Sun), og navnene må stå med stor forbokstav (volt).
-  // ikkeITekst holder ute aliaser som i tekst betyr noe annet (Berry Gordy).
-  const plateselskaper = (ctx.plateselskaper || [])
-    .flatMap((p) => [p.navn, ...(p.aliaser || [])]
-      .filter((n) => n && !(p.ikkeITekst || []).includes(n))
-      .map((n) => ({ id: p.id, nameEsc: esc(n), genitivS: !p.utenGenitiv })))
-    .filter((x, i, alle) => alle.findIndex((y) => y.nameEsc === x.nameEsc) === i)
-    .sort((a, b) => b.nameEsc.length - a.nameEsc.length);
-  const prep = { artists, techItems, genres, plateselskaper };
+  const prep = { artists, techItems, genres };
   _targetsCache.set(ctx, prep);
   return prep;
 }
@@ -69,23 +57,15 @@ export function linkifyAll(text, ctx = {}) {
   const markers = [];
   const lower = escaped.toLowerCase();
 
-  const { artists, techItems, genres, plateselskaper } = prepareTargets(ctx._base || ctx);
+  const { artists, techItems, genres } = prepareTargets(ctx._base || ctx);
   // Egne treff blir «self»-markører: de lenkes ikke, men holder plassen sin,
   // så et kortere navn aldri kan lenkes midt inni kortets eget navn.
   const self = ctx.self || {};
   const selvSjangre = new Set([].concat(self.genre || []));
   // Rekkefølgen avgjør hvem som vinner et overlapp: artistene først (Sun Ra
-  // er artisten, ikke Sun), så innovasjonskortene, så selskapene, og sjangrene
-  // sist, så «Motown» i en tekst er selskapet.
+  // er artisten), så innovasjonskortene, og sjangrene sist.
   for (const a of artists) findMatches(lower, escaped, a.nameEsc, a.id, a.id === self.artist ? "self" : "artist", markers);
   for (const t of techItems) findMatches(lower, escaped, t.nameEsc, t.id, t.id === self.tech ? "self" : "tech", markers);
-  if (plateselskaper.length) {
-    const titler = [...escaped.matchAll(/«[^»]*»/g)].map((m) => [m.index, m.index + m[0].length]);
-    for (const p of plateselskaper) {
-      findMatches(lower, escaped, p.nameEsc, p.id, p.id === self.plateselskap ? "self" : "plateselskap", markers,
-        { genitivS: p.genitivS, skillStore: true, utenfor: titler });
-    }
-  }
   for (const g of genres) findMatches(lower, escaped, g.nameEsc, g.id, selvSjangre.has(g.id) ? "self" : "genre", markers);
 
   if (!markers.length) return escaped;
@@ -100,8 +80,6 @@ export function linkifyAll(text, ctx = {}) {
       result += m.original;
     } else if (m.type === "artist") {
       result += `<a class="artist-link" data-artist-id="${esc(m.id)}" tabindex="0" role="button">${m.original}</a>`;
-    } else if (m.type === "plateselskap") {
-      result += `<a class="plateselskap-link" data-ps-lenke="${esc(m.id)}" tabindex="0" role="button">${m.original}</a>`;
     } else if (m.type === "tech") {
       result += `<a class="tech-link" data-tech-id="${esc(m.id)}" tabindex="0" role="button">${m.original}</a>`;
     } else {
@@ -183,12 +161,7 @@ function wireLink(link, fn) {
   });
 }
 
-export function wireAllLinks(container, { artists, techItems, onArtistClick, onTechClick, onMainGenreClick, onPlateselskapClick } = {}) {
-  if (onPlateselskapClick) {
-    container.querySelectorAll(".plateselskap-link[data-ps-lenke]").forEach((link) => {
-      wireLink(link, () => onPlateselskapClick(link.dataset.psLenke));
-    });
-  }
+export function wireAllLinks(container, { artists, techItems, onArtistClick, onTechClick, onMainGenreClick } = {}) {
   if (onArtistClick) {
     container.querySelectorAll(".artist-link[data-artist-id]").forEach(link => {
       wireLink(link, () => {

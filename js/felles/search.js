@@ -22,8 +22,6 @@ import { INSTRUMENT_TIMELINE_GROUPS, INSTRUMENT_TITLE, instrumentPageId, isVisib
 import { GENEALOGY, GENEALOGY_ROOT_GENRES, genreNodeById, findTreeGenreNode, edgeExists } from "../sjangre/genre-model.js";
 import { storyOrder, storyFor, pageFor } from "./story-format.js";
 import { escapeHtml } from "./util.js";
-import { PLATESELSKAPER, plateselskapSideId } from "./plateselskaper.js";
-import { erSjekket } from "./sjekket.js";
 import { guideForStudent } from "./guide-deler.js";
 import { guideDelSynlig } from "./feature-flags.js";
 import { ytMaal } from "../visning/presentasjon-modell.js";
@@ -44,7 +42,6 @@ export const TYPE_LABEL = {
   podkast: "Podkast",
   oversikt: "Metasjanger",
   galleri: "Artistgalleri",
-  plateselskap: "Plateselskap",
   slide: "Slide",
 };
 
@@ -64,7 +61,6 @@ export const TYPE_FLERTALL = {
   podkast: "Podkaster",
   oversikt: "Metasjangre",
   galleri: "Artistgallerier",
-  plateselskap: "Plateselskaper",
   slide: "Slides",
 };
 
@@ -72,7 +68,7 @@ export const TYPE_FLERTALL = {
 // etter først.
 export const TYPE_ORDER = [
   "artist", "lytteeksempel", "oversikt", "sjanger", "rot", "undersjanger", "tech", "hendelse",
-  "historie", "galleri", "side", "instrument", "plateselskap", "kobling", "podkast", "slide",
+  "historie", "galleri", "side", "instrument", "kobling", "podkast", "slide",
 ];
 
 const SIDE_TITTEL = { rotter: "Røtter før 1910", omHistorie: "Om historie", appGuide: "Slik bruker du appen" };
@@ -275,21 +271,7 @@ export function byggIndeks(state = {}, { erLærer = false, skjul = {}, skjulHub 
       "Instrumenter", [side.body], { hva: "instrument", id: gruppe }));
   }
 
-  // --- Plateselskapene (v6.37) ---------------------------------------------
-  // Alle tretten, også før teksten er skrevet: kortet viser artistene uansett.
-  // Skjult for studentene med samme bryter som hubkortet, så søket ikke blir
-  // en bakvei rundt den. Skrivemåtene (Volt, Tamla, RCA …) er med i teksten.
-  if (erLærer || !skjulHub["sb-plateselskaper"]) {
-    for (const p of PLATESELSKAPER) {
-      // «Bare sjekket innhold» (v6.89): bare de sjekkede selskapene.
-      if (!erLærer && skjul.usjekket && !erSjekket("plateselskaper", p.id)) continue;
-      const d = content[plateselskapSideId(p.id)] || {};
-      const f = d.fakta || {};
-      ut.push(post("plateselskap", p.id, p.navn, "Plateselskap",
-        [p.aliaser.filter((a) => a !== p.navn).join(", "), f.sted, f.grunnleggere, f.grunnlagt, d.body],
-        { hva: "plateselskap", id: p.id }));
-    }
-  }
+  // (Plateselskapene, søkbare fra v6.37, ble tatt ut i fase 4.)
 
   // --- Sjangerkoblingene (strekene i slektstreet) --------------------------
   if (erLærer || !skjul.koblingsbeskrivelser) {
