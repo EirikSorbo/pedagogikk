@@ -229,6 +229,8 @@ export function showSjangerInfo(label, opts = {}, { reopen = true } = {}) {
     ${sekt("era", `<p class="gx-era">${escapeHtml(eraLine(resolved))}</p>`)}
     ${sekt("punkter", punkterHtml(resolved.punkter, lcSelv))}
     ${sekt("beskrivelse", `<div class="gx-desc rt">${descText ? renderRichText(descText, lcSelv) : `<span class="gx-missing">${missingDesc("main")}</span>`}</div>`)}
+    ${sekt("samfunn", resolved.samfunn ? `<h4 class="related-head">Samfunn</h4><div class="gx-desc rt">${renderRichText(resolved.samfunn, lcSelv)}</div>` : "")}
+    ${sekt("skole", resolved.skole ? `<h4 class="related-head">Skole og oppdragelse</h4><div class="gx-desc rt">${renderRichText(resolved.skole, lcSelv)}</div>` : "")}
     ${sekt("lytt", (onEdit || !SKJUL_I_STUDENTVISNING.horEtter) ? lyttHtml(resolved.lytt) : "")}
     ${sekt("relasjoner", relasjoner)}
     ${sekt("artister", artisterHtml)}

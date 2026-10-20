@@ -32,7 +32,7 @@ function yr(v) {
   return erAar(v) ? v : null;
 }
 
-const TOM = { description: "", kilder: [], activeFrom: null, activeTo: null, activeToUgyldig: false, usikre: [], era: "", lytt: [], punkter: [] };
+const TOM = { description: "", kilder: [], activeFrom: null, activeTo: null, activeToUgyldig: false, usikre: [], era: "", lytt: [], punkter: [], samfunn: "", skole: "" };
 
 function fromOverride(o, level) {
   if (!o) return null;
@@ -50,7 +50,8 @@ function fromOverride(o, level) {
   // for nettopp de nodene vært usynlige rett etter migreringen.
   const har = !!lvl.description || yr(lvl.activeFrom) !== null
     || !!String(lvl.era || "").trim() || (Array.isArray(lvl.lytt) && lvl.lytt.length > 0)
-    || normaliserPunkter(lvl.punkter).length > 0;
+    || normaliserPunkter(lvl.punkter).length > 0
+    || !!String(lvl.samfunn || "").trim() || !!String(lvl.skole || "").trim();
   if (!har) return null;
   return {
     description: lvl.description || "",
@@ -73,6 +74,11 @@ function fromOverride(o, level) {
     // Oppsummeringspunktene (v5.50): bare main-nivået har dem i dag (sjanger-
     // kortet), men oppslaget er likt for alle nivåer.
     punkter: normaliserPunkter(lvl.punkter),
+    // Epokekortets to kontekstfelt (fase 3): samfunnet epoken sto i, og hva
+    // den betydde for skole og oppdragelse. Samfunn tok over det tiårskortene
+    // gjorde. Bare main-nivået (epokene) bruker dem.
+    samfunn: String(lvl.samfunn || "").trim(),
+    skole: String(lvl.skole || "").trim(),
   };
 }
 

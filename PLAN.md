@@ -50,6 +50,8 @@ Teknisk hovedlinje: hele koden, filnavnene og databasenøklene beholdes (`artist
 
 **Fase 3: Feltene (Sonnet).** Teoretikerkortet (én retning, flere epoker, prinsipper, fagbakgrunn, hovedverk), prinsippene (felles tekst, merket på teoretikerne, valgfri «Se og les»-liste og «Hos hvem og når» på tidsaksen), reformer og milepæler, epokekortet med «Samfunn» og «Skole og oppdragelse». Start med teoretikerkortet, for prinsippene og reformene bygger på det. Oppdater `firestore.rules` og testene.
 
+*Fase 3, status 2026-10-20:* **epokekortet er ferdig** (felt `samfunn` og `skole` på main-nivå i genreDescriptions: kortet, lærerskjemaet, forslag, `firestore.rules`, søk og sjekk-filteret; v0.04). Epokene er ikke med i utskriften ennå. **Gjenstår i fase 3:** (a) teoretikerkortet: fagbakgrunn-ordlista (erstatter instrumentene; Eirik må godkjenne lista, forslag: Filosof, Teolog, Psykolog, Sosiolog, Praktiker, Politiker og reformator, Forsker) og fjerne lytteeksemplene fra kortet; (b) prinsippene (undersjangre): «Se og les»-liste og «Hos hvem og når»; (c) reformer og milepæler (innovasjonskortene: type lov, læreplan, institusjon, læremiddel, metode, norsk spor). Reglene er endret igjen (`samfunn` og `skole` i pendingEdits), så de må publiseres på nytt.
+
 **Fase 4: Språk og utrenskning (Sonnet).** Alle synlige tekster, logo og tittel. Plateselskapene, instrumentsiden og Lytt-sidene går ut. Et skript finner musikkord som står igjen.
 
 **Fase 5: Tester og dokumentasjon (Sonnet).** README, JSON-OPPSKRIFT, MODULKART og KART-OPPSKRIFT skrives for den nye appen.

@@ -36,6 +36,8 @@ export function currentEntityValues(state, edit) {
         // 35 av 141 beskrivelser har en epoketekst, og godkjenning ERSTATTER:
         // læreren så «(tom)» og trodde feltet var ledig.
         era: r.era || "",
+        samfunn: r.samfunn || "",
+        skole: r.skole || "",
       };
     }
     // Instrumentsammendraget er en innholdsside (content/instrument-<slug>).

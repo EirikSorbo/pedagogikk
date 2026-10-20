@@ -201,3 +201,19 @@ test("epokeFritekst: utelates når den gjentar årstallene, ellers som før", ()
   assert.equal(epokeFritekst({ era: "  " }), "");
   assert.equal(epokeFritekst(undefined), "");
 });
+
+// --- Epokekortets kontekstfelt (pedagogikkappens fase 3) ---------------------
+test("samfunn og skole leses fra main-nivået, trimmes, og er tomme når de mangler", () => {
+  const d = { Humanismen: { main: { description: "x", samfunn: "  Renessansens byer.  ", skole: "Latinskolene." } } };
+  const r = resolveDesc(d, "Humanismen", "main");
+  assert.equal(r.samfunn, "Renessansens byer.");
+  assert.equal(r.skole, "Latinskolene.");
+  assert.equal(resolveDesc({ A: { main: { description: "x" } } }, "A", "main").samfunn, "");
+  assert.equal(resolveDesc({}, "Finnes ikke", "main").skole, "");
+});
+
+test("en epoke med bare samfunnstekst teller som beskrevet, så teksten ikke går tapt", () => {
+  const r = resolveDesc({ B: { main: { samfunn: "Bare kontekst." } } }, "B", "main");
+  assert.equal(r.samfunn, "Bare kontekst.");
+  assert.equal(r.description, "");
+});

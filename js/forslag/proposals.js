@@ -81,6 +81,8 @@ const FIELD_SPECS = {
     { key: "activeTo", label: "Mest aktiv til år (tom = fortsatt aktiv)", type: "number", levels: ["main"] },
     { key: "era", label: "Epoke med ord", type: "text", levels: ["main"], full: true, max: 60,
       hint: "Vises ordrett på sjangertidslinjen, og på sjangerkortet når årstallene over står tomme. Bruk den for nyansering av årstallene hvis nødvendig." },
+    { key: "samfunn", label: "Samfunn", type: "textarea", levels: ["main"], full: true },
+    { key: "skole", label: "Skole og oppdragelse", type: "textarea", levels: ["main"], full: true },
     KILDE_FELT,
   ],
   // Kilder er PÅKREVD for studentforslag her (brukerkrav): sammendraget er

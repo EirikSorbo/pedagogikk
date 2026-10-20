@@ -188,7 +188,7 @@ export function byggIndeks(state = {}, { erLærer = false, skjul = {}, skjulHub 
     const d = (genreDescs[n.l] && genreDescs[n.l].main) || (genreDescs[n.f] && genreDescs[n.f].main) || {};
     ut.push(post(erRot.has(n.id) ? "rot" : "sjanger", n.l, n.f || n.l,
       n.g || "Røtter",
-      [n.l !== n.f ? n.l : "", d.description, d.era, (erLærer || !skjul.horEtter ? (d.lytt || []).join(", ") : "")],
+      [n.l !== n.f ? n.l : "", d.description, d.era, d.samfunn, d.skole, (erLærer || !skjul.horEtter ? (d.lytt || []).join(", ") : "")],
       { hva: "sjanger", id: n.l }));
   }
 

@@ -34,6 +34,10 @@ export const FLATER = {
     { id: "era", navn: "Epoke" },
     { id: "punkter", navn: "Oppsummering i punkter" },
     { id: "beskrivelse", navn: "Beskrivelse" },
+    // Epokekortets kontekstfelt (fase 3). Ikke i NIVAA_SEKT, så de står bare
+    // på nivå 3 (Alt), som alle nye seksjoner.
+    { id: "samfunn", navn: "Samfunn" },
+    { id: "skole", navn: "Skole og oppdragelse" },
     { id: "lytt", navn: "Hør etter" },
     { id: "relasjoner", navn: "Slektskap (vokste ut av …)" },
     { id: "artister", navn: "Artister i sjangeren (navneliste)" },

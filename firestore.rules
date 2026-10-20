@@ -341,7 +341,7 @@ service cloud.firestore {
           "geography", "description", "imageUrl", "imageCredit",
           "type", "category", "inventedYear", "adoptedYear", "adoptedLabel", "kilder",
           "keyWorks", "musicExamples",
-          "activeFrom", "activeTo", "era", "body"
+          "activeFrom", "activeTo", "era", "body", "samfunn", "skole"
         ]) &&
         capOk("name", 120) &&
         capOk("gender", 40) &&
@@ -357,6 +357,8 @@ service cloud.firestore {
         capOk("imageUrl", 2000) &&
         capOk("description", 5000) &&
         capOk("body", 20000) &&
+        capOk("samfunn", 20000) &&
+        capOk("skole", 20000) &&
         capListOk("mainGenre", 50) &&
         capListOk("subGenre", 50) &&
         capListOk("kilder", 50) &&

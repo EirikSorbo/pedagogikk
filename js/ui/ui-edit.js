@@ -21,7 +21,7 @@ const FIELD_LABELS = {
   subgenre: {
     description: "Beskrivelse", kilder: "Kilder",
     activeFrom: "Mest aktiv fra år", activeTo: "Mest aktiv til år",
-    era: "Epoke med ord",
+    era: "Epoke med ord", samfunn: "Samfunn", skole: "Skole og oppdragelse",
   },
   instrument: {
     body: "Sammendrag",

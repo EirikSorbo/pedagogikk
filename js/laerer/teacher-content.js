@@ -71,6 +71,15 @@ export function openSingleSubgenreModal(subgenreId, level = "sub") {
     punktWrap.hidden = level !== "main";
     if (level === "main") fyllPunktfelt($("#ss-punkter"), resolved.punkter);
   }
+  // Samfunn og Skole og oppdragelse (fase 3) gjelder bare epokene (main).
+  const kontekstWrap = $("#ss-kontekst-wrap");
+  if (kontekstWrap) {
+    kontekstWrap.hidden = level !== "main";
+    if (level === "main") {
+      $("#ss-samfunn").value = resolved.samfunn || "";
+      $("#ss-skole").value = resolved.skole || "";
+    }
+  }
   // Lytteforslagene er én per linje i tekstfeltet, en liste i data.
   const lyttWrap = $("#ss-lytt-wrap");
   if (lyttWrap) {
@@ -240,6 +249,8 @@ export function setupSubgenreSingleSave() {
       data.era = $("#ss-era").value.trim();
       data.lytt = $("#ss-lytt").value.split("\n").map((x) => x.trim()).filter(Boolean);
       data.punkter = lesPunktfelt($("#ss-punkter"));
+      data.samfunn = $("#ss-samfunn").value.trim();
+      data.skole = $("#ss-skole").value.trim();
     }
     try {
       await saveGenreDescLevel(subgenreId, level, data);

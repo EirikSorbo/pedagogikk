@@ -26,7 +26,7 @@ export const PROPOSABLE_KEYS = {
   // Sjangre (main = tre-node, sub = fri undersjanger). «kilder» ble åpnet for
   // forslag da sjangerkortene fikk kildelister på linje med artistkortene;
   // activeFrom/activeTo er epoken, og gjelder i praksis bare main-nivået.
-  subgenre: ["description", "kilder", "activeFrom", "activeTo", "era"],
+  subgenre: ["description", "kilder", "activeFrom", "activeTo", "era", "samfunn", "skole"],
   // Instrumentsammendraget bor i content-samlingen; body er hele teksten, og
   // kilder er kildelista under den (samme form som på sjangerkortene).
   instrument: ["body", "kilder"],

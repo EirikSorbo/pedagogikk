@@ -35,7 +35,7 @@ test("tech/subgenre-hvitelistene utelater status og andre systemfelter", () => {
   }
   // Sjangre: beskrivelse, epoke-årstallene og kilder er foreslåbare — men
   // ingen systemfelter. Holdes i synk med FIELD_SPECS.subgenre i proposals.js.
-  assert.deepEqual(PROPOSABLE_KEYS.subgenre, ["description", "kilder", "activeFrom", "activeTo", "era"]);
+  assert.deepEqual(PROPOSABLE_KEYS.subgenre, ["description", "kilder", "activeFrom", "activeTo", "era", "samfunn", "skole"]);
   for (const key of FORBIDDEN) {
     assert.equal(PROPOSABLE_KEYS.subgenre.includes(key), false, `subgenre skal ikke tillate ${key}`);
   }
@@ -98,7 +98,7 @@ test("currentEntityValues dekker alle foreslåbare felter", async () => {
   const fs = await import("node:fs");
   const src = fs.readFileSync(new URL("../../js/forslag/entity-values.js", import.meta.url), "utf8");
   const grener = {
-    subgenre: ["description", "kilder", "activeFrom", "activeTo", "era"],
+    subgenre: ["description", "kilder", "activeFrom", "activeTo", "era", "samfunn", "skole"],
     instrument: ["body", "kilder"],
   };
   for (const [type, felter] of Object.entries(grener)) {
