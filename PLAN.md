@@ -8,10 +8,17 @@ Teknisk hovedlinje: hele koden, filnavnene og databasenøklene beholdes (`artist
 
 - Egen kopi og eget Firebase-prosjekt. Ikke en felles kodebase.
 - Epokene dekker hele historien, fra de gamle grekerne til i dag. Hovedsakelig internasjonalt blikk, men norsk skolehistorie skal med.
-- Nodene i treet er **epoker**. Metasjangrene er **retninger** (farge og gruppe). Strekene viser påvirkning mellom epoker. Undersjangre blir **begreper**. «Grunnlinje» og «retning» er det samme: bruk «retning» i appen.
+- Nodene i treet er **epoker**. Metasjangrene er **retninger** (farge og gruppe). Strekene viser påvirkning mellom epoker. Undersjangre blir **pedagogiske prinsipper** (endret 2026-10-20, se under; først var de tenkt som «begreper»). «Grunnlinje» og «retning» er det samme: bruk «retning» i appen.
 - Påvirkning mellom enkeltpedagoger står i beskrivelsen. Det blir ikke noe eget felt.
 - Domene: **pedagogikk.historieappen.no** (underdomene av musikkappens domene, vedtatt 2026-10-19). Filen `CNAME` i repoet har navnet. DNS: CNAME `pedagogikk` til `eiriksorbo.github.io.` i cPanel Zone Editor hos domene.no.
 - Venter: emne og studenter, og endelig navn.
+
+## Vedtatt av Eirik 2026-10-20
+
+- **Pedagogiske prinsipper erstatter «begreper» og lytteeksemplene.** Et prinsipp (anskuelse, læring gjennom erfaring, tilpasset opplæring …) er en felles tekst som går på tvers av epoker og teoretikere. Det bygges på maskineriet undersjangrene har i dag (felles beskrivelse i `genreDescriptions`, merket på teoretikerne, egen fane, lenker fra løpende tekst, søk og utskrift), så det blir ikke en tredje ting ved siden av. «Begrep» er borte som egen type: ord som Bildung eller «skjult læreplan» står i teksten til epoken eller teoretikeren, eller blir prinsipper i vid forstand.
+- Hvert prinsipp kan ha en valgfri **«Se og les»-liste** med video (den innebygde spilleren) og tekstutdrag. Lytteeksemplene på teoretikerkortet faller bort; hovedverkene blir.
+- Prinsippets side får en **«Hos hvem og når»-visning**: teoretikerne og epokene i tidsrekkefølge, tegnet på tidsaksen fra fase 2.
+- Ikke avgjort: om et prinsipp også skal kunne knyttes direkte til en epoke uten at en teoretiker er nevnt (krever et ekstra felt). Start med merking på teoretikerne; epokene følger av dem.
 
 ## Oversettelse av begrepene
 
@@ -20,14 +27,14 @@ Teknisk hovedlinje: hele koden, filnavnene og databasenøklene beholdes (`artist
 | Artist | Teoretiker (pedagog) |
 | Metasjanger | Retning |
 | Sjanger (node i treet) | Epoke |
-| Undersjanger | Begrep |
+| Undersjanger | Pedagogisk prinsipp |
 | Strek mellom sjangre | Påvirkning mellom epoker |
 | Sjangerhistorie | Fortellingen om retningen |
 | Tiår (samfunn og teknologi) | Fjernes eller omformes (se fase 2) |
 | Innovasjoner | Reformer og milepæler (lov, læreplan, institusjon, læremiddel, metode, norsk spor) |
 | Instrument | Fagbakgrunn (filosof, teolog, psykolog, praktiker …) |
 | Sentrale verk | Hovedverk |
-| Lytteeksempler | Se og les (video og tekstutdrag) |
+| Lytteeksempler | Fjernes på teoretikerkortet. Prinsippet får en valgfri «Se og les»-liste (video og tekstutdrag) |
 | Plateselskap | Fjernes |
 | Varmekart | Tas ut (stort sett en diagonal med epoker som noder) |
 
@@ -41,13 +48,13 @@ Teknisk hovedlinje: hele koden, filnavnene og databasenøklene beholdes (`artist
 
 *Gjenstår for Eirik etter fase 2:* (1) kjør `node tools/lag-pedagogikk-skjelett.js` og importer `json files/pedagogikk-skjelett.json` på nytt, så treet i databasen får tidsrommene (treet som ligger der nå, er fra fase 1 og har dem ikke); (2) publiser den nye `firestore.rules` (gjort 2026-10-20). Regeltestene kjører grønt på GitHub (lokalt mangler maskinen Java). Tidsrom-editoren er bare testet i koden, ikke i nettleseren (lærersiden krever innlogging).
 
-**Fase 3: Feltene (Sonnet).** Teoretikerkortet (én retning, flere epoker, begreper, fagbakgrunn, hovedverk, se og les), reformer og milepæler, epokekortet med «Samfunn» og «Skole og oppdragelse». Oppdater `firestore.rules` og testene.
+**Fase 3: Feltene (Sonnet).** Teoretikerkortet (én retning, flere epoker, prinsipper, fagbakgrunn, hovedverk), prinsippene (felles tekst, merket på teoretikerne, valgfri «Se og les»-liste og «Hos hvem og når» på tidsaksen), reformer og milepæler, epokekortet med «Samfunn» og «Skole og oppdragelse». Start med teoretikerkortet, for prinsippene og reformene bygger på det. Oppdater `firestore.rules` og testene.
 
 **Fase 4: Språk og utrenskning (Sonnet).** Alle synlige tekster, logo og tittel. Plateselskapene, instrumentsiden og Lytt-sidene går ut. Et skript finner musikkord som står igjen.
 
 **Fase 5: Tester og dokumentasjon (Sonnet).** README, JSON-OPPSKRIFT, MODULKART og KART-OPPSKRIFT skrives for den nye appen.
 
-**Fase 6: Innholdet, i runder (Opus til tekstene).** Importfiler for treet, beskrivelsene, teoretikerne i bolker per epoke og reformene. Kilderekkefølge: SNL, Stanford Encyclopedia of Philosophy, Britannica, Internet Encyclopedia of Philosophy. Omfanget avtales før hver runde.
+**Fase 6: Innholdet, i runder (Opus til tekstene).** Importfiler for treet, beskrivelsene, teoretikerne i bolker per epoke, prinsippene (20–30 i første runde, så vokser lista) og reformene. Kilderekkefølge: SNL, Stanford Encyclopedia of Philosophy, Britannica, Internet Encyclopedia of Philosophy. Omfanget avtales før hver runde.
 
 ## Gjenstår for Eirik i fase 0
 
