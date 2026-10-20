@@ -12,7 +12,7 @@
 //         … --lenker   (sjekker i tillegg hver lenke på nettet, med sidetittel)
 //
 //  Hver del eksporterer `default` med noen av nøklene artists,
-//  genreDescriptions ({ meta, main, sub }) og edgeDescriptions. Navn som står i
+//  genreDescriptions ({ meta, main, sub }), edgeDescriptions og tech. Navn som står i
 //  to deler, er en feil: hver teoretiker, epoke og påvirkning skrives ett sted.
 //  Tekstene trimmes, og innrykk i malstrengene fjernes (se ryddTekst).
 // ============================================================================
@@ -41,7 +41,7 @@ export const STANDARD = { status: "active", teacherChecked: false, priority: 0, 
 
 export function slaaSammen(deler, { aar = new Date().getFullYear(), foreslaattAv = "" } = {}) {
   const feil = [];
-  const ut = { formatVersion: 1, artists: [], genreDescriptions: { meta: {}, main: {}, sub: {} }, edgeDescriptions: {} };
+  const ut = { formatVersion: 1, artists: [], genreDescriptions: { meta: {}, main: {}, sub: {} }, edgeDescriptions: {}, tech: [] };
   const hvor = new Map();
   for (const [navn, del] of deler) {
     for (const a of del.artists || []) {
@@ -58,6 +58,12 @@ export function slaaSammen(deler, { aar = new Date().getFullYear(), foreslaattAv
         ut.genreDescriptions[bolk][n] = ryddDypt(dok);
       }
     }
+    for (const t of del.tech || []) {
+      const k = `reform:${String(t.name).trim().toLowerCase()}`;
+      if (hvor.has(k)) feil.push(`Reformen «${t.name}» står i både ${hvor.get(k)} og ${navn}.`);
+      hvor.set(k, navn);
+      ut.tech.push({ status: "active", ...ryddDypt(t) });
+    }
     for (const [n, e] of Object.entries(del.edgeDescriptions || {})) {
       const k = `kobling:${n}`;
       if (hvor.has(k)) feil.push(`Påvirkningen «${n}» står i både ${hvor.get(k)} og ${navn}.`);
@@ -66,6 +72,8 @@ export function slaaSammen(deler, { aar = new Date().getFullYear(), foreslaattAv
     }
   }
   ut.artists.sort((a, b) => (a.influenceStart ?? 0) - (b.influenceStart ?? 0) || a.name.localeCompare(b.name, "no"));
+  ut.tech.sort((a, b) => (a.adoptedYear ?? a.inventedYear ?? 0) - (b.adoptedYear ?? b.inventedYear ?? 0) || a.name.localeCompare(b.name, "no"));
+  if (!ut.tech.length) delete ut.tech;
   return { fil: ut, feil };
 }
 
