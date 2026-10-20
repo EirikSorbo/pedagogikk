@@ -2,13 +2,10 @@
 // gjennom, og hver regel stopper nettopp feilen den skal stoppe.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { sjekkInnholdsfil } from "../../tools/sjekk-innholdsfil.js";
+import { skjelettTre } from "../helpers/skjelett-tre.js";
 
-const ROT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const tre = JSON.parse(fs.readFileSync(path.join(ROT, "json files/pedagogikk-skjelett.json"), "utf8")).genealogy;
+const tre = skjelettTre();
 
 const teoretiker = (over = {}) => ({
   name: "John Dewey", birthYear: 1859, deathYear: 1952, gender: "mann",

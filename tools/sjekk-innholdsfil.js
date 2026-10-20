@@ -24,12 +24,13 @@ import { erAar } from "../js/felles/aarstall.js";
 import { SELES_TEKST_MAKS, SELES_MAKS } from "../js/felles/se-og-les.js";
 import { TECH_CATEGORIES, TECH_TYPES } from "../js/ui/ui-tech.js";
 
-// Ordgrenser per tekst (myke: gir advarsel). Skal justeres når runden er avtalt.
+// Ordgrenser per tekst (myke: gir advarsel). Justert etter runde 1 (2026-10-21):
+// samfunn og skole er korte kontekstbokser, ikke egne essays.
 export const ORDGRENSER = {
-  teoretiker: [60, 260],
+  teoretiker: [40, 260],
   epoke: [100, 450],
-  samfunn: [40, 300],
-  skole: [40, 300],
+  samfunn: [25, 300],
+  skole: [25, 300],
   prinsipp: [60, 400],
   historie: [150, 1200],
 };

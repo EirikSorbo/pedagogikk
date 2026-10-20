@@ -1,7 +1,8 @@
 // Pedagogikkens eget tre (fase 1 og 2) og eksemplene i JSON-OPPSKRIFT.md.
 // De andre testene låser FORMLENE mot musikkappens frø (tests/helpers/seed-model.js);
 // denne låser det nye innholdet: skjelettet Eirik importerer på lærersiden, og at
-// eksemplene i oppskriften faktisk lar seg importere.
+// eksemplene i oppskriften faktisk lar seg importere. Treet bygges fra kilden i
+// tools/ (tests/helpers/skjelett-tre.js), siden «json files/» er utenfor git.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -13,15 +14,14 @@ import {
 } from "../../js/sjangre/genre-model.js";
 import { INSTRUMENTS, GENDERS } from "../../js/felles/limits.js";
 import { normalizeImportFile, validateArtistsForImport, flattenGenreDescriptions } from "../../js/data/import-format.js";
-import { EPOKER, RETNINGER, TIDSROM as SKJELETT_TIDSROM } from "../../tools/pedagogikk-skjelett.js";
+import { skjelettTre, skjelettFil } from "../helpers/skjelett-tre.js";
 
 const ROT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const lesFil = (rel) => fs.readFileSync(path.join(ROT, rel), "utf8");
-const skjelett = JSON.parse(lesFil("json files/pedagogikk-skjelett.json"));
-const tre = skjelett.genealogy;
+const tre = skjelettTre();
+const fil = skjelettFil();
 
-test("skjelettfila er et gyldig tre uten feil", () => {
-  assert.equal(skjelett.formatVersion, 1);
+test("skjelettet er et gyldig tre uten feil", () => {
   const feil = validateTree(tre).filter((p) => p.nivå === "feil");
   assert.deepEqual(feil, []);
   assert.deepEqual(sjekkTidsrom(tre.tidsrom, tre.nodes).filter((p) => p.nivå === "feil"), []);
@@ -62,18 +62,10 @@ test("tidsrommene starter før Kristus og slutter åpent «til i dag»", () => {
   for (let i = 1; i < tre.tidsrom.length; i++) assert.ok(tre.tidsrom[i].fra > tre.tidsrom[i - 1].fra, `tidsrom ${i} stiger ikke`);
 });
 
-test("skjelettfila stemmer med kilden i tools/pedagogikk-skjelett.js", () => {
-  assert.deepEqual(tre.nodes.map((n) => n.id), EPOKER.map((e) => e.id));
-  for (const e of EPOKER) {
-    const n = tre.nodes.find((x) => x.id === e.id);
-    assert.equal(n.l, e.l, e.id);
-    assert.equal(n.g, e.g, e.id);
-    assert.equal(n.r, e.r, e.id);
-    assert.deepEqual(n.p, e.p || [], e.id);
-    assert.deepEqual(n.rx || [], e.rx || [], e.id);
-  }
-  assert.deepEqual(tre.metaGenres.map((m) => m.name), RETNINGER.map((r) => r.navn));
-  assert.deepEqual(tre.tidsrom.map((t) => t.fra), SKJELETT_TIDSROM.map((t) => t.fra));
+// Den genererte fila ligger bare lokalt; på GitHub hoppes testen over.
+test("json files/pedagogikk-skjelett.json er i takt med kilden i tools/", { skip: fil ? false : "fila er utenfor git" }, () => {
+  assert.equal(fil.formatVersion, 1);
+  assert.deepEqual(fil.genealogy, tre, "kjør node tools/lag-pedagogikk-skjelett.js på nytt");
 });
 
 // ---------------------------------------------------------------------------
