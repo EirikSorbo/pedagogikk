@@ -195,7 +195,6 @@ export function showSjangerInfo(label, opts = {}, { reopen = true } = {}) {
 
   const btnArea = [
     (n.g && onShowArtists) ? `<button type="button" class="btn ghost small gx-artists-btn">Teoretikere</button>` : "",
-    (n.g && onShowPlaylist) ? `<button type="button" class="btn ghost small gx-playlist-btn">Spilleliste</button>` : "",
     // Bare når tidslinja har en seksjon for sjangeren (harTidslinje, v6.23).
     (n.g && onShowTimeline && (!harTidslinje || harTidslinje(n.l))) ? `<button type="button" class="btn ghost small gx-timeline-btn">Teoretikertidslinje</button>` : "",
     // Artistgalleriet (v5.96; i appen også fra v5.97, brukerønske 2026-10-01).
@@ -244,8 +243,6 @@ export function showSjangerInfo(label, opts = {}, { reopen = true } = {}) {
   wireRelated(mBody, lc);
   const b = mBody.querySelector(".gx-artists-btn");
   if (b) b.addEventListener("click", () => onShowArtists({ label: n.l }));
-  const bp = mBody.querySelector(".gx-playlist-btn");
-  if (bp) bp.addEventListener("click", () => onShowPlaylist({ label: n.l, fullName: n.f, node: n }));
   const bt = mBody.querySelector(".gx-timeline-btn");
   if (bt) bt.addEventListener("click", () => onShowTimeline({ label: n.l }));
   const bg = mBody.querySelector(".gx-galleri-btn");

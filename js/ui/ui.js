@@ -617,7 +617,6 @@ function showGenreLevelInfo(label, level, opts = {}) {
 
   const btnArea = [
     onShowArtists ? `<button type="button" class="btn ghost small gx-artists-btn">Teoretikere</button>` : "",
-    onShowPlaylist ? `<button type="button" class="btn ghost small gx-playlist-btn">Spilleliste</button>` : "",
   ].filter(Boolean).join(" ");
 
   // Peker navnet på en tre-sjanger? Tilby snarvei til sjanger-beskrivelsen.
@@ -645,8 +644,6 @@ function showGenreLevelInfo(label, level, opts = {}) {
   if (sg) sg.addEventListener("click", () => showSjangerInfo(treeNode.l, opts));
   const b = mBody.querySelector(".gx-artists-btn");
   if (b) b.addEventListener("click", () => onShowArtists({ label }));
-  const bp = mBody.querySelector(".gx-playlist-btn");
-  if (bp) bp.addEventListener("click", () => onShowPlaylist({ label, fullName: label, node: { l: label } }));
   renderGenreEditBtn(root, onEdit ? () => onEdit(label, level) : null);
   modalOpen(modal);
   return true;

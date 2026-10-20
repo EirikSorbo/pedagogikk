@@ -9,7 +9,7 @@ import { GENEALOGY_EDGES, edgeKey } from "../../js/sjangre/genre-model.js";
 
 const artist = (o) => ({
   status: "active", priority: 0, mainGenre: [], subGenre: [],
-  imageUrl: "x", description: "d", musicExamples: [{}], kilder: [{}],
+  imageUrl: "x", description: "d", musicExamples: [{}], keyWorks: [{}], kilder: [{}],
   instrument: "Psykolog", ...o,
 });
 
@@ -17,7 +17,7 @@ test("contentGaps: artist-mediahull telles per felt", () => {
   const artists = [
     artist({ name: "Full" }),
     artist({ name: "UtenBilde", imageUrl: "" }),
-    artist({ name: "UtenAlt", imageUrl: "", description: "  ", musicExamples: [], kilder: [] }),
+    artist({ name: "UtenAlt", imageUrl: "", description: "  ", keyWorks: [], kilder: [] }),
   ];
   const g = contentGaps({ artists, genreDescs: {}, content: {}, contentLoaded: true });
   assert.equal(g.noImage.length, 2);
@@ -70,19 +70,10 @@ test("contentGaps: koblingsbeskrivelse fjerner koblingen fra edgeDesc", () => {
   assert.ok(!withOne.edgeDesc.some((e) => e.from === "blues" && e.to === "jazz"));
 });
 
-test("contentGaps: lytteeksempler uten sjangerknytning teller kun flersjanger-artister", () => {
-  const artists = [
-    // Én sjanger → aldri i bøtta, selv uten genre-felt.
-    artist({ name: "EnSjanger", mainGenre: ["Blues"], musicExamples: [{ url: "https://x" }] }),
-    // Flersjanger uten genre på eksempelet → i bøtta.
-    artist({ name: "Utagget", mainGenre: ["Blues", "Soul"], musicExamples: [{ url: "https://x" }] }),
-    // Flersjanger med gyldig genre → ikke i bøtta.
-    artist({ name: "Tagget", mainGenre: ["Blues", "Soul"], musicExamples: [{ url: "https://x", genre: "Soul" }] }),
-    // Flersjanger med genre som ikke står i mainGenre → i bøtta (mismatch).
-    artist({ name: "Mismatch", mainGenre: ["Blues", "Soul"], musicExamples: [{ url: "https://x", genre: "Funk" }] }),
-  ];
-  const g = contentGaps({ artists, contentLoaded: true });
-  assert.deepEqual(g.noExGenre.map((a) => a.name).sort(), ["Mismatch", "Utagget"]);
+// Fase 4: «noMusic» betyr nå «uten hovedverk», og lytteeksempler uten epoke er ute av oversikten.
+test("contentGaps: noExGenre er tom (lytteeksemplene er ute av oversikten)", () => {
+  const artists = [artist({ name: "Utagget", mainGenre: ["Blues", "Soul"], musicExamples: [{ url: "https://x" }] })];
+  assert.deepEqual(contentGaps({ artists, contentLoaded: true }).noExGenre, []);
 });
 
 test("contentGaps: instrument utenfor vokabularet eller tomt flagges", () => {

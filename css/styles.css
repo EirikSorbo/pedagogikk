@@ -766,7 +766,7 @@ button.ov-kpi:hover .ov-kpi-l { color: var(--accent-2); }
    Nå setter det bredeste navnet kolonnebredden for hele tabellen. */
 .ov-rows-meta {
   display: grid;
-  grid-template-columns: auto 1fr 30px 1fr 34px;
+  grid-template-columns: auto 1fr 30px;
   align-items: center;
   column-gap: 8px;
   row-gap: 8px;

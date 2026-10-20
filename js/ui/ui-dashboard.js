@@ -70,7 +70,7 @@ function distRow(label, count, max, attrs, exCount = null) {
 // er to ulike måltall, og en delt skala ville bare gjort artistsøylene til
 // striper. Tom kolonne tegnes som full varselfarget søyle, samme grep som
 // resten av oversikten bruker for null.
-function metaRow(m, maxN, maxE) {
+function metaRow(m, maxN) {
   const zero = m.n === 0 ? " ov-zero" : "";
   const bar = (v, max, cls) => `<span class="bar small ${cls}${v ? "" : " ov-bar-zero"}">
     <span class="bar-fill" style="width:${v ? pct(v, max) : 100}%"></span></span>`;
@@ -78,8 +78,6 @@ function metaRow(m, maxN, maxE) {
     <span class="ov-name">${escapeHtml(m.g)}</span>
     ${bar(m.n, maxN, "ov-bar-n")}
     <button type="button" class="ov-num" data-ov-meta="${escapeHtml(m.g)}" title="Vis teoretikerne i ${escapeHtml(m.g)}">${m.n}</button>
-    ${bar(m.e, maxE, "ov-bar-ex")}
-    <button type="button" class="ov-num${m.e === 0 ? " ov-ex-zero" : ""}" data-ov-meta-ex="${escapeHtml(m.g)}" title="Vis lytteeksemplene i ${escapeHtml(m.g)}">${m.e}</button>
   </div>`;
 }
 
@@ -120,15 +118,11 @@ export function contentGaps({ artists = [], genreDescs = {}, edgeDescs = {}, con
     .filter((e) => !(edgeDescs[edgeKey(e.from, e.to)]?.description));
   const noImage = active.filter((a) => !a.imageUrl).sort(byName);
   const noDesc = active.filter((a) => !(a.description || "").trim()).sort(byName);
-  const noMusic = active.filter((a) => !(a.musicExamples || []).length).sort(byName);
+  const noMusic = active.filter((a) => !(a.keyWorks || []).length).sort(byName);
   const noSources = active.filter((a) => !(a.kilder || []).length).sort(byName);
   // Flersjanger-artister med lytteeksempler uten (gyldig) sjangerknytning —
   // uten den vises eksemplene i ALLE artistens sjanger-spillelister.
-  const noExGenre = active.filter((a) => {
-    const mg = a.mainGenre || [];
-    if (mg.length < 2) return false;
-    return (a.musicExamples || []).some((m) => !m.genre || !mg.includes(m.genre));
-  }).sort(byName);
+  const noExGenre = [];
   // Instrument utenfor vokabularet (INSTRUMENTS) eller tomt — verdier utenfor
   // lista splitter filteret/statistikken (Saxofon vs Saksofon-fella).
   const badInstrument = active
@@ -184,7 +178,7 @@ export function renderDashboard(el, {
   // Lytteeksempler: alle kuraterte eksempler til sammen (ikke sentrale verk —
   // samme avgrensning som spillelistene). Parentestallet i sjangerlista under
   // teller de samme eksemplene, men fordelt per sjanger.
-  const exampleCount = countExamplesFor(active);
+  const hovedverkAntall = active.reduce((n, a) => n + (a.keyWorks || []).length, 0);
   // Skjulte artistkort: aktive kort læreren har skjult (erSkjult, v6.86). De er
   // usynlige for studentene og teller derfor ikke i noen annen statistikk her —
   // dette er eneste stedet de er synlige som tall.
@@ -225,7 +219,6 @@ export function renderDashboard(el, {
     })
     .sort((a, b) => b.n - a.n || byNo(a.g, b.g));
   const maxMeta = Math.max(1, ...metaCounts.map((m) => m.n));
-  const maxMetaEx = Math.max(1, ...metaCounts.map((m) => m.e));
   const metaByName = Object.fromEntries(metaCounts.map((m) => [m.g, m]));
 
   // --- Tidsrom (fase 2; før tiår) ---------------------------------------------
@@ -380,8 +373,8 @@ export function renderDashboard(el, {
         <span class="ov-kpi-l">Prinsipper</span>
       </button>
       <div class="ov-kpi">
-        <span class="ov-kpi-n">${exampleCount}</span>
-        <span class="ov-kpi-l">Lytteeksempler</span>
+        <span class="ov-kpi-n">${hovedverkAntall}</span>
+        <span class="ov-kpi-l">Hovedverk</span>
       </div>
       <button type="button" class="ov-kpi ov-click" data-ov-open="edges" title="Åpner lista over koblingene i Mangler">
         <span class="ov-kpi-n">${GENEALOGY_EDGES.length}</span>
@@ -410,21 +403,20 @@ export function renderDashboard(el, {
     </div>
 
     <div class="stat-card ov-block">
-      <div class="stat-label">Antall teoretikere og (lytteeksempler) per epoke</div>
+      <div class="stat-label">Antall teoretikere per epoke</div>
       <div class="ov-genre-cols">${genreCounts.map((g) =>
-        distRow(g.l, g.n, maxGenre, `data-ov-genre="${escapeHtml(g.l)}"`, g.e)).join("")}</div>
+        distRow(g.l, g.n, maxGenre, `data-ov-genre="${escapeHtml(g.l)}"`)).join("")}</div>
     </div>
 
     <div class="ov-two">
       <div class="stat-card ov-block" style="margin-top:0">
-        <div class="stat-label">Antall teoretikere og lytteeksempler per retning</div>
+        <div class="stat-label">Antall teoretikere per retning</div>
         <div class="ov-rows-meta">
           <div class="ov-row ov-row-meta ov-row-head">
             <span></span>
             <span class="ov-colh">Teoretikere</span>
-            <span class="ov-colh">Lytteeksempler</span>
           </div>
-          ${metaCounts.map((m) => metaRow(m, maxMeta, maxMetaEx)).join("")}
+          ${metaCounts.map((m) => metaRow(m, maxMeta)).join("")}
         </div>
       </div>
       <div class="stat-card">
@@ -468,8 +460,7 @@ export function renderDashboard(el, {
       </div>
       ${missItem("Teoretikere uten beskrivelse", noDesc.length, artistRows(noDesc))}
       ${missItem("Teoretikere uten bilde", noImage.length, artistRows(noImage))}
-      ${missItem("Teoretikere uten musikkeksempler", noMusic.length, artistRows(noMusic))}
-      ${missItem("Lytteeksempler uten epoke", gaps.noExGenre.length, artistRows(gaps.noExGenre))}
+      ${missItem("Teoretikere uten hovedverk", noMusic.length, artistRows(noMusic))}
       ${missItem("Teoretikere uten gyldig fagbakgrunn", gaps.badInstrument.length,
         artistRows(gaps.badInstrument, (a) => instrumenterFor(a).map((i) => `<span class="tag">${escapeHtml(i)}</span>`).join("")))}
       ${missItem("Teoretikere uten kilder", noSources.length, artistRows(noSources))}
@@ -530,11 +521,6 @@ export function renderDashboard(el, {
     const genre = hit("[data-ov-genre]");
     if (genre) return explore?.onMainGenreClick(genre.dataset.ovGenre);
 
-    const metaEx = hit("[data-ov-meta-ex]");
-    if (metaEx) {
-      const g = metaEx.dataset.ovMetaEx;
-      return onShowPlaylist?.(`Lytteeksempler i ${g}`, metaByName[g]?.list || []);
-    }
     const meta = hit("[data-ov-meta]");
     if (meta) {
       const g = meta.dataset.ovMeta;
