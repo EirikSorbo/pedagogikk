@@ -88,11 +88,11 @@ function tegnMetaOversikt(meta, modal) {
       <h3 class="mo-head">Teoretikere <span class="mo-antall">${antallArt}</span></h3>
       ${artisterHtml}
     </section>
-    <section class="mo-kol mo-eksempler" aria-label="Lytteeksempler">
+    ${eks.antall ? `<section class="mo-kol mo-eksempler" aria-label="Lytteeksempler">
       <h3 class="mo-head">Lytteeksempler <span class="mo-antall">${eks.antall}</span></h3>
       ${spillAlleHtml(eks.rader)}
       ${eksemplerHtml}
-    </section>`;
+    </section>` : ""}`;
 
   // Stolpene og forbindelsene åpner sjangerkortet, navnene artistkortet, oppå
   // oversikten (← fører tilbake). Lytteeksemplene fanges av spilleren.
