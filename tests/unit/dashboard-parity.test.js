@@ -77,7 +77,7 @@ test("toppfeltet: tittelen er skjult for øyet, men finnes for skjermlesere, på
   const les = (f) => fs.readFileSync(new URL(`../../${f}`, import.meta.url), "utf8");
   for (const side of ["index.html", "tre.html", "teacher.html", "student.html"]) {
     const brand = les(side).match(/<a class="brand"[^>]*>[\s\S]*?<\/a>/)?.[0] || "";
-    assert.match(brand, /<h1 class="sr-only">Musikkhistorie<\/h1>/, side);
+    assert.match(brand, /<h1 class="sr-only">Pedagogikkens historie<\/h1>/, side);
   }
   // v5.54 (brukerkrav 2026-09-25): kursnavnet er borte overalt, også fra
   // sidetitlene og appnavnet som nettleseren viser i fanen og i appvinduet.
