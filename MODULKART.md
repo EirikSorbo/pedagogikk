@@ -11,7 +11,7 @@ stopper et kart som ikke stemmer med filene.
 |---|---|---|
 | `js/` | Sidene og oppsettet | 11 |
 | `js/utforsk/` | Utforsk | 15 |
-| `js/sjangre/` | Sjangrene og slektstreet | 13 |
+| `js/sjangre/` | Epokene, prinsippene og slektstreet | 13 |
 | `js/visning/` | Visning | 15 |
 | `js/laerer/` | Lærersiden | 8 |
 | `js/forslag/` | Endringsforslag | 3 |
@@ -23,6 +23,7 @@ stopper et kart som ikke stemmer med filene.
 
 ## Reglene koden holder seg til
 
+- Navnene i koden er musikkappens (PLAN.md): `artist` er en teoretiker, `sjanger` (`genre`, `mainGenre`) en epoke, `metaGenre` en retning, `subGenre` et prinsipp, `instrument` en fagbakgrunn og `tech` en reform eller milepæl. Bare det brukerne ser, er byttet.
 - Bare `data/store.js` snakker med Firestore, og alle sidene leser de delte samlingene gjennom `data/shared-data.js`.
 - Importer en funksjon fra fila som definerer den, ikke via en annen modul. `tools/check-imports.js` stopper videresending.
 - Ingen filer importerer hverandre i ring. Utforsk-kjernen (`utforsk/explore-context.js`) åpner featurene gjennom `nav`, som `utforsk/explore.js` fyller, i stedet for å importere dem. `tools/check-imports.js` stopper importringer.
@@ -51,7 +52,7 @@ stopper et kart som ikke stemmer med filene.
 
 ## `js/utforsk/` Utforsk
 
-Det store bildet, sjangrene, sjangerperiodene, tidslinja, Lytt, Instrumenter, referansene, søket og ?vis=-ruteren. explore.js kobler dem sammen, og explore-context.js er limet de deler.
+Det store bildet, epokene, epokeperiodene, tidslinja, reformene, referansene, søket og ?vis=-ruteren. explore.js kobler dem sammen, og explore-context.js er limet de deler.
 
 | Fil | Hva den gjør |
 |---|---|
@@ -71,9 +72,9 @@ Det store bildet, sjangrene, sjangerperiodene, tidslinja, Lytt, Instrumenter, re
 | `explore.js` | UTFORSK — ORKESTRATOR |
 | `metaoversikt-modell.js` | METASJANGER-OVERSIKTEN — ren modell (v5.94) |
 
-## `js/sjangre/` Sjangrene og slektstreet
+## `js/sjangre/` Epokene, prinsippene og slektstreet
 
-Sjangermodellen (treet bor i Firestore, og alt annet avledes av det), beskrivelsene, sjangerkortet, slektstreet, sjangerhimmelen og migreringen når en sjanger bytter navn.
+Epokemodellen (treet bor i Firestore, og alt annet avledes av det), beskrivelsene, epokekortet, prinsippene, slektstreet, epokehimmelen og migreringen når en epoke eller et prinsipp bytter navn. Mappen heter fortsatt sjangre (musikkappens navn).
 
 | Fil | Hva den gjør |
 |---|---|
@@ -115,7 +116,7 @@ Presentasjonsvisningen på lerretet, kjøreplanene og Visning-vinduet bak presen
 
 ## `js/laerer/` Lærersiden
 
-Skrivebordet, artistene, innholdsredigeringen, sjangertre-editoren, gjennomgangen av endringsforslag og import/eksport.
+Skrivebordet, teoretikerne, innholdsredigeringen, epoketre-editoren, gjennomgangen av endringsforslag og import/eksport.
 
 | Fil | Hva den gjør |
 |---|---|
@@ -149,7 +150,7 @@ Utvalget til heftet og heftets oppbygning. Selve siden er js/utskrift.js.
 
 ## `js/ui/` Byggeklosser for skjermen
 
-Artistkortene og listene, modalene og meldingsboksene, tidslinjene, teknologikortene, oversikten på lærersiden, skjemadelene og YouTube-spilleren.
+Teoretikerkortene og listene, modalene og meldingsboksene, tidslinjene, reformkortene, oversikten på lærersiden, skjemadelene og videospilleren.
 
 | Fil | Hva den gjør |
 |---|---|
@@ -171,7 +172,7 @@ Artistkortene og listene, modalene og meldingsboksene, tidslinjene, teknologikor
 
 ## `js/data/` Data
 
-Firestore (store.js er den eneste fila som snakker med databasen), den delte dataroten, appens tilstand, artistskjemaet og importformatet.
+Firestore (store.js er den eneste fila som snakker med databasen), den delte dataroten, appens tilstand, teoretikerskjemaet og importformatet.
 
 | Fil | Hva den gjør |
 |---|---|
@@ -187,7 +188,7 @@ Firestore (store.js er den eneste fila som snakker med databasen), den delte dat
 
 ## `js/felles/` Felles hjelpere
 
-Små hjelpere og vokabular som flere deler av appen bruker: tekst og lenker, kilder, søkeindeksen, årstall og tidsakse, instrumenter, dype lenker og bryterne.
+Små hjelpere og vokabular som flere deler av appen bruker: tekst og lenker, kilder, søkeindeksen, årstall og tidsakse, fagbakgrunner, dype lenker og bryterne.
 
 | Fil | Hva den gjør |
 |---|---|

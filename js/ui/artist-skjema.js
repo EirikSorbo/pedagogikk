@@ -91,7 +91,7 @@ function markup(modus) {
         </label>
         <p class="hint full">${AAR_HJELP}</p>
         <label class="full">Geografisk tilhørighet
-          <input type="text" data-felt="geography" placeholder="f.eks. Mississippi Delta" />
+          <input type="text" data-felt="geography" placeholder="f.eks. Zürich" />
         </label>
       </div>
     </section>

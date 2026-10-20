@@ -58,6 +58,8 @@ Teknisk hovedlinje: hele koden, filnavnene og databasenøklene beholdes (`artist
 
 **Fase 5: Tester og dokumentasjon (Sonnet).** README, JSON-OPPSKRIFT, MODULKART og KART-OPPSKRIFT skrives for den nye appen.
 
+*Fase 5, status 2026-10-20 (v0.22): dokumentene er skrevet om.* **README** (ny innledning med oversettelsestabell, funksjoner, datamodell og vokabular for pedagogikkappen; Firebase-oppsett, publisering, klassekode og sikkerhet står som før), **JSON-OPPSKRIFT** (teoretikere, beskrivelser med Se og les, reformer, treet med tidsrom, importflyten; `decades`, `varmekart` og `podcasts` er beskrevet som tatt ut), **KART-OPPSKRIFT** (kortet ned til en huskelapp: kartet er arvet fra musikkappen og ikke planlagt her) og **MODULKART** (mappebeskrivelsene i `tools/modulkart.js` og en regel som forklarer at navnene i koden er musikkappens). Ny testfil `tests/unit/pedagogikk-skjelett.test.js` låser skjelettet (8 retninger, 45 epoker, 16 tidsrom, 55 påvirkninger, 8 motreaksjoner, gyldig tre, i takt med `tools/pedagogikk-skjelett.js`) og at eksemplene i JSON-OPPSKRIFT er gyldige importer. De øvrige testene bruker fortsatt musikkappens frø og eksempler (Blues, Jazz, «Cross Road Blues») som nøytrale testdata: de låser formler, ikke pensum, og er ikke skrevet om. **Små rester av musikk som er funnet og ikke rettet** (se `node tools/finn-musikkord.js --detalj`): «Hør etter»-feltet (`lytt`) i epoke-editoren og på epokekortet, «Røtter» og «Opphavet før 1910» i Det store bildet, `STORY_ORDER` i `story-format.js`, etikettene «Plateselskap», «Sentrale verk» og «Musikkeksempler» i `artist-schema.js`, og «Oppfunnet»/«Tatt i bruk» på reformskjemaet.
+
 **Fase 6: Innholdet, i runder (Opus til tekstene).** Importfiler for treet, beskrivelsene, teoretikerne i bolker per epoke, prinsippene (20–30 i første runde, så vokser lista) og reformene. Kilderekkefølge: SNL, Stanford Encyclopedia of Philosophy, Britannica, Internet Encyclopedia of Philosophy. Omfanget avtales før hver runde.
 
 ## Gjenstår for Eirik i fase 0
@@ -69,6 +71,6 @@ Teknisk hovedlinje: hele koden, filnavnene og databasenøklene beholdes (`artist
 
 ## Husk
 
-- Appen under var skrevet for musikk: dokumentene README, JSON-OPPSKRIFT, MODULKART og KART-OPPSKRIFT beskriver fortsatt musikkappen til fase 5.
+- Navnene i koden er musikkappens (se tabellen over og regelen øverst i MODULKART.md). README og JSON-OPPSKRIFT forklarer hva de betyr i pedagogikkappen.
 - Preview og lokal kjøring skriver til databasen i `firebase-config.js`. Før Firebase er koblet til, er appen i oppsettmodus og skriver ingenting.
 - Fellene i musikkappens HANDOVER (grep leser enkelte filer som binære, `-a` hjelper; avledede verdier fra `genre-model.js` må leses ved kall-tid; test med tomt localStorage-speil) gjelder også her.

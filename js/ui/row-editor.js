@@ -29,7 +29,7 @@ export const WORK_SPEC = {
   rowClass: "work-row", removeClass: "remove-work", keepKey: "title",
   removeLabel: "Fjern verk",
   fields: [
-    { key: "title", cls: "work-title", type: "text", ph: "Tittel (f.eks. «Cross Road Blues»)", label: "Tittel", always: true },
+    { key: "title", cls: "work-title", type: "text", ph: "Tittel (f.eks. «Democracy and Education»)", label: "Tittel", always: true },
     { key: "year",  cls: "work-year",  type: "number", ph: "Årstall", label: "Årstall" },
     { key: "url",   cls: "work-url",   type: "url", ph: "https://… (valgfritt)", label: "Lenke (https)" },
   ],
