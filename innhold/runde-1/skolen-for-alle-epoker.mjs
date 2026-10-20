@@ -16,7 +16,7 @@ export default {
       "Skolen for alle": {
         meta: {
           description: `
-            Retningen følger ideen om at alle barn, uansett stand, kjønn, bosted og forutsetninger, skal gå i skole, og helst i den samme skolen. Den begynner med opplysningstidens og statspietismens folkeundervisning, går gjennom folkehøgskolen og den allmenne folkeskolen på 1800-tallet til enhetsskolen og den inkluderende skolen i det 20. århundre. Retningen bærer norsk skolehistorie, fra allmueskolen av 1739 til den tiårige grunnskolen. Felles er tanken om at en felles skole er en forutsetning for et samlet folk og et demokrati. Felles er også spørsmålet om hva fellesskapet krever av dem som ikke passer inn i normen.
+            Retningen følger ideen om at alle barn, uansett stand, kjønn, bosted og forutsetninger, skal gå i skole, og helst i den samme skolen. Den begynner med opplysningstidens og statspietismens folkeundervisning, går gjennom folkehøgskolen og den allmenne folkeskolen på 1800-tallet til enhetsskolen og den inkluderende skolen i det 20. århundre. Retningen bærer norsk skolehistorie, fra allmueskolen av 1739 til den tiårige grunnskolen. Felles er tanken om at en felles skole er en forutsetning for et samlet folk og et demokrati. Felles er også spørsmålet om hva fellesskapet krever av dem som ikke passer inn i normen, fra samiske barn i folkeskolen til elever med funksjonsnedsettelser i dag.
           `,
           kilder: [ENHET, TELHAUG],
         },
@@ -120,7 +120,7 @@ export default {
           activeTo: 1975,
           era: "ca. 1920–1975",
           samfunn: `
-            Mellomkrigstiden var preget av klassekamp og økonomisk krise, og etter 1945 bygde sosialdemokratiet velferdsstaten i Norden. Utdanning ble sett som nøkkelen til både økonomisk vekst og sosial utjevning. Etterkrigstidens planøkonomi og tro på forskning og forsøk preget også skolepolitikken.
+            Mellomkrigstiden var preget av klassekamp og økonomisk krise, og etter 1945 bygde sosialdemokratiet velferdsstaten i Norden. Utdanning ble sett som nøkkelen til både økonomisk vekst og sosial utjevning. Etterkrigstidens planøkonomi og tro på forskning og forsøk preget også skolepolitikken, og partiene sto i hovedsak samlet om målet.
           `,
           skole: `
             Folkeskolen ble den felles inngangen til all videre utdanning, og skoleplikten ble utvidet fra sju til ni år. Forsøk med niårig skole gikk over hele landet fra 1950-tallet, og ungdomsskolen erstattet framhaldsskolen og realskolen. Normalplanen av 1939 og Mønsterplanen av 1974 ga felles læreplaner, og forskjellene mellom by og land, og mellom elever fra ulike klasser, skulle utjevnes.
@@ -140,7 +140,7 @@ export default {
           activeTo: null,
           era: "ca. 1975–",
           samfunn: `
-            Avinstitusjonaliseringen, funksjonshemmedes rettighetsbevegelse og et nytt syn på menneskerettigheter preget tiårene fra 1970. I Norge ble de store institusjonene for utviklingshemmede avviklet med HVPU-reformen i 1991. Kunnskapssamfunnet og økende mangfold i befolkningen gjorde fellesskolen både viktigere og vanskeligere.
+            Avinstitusjonaliseringen, funksjonshemmedes rettighetsbevegelse og et nytt syn på menneskerettigheter preget tiårene fra 1970. I Norge ble de store institusjonene for utviklingshemmede avviklet med HVPU-reformen i 1991. Kunnskapssamfunnet og økende mangfold i befolkningen gjorde fellesskolen både viktigere og vanskeligere, og rettighetene ble i økende grad formulert i lov og konvensjoner.
           `,
           skole: `
             Spesialskolene ble i stor grad lagt ned eller gjort om til kompetansesentre, og elever med særlige behov fikk rett til spesialundervisning i sin nærskole. Tilpasset opplæring ble et prinsipp for alle elever. Samtidig har andelen elever med spesialundervisning, bruk av assistenter og egne grupper vist hvor vanskelig idealet er å realisere.
