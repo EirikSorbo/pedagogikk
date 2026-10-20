@@ -20,10 +20,18 @@ export function techImage(t, bredde = 480) {
   return `<figure class="artist-image">${imgTag(url, t.name, bredde)}${fmtCredit(t.imageCredit)}</figure>`;
 }
 
+// Reformer og milepæler (pedagogikkappens fase 3): kategoriene som før var
+// teknologikategorier (opptak, kringkasting, instrumenter). Kortene heter
+// fortsatt «tech» i dataene og koden, og feltet `category` er det samme.
+// «Norsk spor» er en egen kategori slik planen sier: en norsk lov eller
+// reform kan bare ha én, så læreren velger den som sier mest.
 export const TECH_CATEGORIES = [
-  "Opptak og avspilling",
-  "Kringkasting og spredning",
-  "Instrumenter og lydutstyr",
+  "Lov",
+  "Læreplan",
+  "Institusjon",
+  "Læremiddel",
+  "Metode",
+  "Norsk spor",
 ];
 
 // ----------------------------------------------------------------------------
@@ -47,11 +55,7 @@ export const isHendelse = (t) => techType(t) === "hendelse";
 // Fane-visning (explore): kort etikett per kategori. AVLEDET fra
 // TECH_CATEGORIES, så en omdøping der forplanter seg hit automatisk (ingen
 // hardkodede kopier å glemme). Kategorier uten kort etikett viser full verdi.
-const TECH_SHORT = {
-  "Opptak og avspilling": "Opptak",
-  "Kringkasting og spredning": "Kringkasting",
-  "Instrumenter og lydutstyr": "Instrumenter",
-};
+const TECH_SHORT = {};
 export const TECH_CATEGORY_TABS = TECH_CATEGORIES.map((value) => ({ value, label: TECH_SHORT[value] || value }));
 
 export function renderTechList(el, items, activeCategory, lc) {
