@@ -39,6 +39,9 @@ export const ORDGRENSER = {
 
 const ord = (t) => String(t || "").trim().split(/\s+/).filter(Boolean).length;
 const erHttp = (u) => /^https?:\/\/\S+$/i.test(String(u || ""));
+// Innholdssidene appen viser (JSON-OPPSKRIFT, «pages»).
+export const SIDER = ["omHistorie", "appGuide", "skriveveiledning", "laererHandbok"];
+
 const KJENTE_NOKLER = new Set(["formatVersion", "artists", "genreDescriptions", "edgeDescriptions", "tech", "pages",
   "teacherChecks", "referanser", "presentasjoner", "notater", "genealogy"]);
 
@@ -47,7 +50,7 @@ export function sjekkInnholdsfil(fil, tre, { ordgrenser = ORDGRENSER, kjentePrin
   const advarsler = [];
   const F = (m) => feil.push(m);
   const A = (m) => advarsler.push(m);
-  const tall = { teoretikere: 0, epoker: 0, retninger: 0, prinsipper: 0, pavirkninger: 0, reformer: 0 };
+  const tall = { teoretikere: 0, epoker: 0, retninger: 0, prinsipper: 0, pavirkninger: 0, reformer: 0, sider: 0 };
 
   const d = normalizeImportFile(fil);
   if (!d) { F("Fila kjennes ikke igjen som en importfil (ingen teoretikere og ingen innholdsdeler)."); return { feil, advarsler, tall }; }
@@ -197,6 +200,15 @@ export function sjekkInnholdsfil(fil, tre, { ordgrenser = ORDGRENSER, kjentePrin
     sjekkKilder(t?.kilder, hva);
     if (!String(t?.description || "").trim()) A(`${hva}: ingen beskrivelse.`);
   });
+
+  // --- Innholdssidene -----------------------------------------------------
+  for (const [id, side] of Object.entries(d.pages || {})) {
+    const hva = `Siden «${id}»`;
+    tall.sider++;
+    if (!SIDER.includes(id)) F(`${hva}: ukjent side; appen har ${SIDER.join(", ")}.`);
+    if (!String(side?.body || "").trim()) F(`${hva}: mangler body.`);
+    if (side?.kilder != null) sjekkKilder(side.kilder, hva);
+  }
 
   return { feil, advarsler, tall };
 }

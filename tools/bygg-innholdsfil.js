@@ -41,7 +41,7 @@ export const STANDARD = { status: "active", teacherChecked: false, priority: 0, 
 
 export function slaaSammen(deler, { aar = new Date().getFullYear(), foreslaattAv = "" } = {}) {
   const feil = [];
-  const ut = { formatVersion: 1, artists: [], genreDescriptions: { meta: {}, main: {}, sub: {} }, edgeDescriptions: {}, tech: [] };
+  const ut = { formatVersion: 1, artists: [], genreDescriptions: { meta: {}, main: {}, sub: {} }, edgeDescriptions: {}, tech: [], pages: {} };
   const hvor = new Map();
   for (const [navn, del] of deler) {
     for (const a of del.artists || []) {
@@ -64,6 +64,12 @@ export function slaaSammen(deler, { aar = new Date().getFullYear(), foreslaattAv
       hvor.set(k, navn);
       ut.tech.push({ status: "active", ...ryddDypt(t) });
     }
+    for (const [id, side] of Object.entries(del.pages || {})) {
+      const k = `side:${id}`;
+      if (hvor.has(k)) feil.push(`Siden «${id}» står i både ${hvor.get(k)} og ${navn}.`);
+      hvor.set(k, navn);
+      ut.pages[id] = ryddDypt(side);
+    }
     for (const [n, e] of Object.entries(del.edgeDescriptions || {})) {
       const k = `kobling:${n}`;
       if (hvor.has(k)) feil.push(`Påvirkningen «${n}» står i både ${hvor.get(k)} og ${navn}.`);
@@ -74,6 +80,7 @@ export function slaaSammen(deler, { aar = new Date().getFullYear(), foreslaattAv
   ut.artists.sort((a, b) => (a.influenceStart ?? 0) - (b.influenceStart ?? 0) || a.name.localeCompare(b.name, "no"));
   ut.tech.sort((a, b) => (a.adoptedYear ?? a.inventedYear ?? 0) - (b.adoptedYear ?? b.inventedYear ?? 0) || a.name.localeCompare(b.name, "no"));
   if (!ut.tech.length) delete ut.tech;
+  if (!Object.keys(ut.pages).length) delete ut.pages;
   return { fil: ut, feil };
 }
 

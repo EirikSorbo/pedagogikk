@@ -37,7 +37,7 @@ const harFeil = (fil, mønster) => feilFor(fil).some((m) => mønster.test(m));
 test("en gyldig fil har ingen feil, og tallene stemmer", () => {
   const r = sjekkInnholdsfil(gyldig(), tre);
   assert.deepEqual(r.feil, []);
-  assert.deepEqual(r.tall, { teoretikere: 1, epoker: 1, retninger: 0, prinsipper: 1, pavirkninger: 1, reformer: 1 });
+  assert.deepEqual(r.tall, { teoretikere: 1, epoker: 1, retninger: 0, prinsipper: 1, pavirkninger: 1, reformer: 1, sider: 0 });
 });
 
 test("en fil uten innhold kjennes ikke igjen", () => {
@@ -140,4 +140,16 @@ test("prinsipper fra tidligere runder gir ikke advarsel", () => {
   const med = sjekkInnholdsfil(g, tre, { kjentePrinsipper: ["Læring gjennom erfaring"] }).advarsler.filter((m) => /ingen felles tekst/.test(m));
   assert.equal(uten.length, 1);
   assert.equal(med.length, 0);
+});
+
+test("innholdssidene: kjente sider går gjennom, ukjente og tomme stoppes", () => {
+  const g = gyldig();
+  g.pages = { omHistorie: { body: "### Tittel\nTekst.", kilder: [{ text: "Store norske leksikon.", url: "https://snl.no/pedagogikk" }] } };
+  const ok = sjekkInnholdsfil(g, tre);
+  assert.deepEqual(ok.feil, []);
+  assert.equal(ok.tall.sider, 1);
+  g.pages = { rotter: { body: "Tekst." }, appGuide: { body: "  " } };
+  const { feil } = sjekkInnholdsfil(g, tre);
+  assert.ok(feil.some((m) => /«rotter»: ukjent side/.test(m)));
+  assert.ok(feil.some((m) => /«appGuide»: mangler body/.test(m)));
 });
