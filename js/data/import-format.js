@@ -110,6 +110,31 @@ export function erDelpost(a) {
   return !!a && typeof a === "object" && tom(a.metaGenre) && tom(a.description);
 }
 
+// VIKTIGHETSGRADEN VED FLETTING (v0.26). Graden (priority) står utenfor
+// artistskjemaet, så «Flett» tok den aldri med: en fil med bare navn og grad
+// ga «Ingen endringer å flette inn». Nå gjelder:
+//   - bare grad 1–3 i fila teller. 0, tom og alt annet hoppes over, så en
+//     sikkerhetskopi eller en innholdsfil (priority: 0) aldri tar bort en grad;
+//   - kortet uten grad (0 eller mangler) får graden fra fila;
+//   - kortet med en annen grad (også den gamle -1, «skjult») gir en konflikt,
+//     og læreren velger.
+// Gir null (ingenting å gjøre), { fyll } eller { konflikt } i samme form som
+// konfliktene i handleMergeFile.
+export function flettGrad(eksisterende, importert) {
+  const ny = Number(importert);
+  if (![1, 2, 3].includes(ny)) return null;
+  const naa = Number(eksisterende ?? 0) || 0;
+  if (naa === ny) return null;
+  return naa === 0 ? { fyll: ny } : { konflikt: { field: "priority", existing: naa, imported: ny } };
+}
+
+// Endrer flettingen BARE graden? Da står «sjekket» seg: graden er lærerens
+// vurdering av kortet, ikke ny tekst som må leses (jf. v6.89 i finishMerge).
+export function bareGrad(felt) {
+  const nokler = Object.keys(felt || {});
+  return nokler.length > 0 && nokler.every((k) => k === "priority");
+}
+
 // ---------------------------------------------------------------------------
 //  IMPORTFILENS FORM
 // ---------------------------------------------------------------------------

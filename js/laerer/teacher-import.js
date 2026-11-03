@@ -26,7 +26,8 @@ import { GENEALOGY_META_GENRES, isMainGenre } from "../sjangre/genre-model.js";
 import { validateTree } from "../sjangre/genre-validate.js";
 import { ARTIST_LABELS, ARTIST_COMPARE_FIELDS, ARTIST_EXPORT_FIELDS } from "../data/artist-schema.js";
 import { INSTRUMENTS } from "../felles/limits.js";
-import { validateArtistsForImport, normalizeImportFile, CONTENT_KEYS, erDelpost } from "../data/import-format.js";
+import { validateArtistsForImport, normalizeImportFile, CONTENT_KEYS, erDelpost, flettGrad, bareGrad } from "../data/import-format.js";
+import { PRIO_LABELS } from "../ui/ui-helpers.js";
 import { melding, bekreft, sporTekst } from "../ui/ui-modal.js";
 import { sjekkerEndretAvImport, sjekkerUten } from "../data/sjekket-filter.js";
 import { erKopiNokkel } from "../visning/visningskopi-modell.js";
@@ -329,9 +330,9 @@ function collectUnknownInstruments(artists) {
 function importParts(data) {
   const parts = [];
   const artistCount = (data.artists || []).filter(a => a.name).length;
-  if (artistCount) parts.push(`${artistCount} artister`);
+  if (artistCount) parts.push(`${artistCount} teoretikere`);
   const subCount = Object.keys(data.genreDescriptions || {}).length;
-  if (subCount) parts.push(`${subCount} sjangerbeskrivelser`);
+  if (subCount) parts.push(`${subCount} beskrivelser`);
   const edgeCount = Object.keys(data.edgeDescriptions || {}).length;
   if (edgeCount) parts.push(`${edgeCount} koblingsbeskrivelser`);
   if ((data.tech || []).length) parts.push(`${data.tech.length} reformer og milepæler`);
@@ -680,7 +681,7 @@ async function handleReplace(data) {
   if (delposter.length) {
     melding(`${delposter.length} av ${toAdd.length} teoretikere i fila mangler både retning og beskrivelse, ` +
       "så fila er en delfil (bare noen felt per teoretiker).\n\n«Erstatt alle» er avbrutt: det ville slettet resten " +
-      "av feltene på alle artistene. Bruk «Flett» for å legge feltene inn i teoretikerne som finnes.");
+      "av feltene på alle teoretikerne. Bruk «Slå sammen» for å legge feltene inn i teoretikerne som finnes.");
     return false;
   }
   if (!(await bekreft(
@@ -751,6 +752,12 @@ async function handleMergeFile(data) {
         conflicts.push({ field: f, existing: ev, imported: iv });
       }
     }
+    // Viktighetsgraden står utenfor skjemafeltene og flettes for seg (v0.26,
+    // flettGrad i import-format.js): grad 1–3 fyller et kort uten grad og gir
+    // konflikt mot en annen grad.
+    const grad = flettGrad(existing.priority, imp.priority);
+    if (grad?.fyll) autoFill.priority = grad.fyll;
+    else if (grad?.konflikt) conflicts.push(grad.konflikt);
     if (Object.keys(autoFill).length || conflicts.length) {
       mergeState.queue.push({ existing, imported: imp, conflicts, resolved: { ...autoFill } });
     }
@@ -789,16 +796,19 @@ function renderMergeConflict() {
 
   $("#merge-fields").innerHTML = item.conflicts.map((c) => {
     const n = `cf-${c.field}`;
+    // Graden vises med navnet (Viktigst …), ikke som tall (v0.26).
+    const erGrad = c.field === "priority";
+    const vis = (v) => (erGrad ? PRIO_LABELS[v] || "Ingen grad" : fmtVal(v));
     return `
       <div class="conflict-row">
-        <div class="conflict-field-name">${MERGE_LABELS[c.field] || c.field}</div>
+        <div class="conflict-field-name">${erGrad ? "Viktighetsgrad" : MERGE_LABELS[c.field] || c.field}</div>
         <label class="conflict-opt">
           <input type="radio" name="${n}" value="existing" checked>
-          <span class="conflict-val"><strong>Behold:</strong> ${escapeHtml(fmtVal(c.existing))}</span>
+          <span class="conflict-val"><strong>Behold:</strong> ${escapeHtml(vis(c.existing))}</span>
         </label>
         <label class="conflict-opt">
           <input type="radio" name="${n}" value="imported">
-          <span class="conflict-val new"><strong>Importer:</strong> ${escapeHtml(fmtVal(c.imported))}</span>
+          <span class="conflict-val new"><strong>Importer:</strong> ${escapeHtml(vis(c.imported))}</span>
         </label>
       </div>`;
   }).join("");
@@ -874,9 +884,10 @@ async function finishMerge() {
     for (const item of mergeState.queue) {
       if (Object.keys(item.resolved).length) {
         // Endret kort = ulest kort (v6.89): sjekken faller bort, med mindre
-        // fila selv setter den (en sikkerhetskopi som gjenoppretter).
+        // fila selv setter den (en sikkerhetskopi som gjenoppretter). En ny
+        // grad alene er ikke ny tekst, så da står sjekken (v0.26, bareGrad).
         const felt = { ...item.resolved };
-        if (!("teacherChecked" in felt) && item.existing.teacherChecked === true) {
+        if (!("teacherChecked" in felt) && !bareGrad(felt) && item.existing.teacherChecked === true) {
           felt.teacherChecked = false;
           avsjekket++;
         }
@@ -886,7 +897,7 @@ async function finishMerge() {
     }
     const parts = [];
     if (added)   parts.push(`${added} nye teoretikere lagt til`);
-    if (updated) parts.push(`${updated} artister oppdatert${avsjekket ? ` (sjekk fjernet på ${avsjekket}, siden kortet er endret)` : ""}`);
+    if (updated) parts.push(`${updated} teoretikere oppdatert${avsjekket ? ` (sjekk fjernet på ${avsjekket}, siden kortet er endret)` : ""}`);
     if (parts.length) melding(parts.join(", ") + ".");
   } catch (err) {
     // Uten denne ville en skrivefeil midt i flettingen vært helt stille

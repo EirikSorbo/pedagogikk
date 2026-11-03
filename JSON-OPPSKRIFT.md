@@ -119,7 +119,7 @@ Config-samlingen er borte: fagbakgrunnene er en konstant i `js/felles/limits.js`
 | `imageCredit` | string | | Fotograf + lisens, vises som bildetekst. |
 | `proposedBy` | string | | Hvem la inn forslaget. Mangler → `"Anonym"`. |
 | `status` | string | | `"active"`, `"pending"` eller `"removed"`. Eksporten tar med ALLE. Ved lærer-import beholdes gyldig status; **mangler feltet, settes kortet til `active`**; ugyldige verdier blir `pending`. |
-| `priority` | number | | Viktighetsgrad: 3 = viktigst, 2 = viktig, 1 = mindre viktig, 0/mangler = ingen. |
+| `priority` | number | | Viktighetsgrad: 3 = viktigst, 2 = viktig, 1 = mindre viktig, 0/mangler = ingen. Flettes fra v0.26: en grad 1–3 i fila fyller et kort uten grad og gir konflikt mot en annen grad; 0 i fila tar aldri bort en grad. Gradene står i `innhold/viktighetsgrader.mjs`, og `node tools/lag-viktighetsgrader.js` lager delfila. |
 | `hidden` | boolean | | Skjult for studentene. (Gammel verdi: `priority: -1` leses også som skjult.) |
 | `teacherChecked` | boolean | | Lærerens «gjennomgått»-hake. |
 | `votedUpBy` | array av strings | | Stemme-identiteter (uid-er). Bevares ved lærer-import, så backup → restore ikke mister stemmer. Studentinnsending kan ikke sette feltet. |
@@ -435,7 +435,7 @@ Formateringen skjer ved visning; det som lagres i Firestore og i denne fila er t
 1. **Eksport** (lærersiden → «Eksporter»): `pedagogikkhistorie-YYYY-MM-DD.json` med alle seksjonene i toppnivåstrukturen over. Tar med alle teoretikere og reformer uansett status — også ventende forslag — så eksporten er en komplett, tapsfri backup. Vakten foran eksporten nekter å lage en fil før alle samlingene er lastet.
 2. **Import** (lærersiden → «Importer»): velg fil. Hele teoretikerlista valideres FØR noe skrives eller slettes; feil rapporteres med radnummer og ingenting endres. Deretter valget *Erstatt* eller *Slå sammen*.
 3. **Erstatt alle**: laster ned en full sikkerhetskopi (`pedagogikkhistorie-BACKUP-…`) og krever bekreftelse på at fila faktisk kom, FØR noe slettes.
-4. **Slå sammen**: teoretikere matches på navn (uavhengig av store/små bokstaver). Tomme felter fylles automatisk fra importfila. Konflikter løses interaktivt eller med *Behold alle*/*Importer alle*. En fil med bare noen felt (navn + oppsummeringspunkter, uten retning og beskrivelse) regnes som en delpost og kan bare flettes inn i teoretikere som finnes.
+4. **Slå sammen**: teoretikere matches på navn (uavhengig av store/små bokstaver). Tomme felter fylles automatisk fra importfila. Konflikter løses interaktivt eller med *Behold alle*/*Importer alle*. En fil med bare noen felt (navn + oppsummeringspunkter, eller navn + viktighetsgrad, uten retning og beskrivelse) regnes som en delpost og kan bare flettes inn i teoretikere som finnes.
 5. **Beskrivelser** importeres alltid (overskriver eksisterende verdier). **Reformer** matches på navn (oppdater/legg til). **Treet** og **referansene** erstattes i sin helhet.
 
 ### Formatkrav (ingen bakoverkompatibilitet)
