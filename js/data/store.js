@@ -350,9 +350,25 @@ export async function teacherDelete(artistId) {
   return deleteDoc(doc(db, "artists", artistId));
 }
 
-// Oppdater enkeltfelt på en eksisterende artist (brukt av merge-import).
+// Oppdater enkeltfelt på en eksisterende artist.
 export async function updateArtistFields(artistId, fields) {
   return updateDoc(doc(db, "artists", artistId), fields);
+}
+
+// Oppdater mange artister på én gang (v0.27, «Slå sammen»): endringer er
+// [{ id, felt }]. Flettingen skrev før kortene ett og ett, cirka 0,2 s hver,
+// så 196 viktighetsgrader tok 40 sekunder uten tegn til liv på skjermen, og
+// skrivingen stoppet etter 13 (2026-11-03). I batcher tar det et sekund, og
+// hver batch på opptil BATCH_LIMIT skrives helt eller ikke i det hele tatt.
+export async function updateArtistsBulk(endringer) {
+  for (let i = 0; i < endringer.length; i += BATCH_LIMIT) {
+    const batch = writeBatch(db);
+    for (const { id, felt } of endringer.slice(i, i + BATCH_LIMIT)) {
+      batch.update(doc(db, "artists", id), felt);
+    }
+    await batch.commit();
+  }
+  return endringer.length;
 }
 
 // Slett alle artister (full reset). Batchet.

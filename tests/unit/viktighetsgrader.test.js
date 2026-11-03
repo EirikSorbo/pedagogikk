@@ -50,6 +50,18 @@ test("flettingen på lærersiden bruker flettGrad og bareGrad", () => {
   assert.match(kode, /"Viktighetsgrad"/, "konfliktdialogen viser feltnavnet");
 });
 
+// v0.27: 196 grader ble skrevet ett kort om gangen (ca. 0,2 s hver), uten
+// noe på skjermen før alt var ferdig, og skrivingen stoppet etter 13. Nå
+// samles endringene og skrives i batcher.
+test("flettingen skriver endringene i batcher, ikke ett kort om gangen", () => {
+  const imp = lesJs("teacher-import.js");
+  assert.match(imp, /updated = await updateArtistsBulk\(endringer\)/);
+  assert.doesNotMatch(imp, /updateArtistFields/, "ingen enkeltskriving igjen i importen");
+  const store = lesJs("store.js");
+  const fn = store.slice(store.indexOf("export async function updateArtistsBulk"));
+  assert.match(fn.slice(0, 400), /writeBatch\(db\)[\s\S]*batch\.update\([\s\S]*batch\.commit\(\)/);
+});
+
 // Alle teoretikerne i innholdsrundene, slik tools/bygg-innholdsfil.js leser dem.
 async function innholdsnavn() {
   const navn = [];

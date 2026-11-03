@@ -13,7 +13,7 @@ import {
   addTech,
   saveDocsBulk,
   saveGenealogyTree,
-  updateArtistFields,
+  updateArtistsBulk,
   saveReferanser,
   lagreNotat,
   setTeacherChecks,
@@ -881,6 +881,7 @@ async function finishMerge() {
       mergeState.newArtists.map((a) => ({ proposedBy: "Eirik Sørbø", status: "active", ...a }))
     );
     let avsjekket = 0;
+    const endringer = [];
     for (const item of mergeState.queue) {
       if (Object.keys(item.resolved).length) {
         // Endret kort = ulest kort (v6.89): sjekken faller bort, med mindre
@@ -891,10 +892,11 @@ async function finishMerge() {
           felt.teacherChecked = false;
           avsjekket++;
         }
-        await updateArtistFields(item.existing.id, felt);
-        updated++;
+        endringer.push({ id: item.existing.id, felt });
       }
     }
+    // Alt i batcher, ikke ett kort om gangen (v0.27, updateArtistsBulk).
+    updated = await updateArtistsBulk(endringer);
     const parts = [];
     if (added)   parts.push(`${added} nye teoretikere lagt til`);
     if (updated) parts.push(`${updated} teoretikere oppdatert${avsjekket ? ` (sjekk fjernet på ${avsjekket}, siden kortet er endret)` : ""}`);
