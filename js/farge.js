@@ -9,7 +9,7 @@
  *      :root[data-farge="kobolt"] { --accent-50 … --accent-700, --accent-rgb }
  *  Dette skriptet setter bare data-farge på <html>. Alle fargene har minst
  *  4,5:1 i kontrast mot hvitt, begge veier (vakttesten design-variabler
- *  sjekker det). Logoen (tempelet) er én farge: img/logo.svg#logo tegnes med <use> og
+ *  sjekker det). Logoen (studenthatten) er én farge: img/logo.svg#logo tegnes med <use> og
  *  følger teksten rundt (currentColor), ikke dagens farge.
  *
  *  Valg:

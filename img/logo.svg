@@ -1,19 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="104" height="86" viewBox="12 18 104 86" role="img" aria-labelledby="title desc">
-<!-- Tempellogoen (2026-10-20): fronton, fire søyler og to bjelker. Én farge, currentColor.
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="260" viewBox="36 116 440 260" role="img" aria-labelledby="title desc">
+<!-- Studenthatten (2026-11-06). Lages av tools/lag-ikoner.py, ikke rediger her. Én farge, currentColor.
      Sidene tegner den med <svg><use href="img/logo.svg#logo">, og fargen følger teksten rundt (.brand-icon i stilarket).
-     Som bilde (fanen) gjelder stilen under: mørk strek, lys i mørk modus. Ikonene (PNG) lages av tools/lag-ikoner.py. -->
+     Som bilde (fanen) gjelder stilen under: mørk tegning, lys i mørk modus. -->
 <style>:root{color:#111}@media (prefers-color-scheme:dark){:root{color:#f2f2f2}}</style>
-<title id="title">Tempel</title>
-<desc id="desc">Et tempel med trekantet gavl, fire søyler og en sokkel.</desc>
-<g id="logo">
-<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M27 44.5 64 23l37 21.5" stroke-width="6.5"/>
-  <path d="M25 43h78v9H25z" fill="currentColor" stroke="none"/>
-  <path d="M18 49.5h92" stroke-width="6"/>
-  <path d="M31 58h66" stroke-width="5"/>
-  <path d="M38 60v31M56 60v31M72 60v31M90 60v31" stroke-width="6.5" stroke-linecap="butt"/>
-  <path d="M31.7 91.5h64.8" stroke-width="4.5"/>
-  <path d="M28.3 98h71.5" stroke-width="5.5"/>
-</g>
+<title id="title">Studenthatt</title>
+<desc id="desc">En studenthatt med firkantet brett og dusk.</desc>
+<g id="logo" fill="currentColor">
+  <path d="M256 122.3L471 202.6L430.4 218.8Q427.2 213.8 421 215.7L256 276.8L88 214.6L88 314.4A11 11 0 0 1 66 314.4L66 212.9L41 202.6Z"/>
+  <path d="M128 252.1L256 303.3L384 252.1L384 330.5A128 40 0 0 1 128 330.5Z"/>
 </g>
 </svg>

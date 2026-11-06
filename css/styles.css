@@ -2525,7 +2525,7 @@ body:not(.presentasjon) :is(#modal-artistliste, #modal-spilleliste) > .modal > *
    manifest.json, som nettleseren viser i fanen og i appvinduet (brukerkrav
    2026-09-25). Navnet er nå «Musikkhistorie». */
 a.brand { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px; }
-.brand-icon { height: 40px; width: auto; aspect-ratio: 104 / 86; flex-shrink: 0; color: var(--text); }   /* tempellogoen (2026-10-20); inline <svg><use>, én farge: currentColor følger teksten, også i mørk modus */
+.brand-icon { height: 36px; width: auto; aspect-ratio: 440 / 260; flex-shrink: 0; color: var(--text); }   /* studenthatten (2026-11-06, erstattet tempelet); inline <svg><use>, én farge: currentColor følger teksten. Bred figur, så litt lavere enn tempelets 40px for samme tyngde. Tegningen lages av tools/lag-ikoner.py. */
 
 /* Navigasjon */
 .nav { display: flex; gap: 6px; align-items: center; }
